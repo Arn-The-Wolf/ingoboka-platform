@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import rw.ingoboka.identity.api.dto.request.LoginRequest;
 import rw.ingoboka.identity.api.dto.request.RefreshTokenRequest;
 import rw.ingoboka.identity.api.dto.request.RegisterRequest;
+import rw.ingoboka.identity.api.dto.request.ResendOtpRequest;
 import rw.ingoboka.identity.api.dto.request.VerifyOtpRequest;
 import rw.ingoboka.identity.api.dto.response.AuthResponse;
 import rw.ingoboka.identity.api.dto.response.UserResponse;
@@ -42,6 +43,14 @@ public class AuthController {
     public ApiResponse<Void> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
         authService.verifyOtp(request);
         return ApiResponse.ok(null, "Account verified successfully");
+    }
+
+    @PostMapping("/resend-otp")
+    @Operation(summary = "Resend verification OTP via SMS")
+    @ApiResponses
+    public ApiResponse<Void> resendOtp(@Valid @RequestBody ResendOtpRequest request) {
+        authService.resendOtp(request);
+        return ApiResponse.ok(null, "OTP sent");
     }
 
     @PostMapping("/login")

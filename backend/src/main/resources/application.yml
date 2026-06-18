@@ -134,6 +134,19 @@ app:
     local:
       base-path: ${STORAGE_LOCAL_BASE_PATH:./storage}
 
+  sms:
+    provider: ${SMS_PROVIDER:log}
+    api-url: ${SMS_API_URL:}
+    api-key: ${SMS_API_KEY:}
+    sender-id: ${SMS_SENDER_ID:Ingoboka}
+
+  payment:
+    provider: ${PAYMENT_PROVIDER:sandbox}
+    momo:
+      collection-url: ${MOMO_COLLECTION_URL:}
+      subscription-key: ${MOMO_SUBSCRIPTION_KEY:}
+      callback-base-url: ${MOMO_CALLBACK_BASE_URL:}
+
   security:
     public-routes:
       - /api/v1/auth/**
@@ -141,6 +154,7 @@ app:
       - /api/v1/products/**
       - /api/v1/verify/**
       - /api/v1/payments/sandbox/callback
+      - /api/v1/payments/momo/callback
       - /actuator/health
       - /actuator/info
       - /v3/api-docs/**

@@ -62,7 +62,8 @@
     "scanQr": "Scan to verify",
     "home": "Home",
     "claims": "Claims",
-    "profile": "Profile"
+    "profile": "Profile",
+    "dependants": "Dependants"
   },
   "insurer": {
     "dashboard": "Insurer dashboard",
@@ -87,7 +88,13 @@
     "createProduct": "Create product",
     "publish": "Publish",
     "draft": "Draft",
-    "activeProduct": "Active"
+    "activeProduct": "Active",
+    "partner": "Partner revenue",
+    "contracts": "Contracts",
+    "invoices": "Invoices",
+    "revenueLedger": "Revenue ledger",
+    "activePolicies": "Active policies",
+    "enrolledCitizens": "Enrolled citizens"
   },
   "admin": {
     "dashboard": "Platform admin",

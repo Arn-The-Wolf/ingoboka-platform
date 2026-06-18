@@ -33,6 +33,7 @@ import rw.ingoboka.identity.infrastructure.persistence.repository.RefreshTokenRe
 import rw.ingoboka.identity.infrastructure.persistence.repository.UserRepository;
 import rw.ingoboka.identity.infrastructure.persistence.repository.VerificationChallengeRepository;
 import rw.ingoboka.shared.config.AppProperties;
+import rw.ingoboka.shared.messaging.SmsPort;
 import rw.ingoboka.shared.util.HashUtil;
 import rw.ingoboka.shared.util.OtpGenerator;
 
@@ -64,6 +65,7 @@ class AuthServiceTest {
     @Mock private AppProperties appProperties;
     @Mock private ApplicationEventPublisher eventPublisher;
     @Mock private AuthMapper authMapper;
+    @Mock private SmsPort smsPort;
 
     @InjectMocks
     private AuthService authService;

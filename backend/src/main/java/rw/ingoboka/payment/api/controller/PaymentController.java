@@ -46,6 +46,13 @@ public class PaymentController {
         return ApiResponse.ok(null, "Callback processed");
     }
 
+    @PostMapping("/momo/callback")
+    @Operation(summary = "MTN MoMo payment callback")
+    public ApiResponse<Void> momoCallback(@Valid @RequestBody SandboxCallbackRequest request) {
+        paymentService.processSandboxCallback(request);
+        return ApiResponse.ok(null, "Callback processed");
+    }
+
     @GetMapping("/{id}/status")
     @PreAuthorize("hasRole('CITIZEN')")
     @Operation(summary = "Get payment status")

@@ -72,21 +72,24 @@ export const claimApi = {
   },
 
   async getInsurerStats(): Promise<InsurerStats> {
-    const { data } = await apiClient.get<{
+    const { data: overview } = await apiClient.get<{
       pendingClaims: number;
       approvedClaims: number;
       rejectedClaims: number;
-      activePolicies: number;
     }>('/admin/reports/overview');
+    const { data: breakdown } = await apiClient.get<{
+      resolvedToday: number;
+      avgResolutionDays: number;
+      claimsByStatus: { status: string; count: number }[];
+    }>('/admin/reports/claims-breakdown');
     return {
-      openClaims: data.pendingClaims ?? 0,
-      resolvedToday: data.approvedClaims ?? 0,
-      avgResolutionDays: 3,
-      claimsByStatus: [
-        { status: 'Pending', count: data.pendingClaims ?? 0 },
-        { status: 'Approved', count: data.approvedClaims ?? 0 },
-        { status: 'Rejected', count: data.rejectedClaims ?? 0 },
-      ],
+      openClaims: overview.pendingClaims ?? 0,
+      resolvedToday: breakdown.resolvedToday ?? 0,
+      avgResolutionDays: breakdown.avgResolutionDays ?? 0,
+      claimsByStatus: (breakdown.claimsByStatus ?? []).map((c) => ({
+        status: c.status,
+        count: c.count,
+      })),
     };
   },
 };

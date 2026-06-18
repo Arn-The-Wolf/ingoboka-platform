@@ -19,8 +19,9 @@ const navItems = [
   { href: '/insurer/dashboard', icon: LayoutDashboard, labelKey: 'overview' as const },
   { href: '/insurer/dashboard', icon: FileText, labelKey: 'claimsQueue' as const },
   { href: '/insurer/products', icon: Package, labelKey: 'products' as const },
-  { href: '/insurer/dashboard', icon: BarChart3, labelKey: 'reports' as const },
-  { href: '/insurer/dashboard', icon: Settings, labelKey: 'settings' as const },
+  { href: '/insurer/reports', icon: BarChart3, labelKey: 'reports' as const },
+  { href: '/insurer/partner', icon: Shield, labelKey: 'partner' as const },
+  { href: '/insurer/settings', icon: Settings, labelKey: 'settings' as const },
 ];
 
 export function Sidebar() {

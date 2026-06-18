@@ -15,6 +15,8 @@ public class AppProperties {
     private final Otp otp = new Otp();
     private final Storage storage = new Storage();
     private final Security security = new Security();
+    private final Sms sms = new Sms();
+    private final Payment payment = new Payment();
 
     @Getter
     @Setter
@@ -91,11 +93,36 @@ public class AppProperties {
                 "/api/v1/products/**",
                 "/api/v1/public/**",
                 "/api/v1/payments/sandbox/callback",
+                "/api/v1/payments/momo/callback",
                 "/actuator/health",
                 "/actuator/info",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/swagger-ui.html"
         );
+    }
+
+    @Getter
+    @Setter
+    public static class Sms {
+        private String provider = "log";
+        private String apiUrl;
+        private String apiKey;
+        private String senderId = "Ingoboka";
+    }
+
+    @Getter
+    @Setter
+    public static class Payment {
+        private String provider = "sandbox";
+        private final Momo momo = new Momo();
+
+        @Getter
+        @Setter
+        public static class Momo {
+            private String collectionUrl;
+            private String subscriptionKey;
+            private String callbackBaseUrl;
+        }
     }
 }

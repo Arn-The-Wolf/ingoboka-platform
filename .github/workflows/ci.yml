@@ -47,12 +47,16 @@ jobs:
       - name: Run tests
         working-directory: backend
         env:
+          SPRING_PROFILES_ACTIVE: test
           DB_URL: jdbc:postgresql://localhost:5432/ingoboka
-          DB_USER: ingoboka
+          DB_USERNAME: ingoboka
           DB_PASSWORD: ingoboka_dev_secret
           REDIS_HOST: localhost
           REDIS_PORT: 6379
           JWT_SECRET: test-jwt-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256-algorithm
+          STORAGE_PROVIDER: local
+          SMS_PROVIDER: log
+          PAYMENT_PROVIDER: sandbox
         run: |
           chmod +x mvnw
           ./mvnw test

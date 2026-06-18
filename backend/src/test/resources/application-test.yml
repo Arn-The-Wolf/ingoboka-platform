@@ -12,3 +12,7 @@ app:
     provider: local
     local:
       base-path: ./target/test-storage
+  sms:
+    provider: log
+  payment:
+    provider: sandbox

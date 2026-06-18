@@ -1,21 +1,21 @@
 package rw.ingoboka.identity.listener;
 
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import rw.ingoboka.identity.domain.event.UserRegisteredEvent;
+import rw.ingoboka.shared.messaging.SmsPort;
 
-@Slf4j
 @Component
+@RequiredArgsConstructor
 public class UserRegisteredEventListener {
+
+    private final SmsPort smsPort;
 
     @EventListener
     public void onUserRegistered(UserRegisteredEvent event) {
-        log.info(
-                "User registered: userId={}, phone={}, email={}. OTP (dev placeholder): {}",
-                event.userId(),
-                event.phone(),
-                event.email(),
-                event.otp());
+        if (event.phone() != null) {
+            smsPort.sendOtp(event.phone(), event.otp());
+        }
     }
 }

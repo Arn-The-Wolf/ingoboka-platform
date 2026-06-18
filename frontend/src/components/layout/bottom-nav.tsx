@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { href: '/dashboard', icon: Home, labelKey: 'home' as const },
   { href: '/dashboard', icon: FileText, labelKey: 'claims' as const },
-  { href: '/dashboard', icon: User, labelKey: 'profile' as const },
+  { href: '/dependants', icon: User, labelKey: 'dependants' as const },
 ];
 
 export function BottomNav() {

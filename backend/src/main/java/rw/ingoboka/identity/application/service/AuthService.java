@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import rw.ingoboka.identity.api.dto.request.LoginRequest;
 import rw.ingoboka.identity.api.dto.request.RefreshTokenRequest;
 import rw.ingoboka.identity.api.dto.request.RegisterRequest;
+import rw.ingoboka.identity.api.dto.request.ResendOtpRequest;
 import rw.ingoboka.identity.api.dto.request.VerifyOtpRequest;
 import rw.ingoboka.identity.api.dto.response.AuthResponse;
 import rw.ingoboka.identity.api.dto.response.UserResponse;
@@ -35,6 +36,7 @@ import rw.ingoboka.identity.infrastructure.persistence.repository.RefreshTokenRe
 import rw.ingoboka.identity.infrastructure.persistence.repository.UserRepository;
 import rw.ingoboka.identity.infrastructure.persistence.repository.VerificationChallengeRepository;
 import rw.ingoboka.shared.config.AppProperties;
+import rw.ingoboka.shared.messaging.SmsPort;
 import rw.ingoboka.shared.util.HashUtil;
 import rw.ingoboka.shared.util.OtpGenerator;
 
@@ -52,6 +54,7 @@ public class AuthService {
     private final AppProperties appProperties;
     private final ApplicationEventPublisher eventPublisher;
     private final AuthMapper authMapper;
+    private final SmsPort smsPort;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -124,6 +127,33 @@ public class AuthService {
         userRepository.save(user);
 
         eventPublisher.publishEvent(new PhoneVerifiedEvent(user.getId(), user.getPhone()));
+    }
+
+    @Transactional
+    public void resendOtp(ResendOtpRequest request) {
+        UserEntity user = findByPhoneOrEmail(request.getPhoneOrEmail());
+        if (user.getStatus() == UserStatus.ACTIVE) {
+            throw new IllegalArgumentException("Account is already verified");
+        }
+        challengeRepository.findByUserIdAndTypeAndUsedFalse(user.getId(), ChallengeType.PHONE_VERIFICATION)
+                .forEach(c -> {
+                    c.setUsed(true);
+                    challengeRepository.save(c);
+                });
+
+        String otp = otpGenerator.generateOtp(appProperties.getOtp().getLength());
+        VerificationChallengeEntity challenge = new VerificationChallengeEntity();
+        challenge.setUserId(user.getId());
+        challenge.setType(ChallengeType.PHONE_VERIFICATION);
+        challenge.setCodeHash(hashUtil.bcryptHash(otp));
+        challenge.setAttempts(0);
+        challenge.setExpiresAt(LocalDateTime.now().plusSeconds(appProperties.getOtp().getExpirationSeconds()));
+        challenge.setUsed(false);
+        challengeRepository.save(challenge);
+
+        if (user.getPhone() != null) {
+            smsPort.sendOtp(user.getPhone(), otp);
+        }
     }
 
     @Transactional

@@ -3,6 +3,7 @@ package rw.ingoboka.shared.notification;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,4 +26,7 @@ class NotificationEntity extends BaseEntity {
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String body;
+
+    @Column(name = "read_at")
+    private Instant readAt;
 }

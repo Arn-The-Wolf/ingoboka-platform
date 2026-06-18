@@ -63,4 +63,45 @@ export const customerApiExt = {
     const { data } = await apiClient.post('/customer/dependants', payload);
     return data;
   },
+
+  async removeDependant(id: string) {
+    await apiClient.delete(`/customer/dependants/${id}`);
+  },
+
+  async submitKyc() {
+    const { data } = await apiClient.post('/customer/kyc/submit');
+    return data;
+  },
+};
+
+export const insurerApi = {
+  async getSettings() {
+    const { data } = await apiClient.get('/admin/organizations/me');
+    return data;
+  },
+
+  async updateSettings(payload: Record<string, unknown>) {
+    const { data } = await apiClient.patch('/admin/organizations/me', payload);
+    return data;
+  },
+
+  async getPolicyReport() {
+    const { data } = await apiClient.get('/admin/reports/policies');
+    return data;
+  },
+
+  async listPartnerInvoices() {
+    const { data } = await apiClient.get('/admin/partner/invoices');
+    return data;
+  },
+
+  async listPartnerContracts() {
+    const { data } = await apiClient.get('/admin/partner/contracts');
+    return data;
+  },
+
+  async listPartnerLedger() {
+    const { data } = await apiClient.get('/admin/partner/revenue/ledger');
+    return data;
+  },
 };

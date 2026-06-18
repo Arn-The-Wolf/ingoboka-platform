@@ -78,3 +78,17 @@ VALUES
     ('60606060-6060-6060-6060-606060606060', 'ING-CLM-2026-DEMO01', '50505050-5050-5050-5050-505050505050',
      'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', '22222222-2222-2222-2222-222222222222', 'UNDER_REVIEW',
      CURRENT_DATE - INTERVAL '7 days', 'ACCIDENT', 'Minor road accident requiring outpatient treatment.', 75000.00, NOW() - INTERVAL '5 days');
+
+INSERT INTO partner_contracts (id, organization_id, partner_id, contract_number, status, start_date, terms)
+VALUES
+    ('77777777-7777-7777-7777-777777777777', '22222222-2222-2222-2222-222222222222',
+     '11111111-1111-1111-1111-111111111111', 'PC-2026-DEMO01', 'ACTIVE', CURRENT_DATE, '{}');
+
+INSERT INTO contract_price_rules (contract_id, rule_type, rate_value, currency, effective_from)
+VALUES
+    ('77777777-7777-7777-7777-777777777777', 'COMMISSION_PERCENT', 5.0000, 'RWF', CURRENT_DATE);
+
+INSERT INTO revenue_ledger (organization_id, entry_type, amount, currency, reference_type, reference_id, description)
+VALUES
+    ('22222222-2222-2222-2222-222222222222', 'CREDIT', 225.00, 'RWF', 'PAYMENT',
+     '50505050-5050-5050-5050-505050505050', 'Platform service fee on demo payment');

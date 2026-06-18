@@ -4,4 +4,4 @@ export { policyApi } from './policies';
 export { claimApi } from './claims';
 export { productApi, enrollmentApi } from './products';
 export { paymentApi } from './payments';
-export { adminApi, agentApi, customerApiExt } from './admin';
+export { adminApi, agentApi, customerApiExt, insurerApi } from './admin';

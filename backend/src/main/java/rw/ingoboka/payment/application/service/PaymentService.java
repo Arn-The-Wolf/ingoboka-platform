@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import rw.ingoboka.customer.infrastructure.persistence.entity.CitizenProfileEntity;
 import rw.ingoboka.customer.infrastructure.persistence.repository.CitizenProfileRepository;
 import rw.ingoboka.enrollment.application.service.EnrollmentService;
+import rw.ingoboka.identity.infrastructure.persistence.repository.UserRepository;
 import rw.ingoboka.enrollment.infrastructure.persistence.entity.PolicyApplicationEntity;
 import rw.ingoboka.payment.api.dto.request.InitiatePaymentRequest;
 import rw.ingoboka.payment.api.dto.request.SandboxCallbackRequest;
@@ -25,6 +26,7 @@ import rw.ingoboka.policy.infrastructure.persistence.entity.PolicyEntity;
 import rw.ingoboka.policy.infrastructure.persistence.repository.PolicyRepository;
 import rw.ingoboka.shared.exception.BadRequestException;
 import rw.ingoboka.shared.exception.NotFoundException;
+import rw.ingoboka.shared.infrastructure.idempotency.IdempotencyService;
 import rw.ingoboka.shared.notification.NotificationService;
 
 @Service
@@ -43,6 +45,8 @@ public class PaymentService {
     private final NotificationService notificationService;
     private final PremiumScheduleService premiumScheduleService;
     private final PartnerRevenueService partnerRevenueService;
+    private final IdempotencyService idempotencyService;
+    private final UserRepository userRepository;
 
     @Transactional
     public PaymentResponse initiateSandboxPayment(UUID policyId, UUID userId, InitiatePaymentRequest request) {
@@ -90,13 +94,14 @@ public class PaymentService {
         payment.setInitiatedAt(LocalDateTime.now());
         payment = paymentRepository.save(payment);
 
+        String phone = userRepository.findById(userId).map(u -> u.getPhone()).orElse(null);
         PaymentPort.PaymentInitiationResult result = paymentPort.initiatePayment(
                 new PaymentPort.PaymentInitiationRequest(
                         payment.getId(),
                         payment.getPaymentReference(),
                         payment.getAmount(),
                         payment.getCurrency(),
-                        null));
+                        phone));
 
         payment.setProviderReference(result.providerReference());
         payment.setStatus("PROCESSING");
@@ -116,6 +121,9 @@ public class PaymentService {
 
     @Transactional
     public void processSandboxCallback(SandboxCallbackRequest request) {
+        if (request.getIdempotencyKey() != null && idempotencyService.isProcessed(request.getIdempotencyKey())) {
+            return;
+        }
         PaymentEntity payment = paymentRepository.findByProviderReference(request.getProviderReference())
                 .orElseThrow(() -> new NotFoundException("Payment", request.getProviderReference()));
 
@@ -138,6 +146,9 @@ public class PaymentService {
             recordEvent(payment.getId(), "FAILED", SANDBOX_PROVIDER);
         }
         paymentRepository.save(payment);
+        if (request.getIdempotencyKey() != null) {
+            idempotencyService.record(request.getIdempotencyKey(), "{\"status\":\"" + payment.getStatus() + "\"}", 24);
+        }
     }
 
     @Transactional(readOnly = true)

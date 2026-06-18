@@ -62,7 +62,8 @@
     "scanQr": "Sikana kugira ngo wemeze",
     "home": "Ahabanza",
     "claims": "Ibyifuzo",
-    "profile": "Umwirondoro"
+    "profile": "Umwirondoro",
+    "dependants": "Abagize"
   },
   "insurer": {
     "dashboard": "Ikibaho cy'uwatanga ubwishingizi",
@@ -87,7 +88,13 @@
     "createProduct": "Kurema igicuruzwa",
     "publish": "Gusohora",
     "draft": "Igishushanyo",
-    "activeProduct": "Gikora"
+    "activeProduct": "Gikora",
+    "partner": "Inyungu z'umufatanyabikorwa",
+    "contracts": "Amasezerano",
+    "invoices": "Inyemezabuguzi",
+    "revenueLedger": "Inyandiko y'amafaranga",
+    "activePolicies": "Ubwishingizi bukora",
+    "enrolledCitizens": "Abaturage biyandikishije"
   },
   "admin": {
     "dashboard": "Ubuyobozi bwa platform",

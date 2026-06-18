@@ -3,10 +3,8 @@ package rw.ingoboka.payment.infrastructure.adapter;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import org.springframework.stereotype.Component;
 import rw.ingoboka.payment.domain.PaymentPort;
 
-@Component
 public class SandboxPaymentAdapter implements PaymentPort {
 
     private final Map<String, SandboxPaymentState> payments = new ConcurrentHashMap<>();
