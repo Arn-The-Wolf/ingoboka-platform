@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class PublicVerificationResponse {
+    private boolean valid;
     private String insurerName;
     private String productName;
     private String status;

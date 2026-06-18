@@ -7,6 +7,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import rw.ingoboka.identity.api.dto.request.LoginRequest;
@@ -49,6 +51,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class AuthServiceTest {
 
     @Mock private UserRepository userRepository;
@@ -69,10 +72,10 @@ class AuthServiceTest {
     void setUp() {
         AppProperties.Otp otp = new AppProperties.Otp();
         otp.setLength(6);
-        otp.setExpiryMinutes(5);
+        otp.setExpirationSeconds(300);
         AppProperties.Jwt jwt = new AppProperties.Jwt();
-        jwt.setAccessTokenExpiryMs(900_000L);
-        jwt.setRefreshTokenExpiryMs(604_800_000L);
+        jwt.setAccessTokenExpirationMs(900_000L);
+        jwt.setRefreshTokenExpirationMs(604_800_000L);
         when(appProperties.getOtp()).thenReturn(otp);
         when(appProperties.getJwt()).thenReturn(jwt);
     }

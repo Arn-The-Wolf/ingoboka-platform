@@ -2,8 +2,6 @@ package rw.ingoboka.claim.infrastructure.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,28 +16,27 @@ import rw.ingoboka.shared.domain.BaseEntity;
 @Table(name = "claim_decisions")
 public class ClaimDecisionEntity extends BaseEntity {
 
-    @Column(name = "claim_id", nullable = false, unique = true)
+    @Column(name = "claim_id", nullable = false)
     private UUID claimId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "decision", nullable = false, length = 30)
-    private Decision decision;
+    @Column(name = "decision", nullable = false, length = 50)
+    private String decision;
 
-    @Column(name = "approved_amount", precision = 19, scale = 2)
+    @Column(name = "approved_amount", precision = 14, scale = 2)
     private BigDecimal approvedAmount;
 
-    @Column(name = "reason", columnDefinition = "TEXT")
-    private String reason;
+    @Column(nullable = false, length = 3)
+    private String currency = "RWF";
 
-    @Column(name = "decided_by")
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String rationale;
+
+    @Column(name = "decided_by", nullable = false)
     private UUID decidedBy;
 
     @Column(name = "decided_at", nullable = false)
     private Instant decidedAt = Instant.now();
 
-    public enum Decision {
-        APPROVED,
-        PARTIALLY_APPROVED,
-        REJECTED
-    }
+    @Column(name = "is_final", nullable = false)
+    private boolean isFinal = true;
 }

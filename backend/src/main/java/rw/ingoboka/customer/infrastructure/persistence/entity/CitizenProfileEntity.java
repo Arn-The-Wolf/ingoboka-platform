@@ -3,12 +3,11 @@ package rw.ingoboka.customer.infrastructure.persistence.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
+import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 import rw.ingoboka.shared.domain.BaseEntity;
-
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(name = "citizen_profiles")
@@ -31,6 +30,8 @@ public class CitizenProfileEntity extends BaseEntity {
     private String kycStatus = "PENDING";
 
     private String district;
+
     private String sector;
+
     private String occupation;
 }

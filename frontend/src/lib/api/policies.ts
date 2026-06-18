@@ -1,17 +1,15 @@
 import { apiClient, isNetworkError } from './client';
-import { mockData, paginate } from './mock-data';
-import type { PaginatedResponse, Policy, PolicyCard, PublicVerification } from '@/types';
+import { mockData } from './mock-data';
+import type { Policy, PolicyCard, PublicVerification } from '@/types';
 
 export const policyApi = {
-  async list(page = 0, size = 20): Promise<PaginatedResponse<Policy>> {
+  async list() {
     try {
-      const { data } = await apiClient.get<PaginatedResponse<Policy>>('/policies', {
-        params: { page, size },
-      });
-      return data;
+      const { data } = await apiClient.get<Policy[]>('/policies');
+      return { content: data ?? [], totalElements: data?.length ?? 0 };
     } catch (error) {
       if (isNetworkError(error)) {
-        return paginate(mockData.policies, page, size);
+        return { content: mockData.policies, totalElements: mockData.policies.length };
       }
       throw error;
     }
@@ -47,9 +45,7 @@ export const policyApi = {
 
   async verifyPublic(token: string): Promise<PublicVerification> {
     try {
-      const { data } = await apiClient.get<PublicVerification>(
-        `/verify/${token}`
-      );
+      const { data } = await apiClient.get<PublicVerification>(`/verify/${token}`);
       return data;
     } catch (error) {
       if (isNetworkError(error)) {

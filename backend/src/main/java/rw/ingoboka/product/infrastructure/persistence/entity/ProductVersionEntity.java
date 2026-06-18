@@ -3,13 +3,12 @@ package rw.ingoboka.product.infrastructure.persistence.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.Getter;
-import lombok.Setter;
-import rw.ingoboka.shared.domain.BaseEntity;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
+import rw.ingoboka.shared.domain.BaseEntity;
 
 @Entity
 @Table(name = "product_versions")
@@ -26,7 +25,7 @@ public class ProductVersionEntity extends BaseEntity {
     @Column(name = "effective_from", nullable = false)
     private LocalDate effectiveFrom;
 
-    @Column(name = "terms_summary")
+    @Column(name = "terms_summary", columnDefinition = "TEXT")
     private String termsSummary;
 
     @Column(nullable = false)

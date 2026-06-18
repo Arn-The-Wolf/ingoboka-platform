@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { useAuthStore } from '@/store/auth-store';
 import { usePolicies } from '@/hooks/use-policies';
 import { PolicyListItem } from '@/components/citizen/policy-list-item';
@@ -72,6 +73,19 @@ export default function CitizenDashboardPage() {
         </Card>
       </div>
 
+      <div className="mb-4 flex gap-2">
+        <Link href="/products">
+          <Button variant="outline" size="sm">
+            {t('browseProducts')}
+          </Button>
+        </Link>
+        <Link href="/claims/new">
+          <Button variant="outline" size="sm">
+            File a claim
+          </Button>
+        </Link>
+      </div>
+
       <h2 className="mb-3 text-sm font-semibold text-brand-muted">{t('dashboard')}</h2>
 
       {isLoading && (
@@ -93,9 +107,11 @@ export default function CitizenDashboardPage() {
         <Card>
           <CardContent className="py-8 text-center">
             <p className="text-brand-muted">{t('noPolicies')}</p>
-            <Button className="mt-4" variant="outline">
-              {t('browseProducts')}
-            </Button>
+            <Link href="/products">
+              <Button className="mt-4" variant="outline">
+                {t('browseProducts')}
+              </Button>
+            </Link>
           </CardContent>
         </Card>
       )}

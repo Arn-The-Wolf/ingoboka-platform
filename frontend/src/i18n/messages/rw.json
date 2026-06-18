@@ -82,7 +82,29 @@
     "overview": "Incamake",
     "products": "Ibicuruzwa",
     "reports": "Raporo",
-    "settings": "Igenamiterere"
+    "settings": "Igenamiterere",
+    "manageProducts": "Gucunga ibicuruzwa",
+    "createProduct": "Kurema igicuruzwa",
+    "publish": "Gusohora",
+    "draft": "Igishushanyo",
+    "activeProduct": "Gikora"
+  },
+  "admin": {
+    "dashboard": "Ubuyobozi bwa platform",
+    "overview": "Incamake ya platform",
+    "organizations": "Imiryango",
+    "activeUsers": "Abakoresha bakora",
+    "activePolicies": "Ubwishingizi bukora",
+    "openClaims": "Ibyifuzo bifunguye",
+    "applications": "Ubusabe"
+  },
+  "agent": {
+    "dashboard": "Ikibaho cy'umukozi",
+    "assistedEnrollment": "Kwiyandikisha ufashijwe",
+    "applications": "Ubusabe",
+    "citizenPhone": "Telefone y'umuturage",
+    "productPlan": "ID y'igishushanyo",
+    "createApplication": "Tangira ubusabe"
   },
   "verify": {
     "title": "Kwemeza ubwishingizi",

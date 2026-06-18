@@ -21,6 +21,9 @@ public class PolicyEntity extends BaseEntity {
     @Column(name = "policy_number", nullable = false, unique = true)
     private String policyNumber;
 
+    @Column(name = "application_id")
+    private UUID applicationId;
+
     @Column(name = "citizen_profile_id", nullable = false)
     private UUID citizenProfileId;
 

@@ -5,6 +5,17 @@ spring:
   jpa:
     show-sql: true
 
+app:
+  storage:
+    provider: s3
+    s3:
+      bucket: ingoboka
+      region: us-east-1
+      endpoint: http://localhost:9000
+      access-key: ingoboka_minio
+      secret-key: ingoboka_minio_secret
+      path-style-access: true
+
 logging:
   level:
     rw.ingoboka: DEBUG

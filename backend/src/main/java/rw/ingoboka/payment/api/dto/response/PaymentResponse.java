@@ -11,6 +11,7 @@ import java.util.UUID;
 public class PaymentResponse {
     private UUID id;
     private String paymentReference;
+    private String providerReference;
     private String status;
     private BigDecimal amount;
     private String currency;

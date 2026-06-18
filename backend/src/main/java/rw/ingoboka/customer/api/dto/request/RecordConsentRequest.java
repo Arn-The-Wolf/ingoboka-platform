@@ -13,5 +13,6 @@ public class RecordConsentRequest {
     private String versionRef;
 
     private boolean granted = true;
+
     private String channel;
 }

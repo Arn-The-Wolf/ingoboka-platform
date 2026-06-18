@@ -2,8 +2,6 @@ package rw.ingoboka.claim.infrastructure.persistence;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -28,9 +26,11 @@ public class ClaimEntity extends BaseEntity {
     @Column(name = "citizen_profile_id", nullable = false)
     private UUID citizenProfileId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 30)
-    private ClaimStatus status = ClaimStatus.SUBMITTED;
+    @Column(name = "organization_id", nullable = false)
+    private UUID organizationId;
+
+    @Column(name = "status", nullable = false, length = 50)
+    private String status = "DRAFT";
 
     @Column(name = "incident_date", nullable = false)
     private LocalDate incidentDate;
@@ -38,20 +38,27 @@ public class ClaimEntity extends BaseEntity {
     @Column(name = "reported_at", nullable = false)
     private Instant reportedAt = Instant.now();
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "claim_type", nullable = false, length = 100)
+    private String claimType;
+
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "claimed_amount", precision = 19, scale = 2)
+    @Column(name = "claimed_amount", nullable = false, precision = 14, scale = 2)
     private BigDecimal claimedAmount;
 
-    public enum ClaimStatus {
-        SUBMITTED,
-        UNDER_REVIEW,
-        ADDITIONAL_INFO_REQUIRED,
-        APPROVED,
-        PARTIALLY_APPROVED,
-        REJECTED,
-        PAID,
-        CLOSED
-    }
+    @Column(name = "approved_amount", precision = 14, scale = 2)
+    private BigDecimal approvedAmount;
+
+    @Column(nullable = false, length = 3)
+    private String currency = "RWF";
+
+    @Column(name = "assigned_to")
+    private UUID assignedTo;
+
+    @Column(name = "submitted_at")
+    private Instant submittedAt;
+
+    @Column(name = "resolved_at")
+    private Instant resolvedAt;
 }

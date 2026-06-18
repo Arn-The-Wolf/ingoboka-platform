@@ -8,3 +8,7 @@ spring:
 app:
   jwt:
     secret: test-jwt-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256-algorithm
+  storage:
+    provider: local
+    local:
+      base-path: ./target/test-storage

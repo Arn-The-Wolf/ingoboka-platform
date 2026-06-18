@@ -16,6 +16,6 @@ public interface AuthMapper {
     @Mapping(target = "role", expression = "java(entity.getRole().name())")
     @Mapping(target = "status", expression = "java(entity.getStatus().name())")
     @Mapping(target = "preferredLanguage", expression = "java(entity.getPreferredLanguage().name())")
-    @Mapping(target = "createdAt", expression = "java(entity.getCreatedAt() == null ? null : java.time.LocalDateTime.ofInstant(entity.getCreatedAt(), ZoneOffset.UTC))")
+    @Mapping(target = "createdAt", expression = "java(entity.getCreatedAt() == null ? null : java.time.LocalDateTime.ofInstant(entity.getCreatedAt(), java.time.ZoneOffset.UTC))")
     User toDomain(UserEntity entity);
 }

@@ -82,7 +82,29 @@
     "overview": "Overview",
     "products": "Products",
     "reports": "Reports",
-    "settings": "Settings"
+    "settings": "Settings",
+    "manageProducts": "Manage products",
+    "createProduct": "Create product",
+    "publish": "Publish",
+    "draft": "Draft",
+    "activeProduct": "Active"
+  },
+  "admin": {
+    "dashboard": "Platform admin",
+    "overview": "Platform overview",
+    "organizations": "Organizations",
+    "activeUsers": "Active users",
+    "activePolicies": "Active policies",
+    "openClaims": "Open claims",
+    "applications": "Applications"
+  },
+  "agent": {
+    "dashboard": "Agent portal",
+    "assistedEnrollment": "Assisted enrollment",
+    "applications": "Applications",
+    "citizenPhone": "Citizen phone",
+    "productPlan": "Product plan ID",
+    "createApplication": "Start application"
   },
   "verify": {
     "title": "Policy verification",

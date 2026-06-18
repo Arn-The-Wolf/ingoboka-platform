@@ -43,6 +43,15 @@ public class ProductController {
         return ApiResponse.ok(productService.getProductDetail(id));
     }
 
+    @GetMapping("/api/v1/admin/products")
+    @PreAuthorize("hasAnyRole('INSURER_PRODUCT_MANAGER', 'INSURER_ADMIN')")
+    @Operation(summary = "List organization products")
+    public ApiResponse<PageResponse<ProductResponse>> listOrganizationProducts(
+            @AuthenticationPrincipal UserEntity user,
+            Pageable pageable) {
+        return ApiResponse.ok(productService.listOrganizationProducts(user.getOrganizationId(), pageable));
+    }
+
     @PostMapping("/api/v1/admin/products")
     @PreAuthorize("hasAnyRole('INSURER_PRODUCT_MANAGER', 'INSURER_ADMIN')")
     @Operation(summary = "Create product")

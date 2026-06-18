@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import rw.ingoboka.claim.api.dto.request.AppealRequest;
 import rw.ingoboka.claim.api.dto.request.ClaimDecisionRequest;
 import rw.ingoboka.claim.api.dto.request.CreateClaimRequest;
@@ -54,6 +56,17 @@ public class ClaimController {
         return ApiResponse.ok(claimService.submitClaim(id, user.getId()));
     }
 
+    @PostMapping("/claims/{id}/documents")
+    @PreAuthorize("hasRole('CITIZEN')")
+    @Operation(summary = "Upload claim document")
+    public ApiResponse<ClaimResponse> uploadDocument(
+            @AuthenticationPrincipal UserEntity user,
+            @PathVariable UUID id,
+            @RequestParam("documentType") String documentType,
+            @RequestParam("file") MultipartFile file) {
+        return ApiResponse.ok(claimService.attachDocument(id, user.getId(), documentType, file));
+    }
+
     @GetMapping("/claims/{id}")
     @PreAuthorize("hasRole('CITIZEN')")
     @Operation(summary = "Get claim status")
@@ -70,6 +83,24 @@ public class ClaimController {
             @AuthenticationPrincipal UserEntity user,
             Pageable pageable) {
         return ApiResponse.ok(claimService.listCitizenClaims(user.getId(), pageable));
+    }
+
+    @GetMapping("/admin/claims")
+    @PreAuthorize("hasAnyRole('INSURER_CLAIMS_OFFICER', 'INSURER_CLAIMS_SUPERVISOR', 'INSURER_ADMIN')")
+    @Operation(summary = "List organization claims")
+    public ApiResponse<PageResponse<ClaimSummaryResponse>> listOrganizationClaims(
+            @AuthenticationPrincipal UserEntity user,
+            Pageable pageable) {
+        return ApiResponse.ok(claimService.listOrganizationClaims(user.getOrganizationId(), pageable));
+    }
+
+    @GetMapping("/admin/claims/{id}")
+    @PreAuthorize("hasAnyRole('INSURER_CLAIMS_OFFICER', 'INSURER_CLAIMS_SUPERVISOR', 'INSURER_ADMIN')")
+    @Operation(summary = "Get organization claim detail")
+    public ApiResponse<ClaimSummaryResponse> getOrganizationClaim(
+            @AuthenticationPrincipal UserEntity user,
+            @PathVariable UUID id) {
+        return ApiResponse.ok(claimService.getOrganizationClaim(id, user.getOrganizationId()));
     }
 
     @PatchMapping("/admin/claims/{id}/status")

@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import rw.ingoboka.audit.domain.AuditEvent;
-import rw.ingoboka.audit.infrastructure.persistence.AuditLogEntity;
-import rw.ingoboka.audit.infrastructure.persistence.AuditLogRepository;
+import rw.ingoboka.audit.infrastructure.persistence.entity.AuditLogEntity;
+import rw.ingoboka.audit.infrastructure.persistence.repository.AuditLogRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -23,21 +23,19 @@ public class AuditService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onAuditEvent(AuditEvent event) {
         AuditLogEntity log = new AuditLogEntity();
-        log.setEventType(event.getEventType());
         log.setActorId(event.getActorId());
-        log.setResourceType(event.getResourceType());
-        log.setResourceId(event.getResourceId());
         log.setAction(event.getAction());
-        log.setPayloadJson(serializeMetadata(event));
+        log.setEntityType(event.getResourceType());
+        log.setEntityId(event.getResourceId());
         log.setCorrelationId(event.getCorrelationId());
         log.setOccurredAt(event.getOccurredAt());
+        if (event.getMetadata() != null && !event.getMetadata().isEmpty()) {
+            log.setAfterState(serializeMetadata(event));
+        }
         auditLogRepository.save(log);
     }
 
     private String serializeMetadata(AuditEvent event) {
-        if (event.getMetadata() == null || event.getMetadata().isEmpty()) {
-            return null;
-        }
         try {
             return objectMapper.writeValueAsString(event.getMetadata());
         } catch (JsonProcessingException e) {

@@ -3,23 +3,24 @@ package rw.ingoboka.policy.application.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HexFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rw.ingoboka.policy.application.dto.PublicVerificationResponse;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyEntity;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyEntity.PolicyStatus;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyRepository;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyVerificationTokenEntity;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyVerificationTokenRepository;
-import rw.ingoboka.product.infrastructure.persistence.InsurerEntity;
-import rw.ingoboka.product.infrastructure.persistence.InsurerRepository;
-import rw.ingoboka.product.infrastructure.persistence.ProductEntity;
-import rw.ingoboka.product.infrastructure.persistence.ProductRepository;
-import rw.ingoboka.product.infrastructure.persistence.ProductVersionEntity;
-import rw.ingoboka.product.infrastructure.persistence.ProductVersionRepository;
+import rw.ingoboka.policy.api.dto.response.PublicVerificationResponse;
+import rw.ingoboka.policy.infrastructure.persistence.entity.PolicyEntity;
+import rw.ingoboka.policy.infrastructure.persistence.entity.PolicyVerificationTokenEntity;
+import rw.ingoboka.policy.infrastructure.persistence.repository.PolicyRepository;
+import rw.ingoboka.policy.infrastructure.persistence.repository.PolicyVerificationTokenRepository;
+import rw.ingoboka.product.infrastructure.persistence.entity.InsuranceProductEntity;
+import rw.ingoboka.product.infrastructure.persistence.entity.ProductPlanEntity;
+import rw.ingoboka.product.infrastructure.persistence.entity.ProductVersionEntity;
+import rw.ingoboka.product.infrastructure.persistence.repository.InsuranceProductRepository;
+import rw.ingoboka.product.infrastructure.persistence.repository.ProductPlanRepository;
+import rw.ingoboka.product.infrastructure.persistence.repository.ProductVersionRepository;
+import rw.ingoboka.shared.infrastructure.persistence.entity.OrganizationEntity;
+import rw.ingoboka.shared.infrastructure.persistence.repository.OrganizationRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -27,61 +28,49 @@ public class PolicyVerificationService {
 
     private final PolicyVerificationTokenRepository verificationTokenRepository;
     private final PolicyRepository policyRepository;
-    private final ProductVersionRepository productVersionRepository;
-    private final ProductRepository productRepository;
-    private final InsurerRepository insurerRepository;
+    private final ProductPlanRepository planRepository;
+    private final ProductVersionRepository versionRepository;
+    private final InsuranceProductRepository productRepository;
+    private final OrganizationRepository organizationRepository;
 
     @Transactional(readOnly = true)
     public PublicVerificationResponse verify(String token) {
         String tokenHash = hashToken(token);
-        PolicyVerificationTokenEntity tokenEntity = verificationTokenRepository
-                .findByTokenHashAndRevokedFalse(tokenHash)
+        PolicyVerificationTokenEntity tokenEntity = verificationTokenRepository.findByTokenHash(tokenHash)
                 .orElse(null);
 
-        if (tokenEntity == null) {
-            return invalid("Verification token not found");
+        if (tokenEntity == null || tokenEntity.isUsed()) {
+            return invalid();
         }
-        if (tokenEntity.getExpiresAt().isBefore(Instant.now())) {
-            return invalid("Verification token has expired");
+        if (tokenEntity.getExpiresAt().isBefore(LocalDateTime.now())) {
+            return invalid();
         }
 
         PolicyEntity policy = policyRepository.findById(tokenEntity.getPolicyId()).orElse(null);
         if (policy == null) {
-            return invalid("Policy not found");
+            return invalid();
         }
 
-        ProductVersionEntity version = productVersionRepository.findById(policy.getProductVersionId()).orElse(null);
-        ProductEntity product = version != null
-                ? productRepository.findById(version.getProductId()).orElse(null)
-                : null;
-        String productName = product != null ? product.getName() : "Unknown";
-        String insurerName = product != null
-                ? insurerRepository.findById(product.getInsurerId()).map(InsurerEntity::getName).orElse("Unknown")
-                : "Unknown";
+        String productName = resolveProductName(policy.getProductPlanId());
+        String insurerName = organizationRepository.findById(policy.getOrganizationId())
+                .map(OrganizationEntity::getName)
+                .orElse("Unknown");
 
-        return new PublicVerificationResponse(
-                policy.getStatus() == PolicyStatus.ACTIVE,
-                maskPolicyNumber(policy.getPolicyNumber()),
-                productName,
-                insurerName,
-                policy.getStatus(),
-                policy.getEffectiveFrom(),
-                policy.getEffectiveTo(),
-                Instant.now(),
-                policy.getStatus() == PolicyStatus.ACTIVE ? "Policy is active" : "Policy is not active");
+        return PublicVerificationResponse.builder()
+                .valid("ACTIVE".equals(policy.getStatus()))
+                .policyRef(maskPolicyNumber(policy.getPolicyNumber()))
+                .productName(productName)
+                .insurerName(insurerName)
+                .status(policy.getStatus())
+                .validUntil(policy.getCoverageEndDate())
+                .build();
     }
 
-    private PublicVerificationResponse invalid(String message) {
-        return new PublicVerificationResponse(
-                false,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                Instant.now(),
-                message);
+    private PublicVerificationResponse invalid() {
+        return PublicVerificationResponse.builder()
+                .valid(false)
+                .status("INVALID")
+                .build();
     }
 
     private String maskPolicyNumber(String policyNumber) {
@@ -89,6 +78,14 @@ public class PolicyVerificationService {
             return "****";
         }
         return "****" + policyNumber.substring(policyNumber.length() - 4);
+    }
+
+    private String resolveProductName(java.util.UUID productPlanId) {
+        return planRepository.findById(productPlanId)
+                .flatMap(plan -> versionRepository.findById(plan.getProductVersionId()))
+                .flatMap(version -> productRepository.findById(version.getProductId()))
+                .map(InsuranceProductEntity::getName)
+                .orElse("Unknown");
     }
 
     private String hashToken(String rawToken) {

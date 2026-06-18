@@ -1,24 +1,31 @@
 package rw.ingoboka.payment.application.service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rw.ingoboka.customer.infrastructure.persistence.CitizenProfileEntity;
-import rw.ingoboka.customer.infrastructure.persistence.CitizenProfileRepository;
-import rw.ingoboka.payment.application.dto.InitiateSandboxPaymentRequest;
-import rw.ingoboka.payment.application.dto.PaymentStatusResponse;
-import rw.ingoboka.payment.application.dto.SandboxPaymentCallbackRequest;
+import rw.ingoboka.customer.infrastructure.persistence.entity.CitizenProfileEntity;
+import rw.ingoboka.customer.infrastructure.persistence.repository.CitizenProfileRepository;
+import rw.ingoboka.enrollment.application.service.EnrollmentService;
+import rw.ingoboka.enrollment.infrastructure.persistence.entity.PolicyApplicationEntity;
+import rw.ingoboka.payment.api.dto.request.InitiatePaymentRequest;
+import rw.ingoboka.payment.api.dto.request.SandboxCallbackRequest;
+import rw.ingoboka.payment.api.dto.response.PaymentResponse;
+import rw.ingoboka.payment.api.dto.response.PaymentStatusResponse;
 import rw.ingoboka.payment.domain.PaymentPort;
-import rw.ingoboka.payment.infrastructure.persistence.PaymentEntity;
-import rw.ingoboka.payment.infrastructure.persistence.PaymentEntity.PaymentStatus;
 import rw.ingoboka.payment.infrastructure.persistence.PaymentEventEntity;
-import rw.ingoboka.payment.infrastructure.persistence.PaymentEventEntity.PaymentEventType;
 import rw.ingoboka.payment.infrastructure.persistence.PaymentEventRepository;
-import rw.ingoboka.payment.infrastructure.persistence.PaymentRepository;
+import rw.ingoboka.payment.infrastructure.persistence.entity.PaymentEntity;
+import rw.ingoboka.payment.infrastructure.persistence.repository.PaymentRepository;
+import rw.ingoboka.billing.application.service.PremiumScheduleService;
+import rw.ingoboka.partner.application.service.PartnerRevenueService;
+import rw.ingoboka.policy.application.service.PolicyService;
+import rw.ingoboka.policy.infrastructure.persistence.entity.PolicyEntity;
+import rw.ingoboka.policy.infrastructure.persistence.repository.PolicyRepository;
+import rw.ingoboka.shared.exception.BadRequestException;
 import rw.ingoboka.shared.exception.NotFoundException;
-import rw.ingoboka.shared.security.SecurityUtils;
+import rw.ingoboka.shared.notification.NotificationService;
 
 @Service
 @RequiredArgsConstructor
@@ -28,23 +35,59 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PaymentEventRepository paymentEventRepository;
-    private final CitizenProfileRepository citizenProfileRepository;
+    private final CitizenProfileRepository profileRepository;
+    private final PolicyRepository policyRepository;
+    private final PolicyService policyService;
+    private final EnrollmentService enrollmentService;
     private final PaymentPort paymentPort;
+    private final NotificationService notificationService;
+    private final PremiumScheduleService premiumScheduleService;
+    private final PartnerRevenueService partnerRevenueService;
 
     @Transactional
-    public PaymentStatusResponse initiateSandboxPayment(InitiateSandboxPaymentRequest request) {
-        CitizenProfileEntity profile = citizenProfileRepository.findByUserId(SecurityUtils.getCurrentUserId())
-                .orElseThrow(() -> new NotFoundException("Citizen profile", SecurityUtils.getCurrentUserId()));
+    public PaymentResponse initiateSandboxPayment(UUID policyId, UUID userId, InitiatePaymentRequest request) {
+        CitizenProfileEntity profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("Citizen profile", userId));
+
+        UUID resolvedPolicyId = policyId != null ? policyId : request.getPolicyId();
+        PolicyEntity policy;
+
+        if (resolvedPolicyId != null) {
+            final UUID lookupId = resolvedPolicyId;
+            policy = policyRepository.findById(lookupId)
+                    .orElseThrow(() -> new NotFoundException("Policy", lookupId));
+            if (!policy.getCitizenProfileId().equals(profile.getId())) {
+                throw new NotFoundException("Policy", lookupId);
+            }
+        } else if (request.getApplicationId() != null) {
+            PolicyApplicationEntity application = enrollmentService.getApprovedApplication(
+                    request.getApplicationId(), userId);
+            policy = policyRepository.findByApplicationId(application.getId()).orElseGet(() ->
+                    policyService.activateFromApplication(
+                            application.getId(),
+                            application.getCitizenProfileId(),
+                            application.getProductPlanId(),
+                            application.getOrganizationId(),
+                            application.getPremiumAmount(),
+                            application.getCurrency()));
+            resolvedPolicyId = policy.getId();
+        } else {
+            throw new BadRequestException("Either policyId or applicationId is required");
+        }
+
+        final UUID paymentPolicyId = resolvedPolicyId;
 
         PaymentEntity payment = new PaymentEntity();
         payment.setPaymentReference(generatePaymentReference());
-        payment.setPolicyId(request.policyId());
+        payment.setPolicyId(paymentPolicyId);
         payment.setCitizenProfileId(profile.getId());
-        payment.setAmount(request.amount());
-        payment.setCurrency(request.currency());
-        payment.setStatus(PaymentStatus.INITIATED);
+        payment.setOrganizationId(policy.getOrganizationId());
+        payment.setAmount(policy.getPremiumAmount());
+        payment.setCurrency(policy.getCurrency());
+        payment.setPaymentMethod("MOBILE_MONEY");
+        payment.setStatus("PENDING");
         payment.setProvider(SANDBOX_PROVIDER);
-        payment.setInitiatedAt(Instant.now());
+        payment.setInitiatedAt(LocalDateTime.now());
         payment = paymentRepository.save(payment);
 
         PaymentPort.PaymentInitiationResult result = paymentPort.initiatePayment(
@@ -53,99 +96,97 @@ public class PaymentService {
                         payment.getPaymentReference(),
                         payment.getAmount(),
                         payment.getCurrency(),
-                        request.phoneNumber()));
+                        null));
 
         payment.setProviderReference(result.providerReference());
-        payment.setStatus(PaymentStatus.PENDING);
+        payment.setStatus("PROCESSING");
         payment = paymentRepository.save(payment);
+        recordEvent(payment.getId(), "INITIATED", SANDBOX_PROVIDER);
 
-        recordEvent(payment.getId(), PaymentEventType.INITIATED, "{\"provider\":\"SANDBOX\"}");
-
-        return toResponse(payment, result.checkoutUrl());
+        return PaymentResponse.builder()
+                .id(payment.getId())
+                .paymentReference(payment.getPaymentReference())
+                .providerReference(payment.getProviderReference())
+                .status(payment.getStatus())
+                .amount(payment.getAmount())
+                .currency(payment.getCurrency())
+                .instructions("Complete sandbox payment at: " + result.checkoutUrl())
+                .build();
     }
 
     @Transactional
-    public PaymentStatusResponse processSandboxCallback(SandboxPaymentCallbackRequest request) {
-        PaymentEntity payment = paymentRepository.findByProviderReference(request.providerReference())
-                .orElseThrow(() -> new NotFoundException("Payment", request.providerReference()));
+    public void processSandboxCallback(SandboxCallbackRequest request) {
+        PaymentEntity payment = paymentRepository.findByProviderReference(request.getProviderReference())
+                .orElseThrow(() -> new NotFoundException("Payment", request.getProviderReference()));
 
         PaymentPort.PaymentCallbackResult result = paymentPort.processCallback(
                 new PaymentPort.PaymentCallbackRequest(
-                        request.providerReference(),
-                        request.status(),
-                        request.rawPayload()));
+                        request.getProviderReference(),
+                        request.getStatus(),
+                        "{}"));
 
-        recordEvent(payment.getId(), PaymentEventType.CALLBACK_RECEIVED, request.rawPayload());
+        recordEvent(payment.getId(), "CALLBACK_RECEIVED", SANDBOX_PROVIDER);
 
         if (result.success()) {
-            payment.setStatus(PaymentStatus.SUCCESS);
-            payment.setCompletedAt(Instant.now());
-            recordEvent(payment.getId(), PaymentEventType.SUCCESS, null);
+            payment.setStatus("COMPLETED");
+            payment.setCompletedAt(LocalDateTime.now());
+            recordEvent(payment.getId(), "COMPLETED", SANDBOX_PROVIDER);
+            activatePolicyAfterPayment(payment);
         } else {
-            payment.setStatus(PaymentStatus.FAILED);
-            payment.setCompletedAt(Instant.now());
-            recordEvent(payment.getId(), PaymentEventType.FAILED, null);
+            payment.setStatus("FAILED");
+            payment.setCompletedAt(LocalDateTime.now());
+            recordEvent(payment.getId(), "FAILED", SANDBOX_PROVIDER);
         }
-
-        return toResponse(paymentRepository.save(payment), null);
+        paymentRepository.save(payment);
     }
 
     @Transactional(readOnly = true)
-    public PaymentStatusResponse getPaymentStatus(UUID paymentId) {
+    public PaymentStatusResponse getPaymentStatus(UUID paymentId, UUID userId) {
+        CitizenProfileEntity profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("Citizen profile", userId));
         PaymentEntity payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new NotFoundException("Payment", paymentId));
-
-        CitizenProfileEntity profile = citizenProfileRepository.findByUserId(SecurityUtils.getCurrentUserId())
-                .orElseThrow(() -> new NotFoundException("Citizen profile", SecurityUtils.getCurrentUserId()));
         if (!payment.getCitizenProfileId().equals(profile.getId())) {
             throw new NotFoundException("Payment", paymentId);
         }
 
-        if (payment.getProviderReference() != null && payment.getStatus() == PaymentStatus.PENDING) {
-            PaymentPort.PaymentStatusResult providerStatus =
-                    paymentPort.getPaymentStatus(payment.getProviderReference());
-            if ("SUCCESS".equals(providerStatus.status())) {
-                payment.setStatus(PaymentStatus.SUCCESS);
-            } else if ("FAILED".equals(providerStatus.status())) {
-                payment.setStatus(PaymentStatus.FAILED);
-            }
-        }
-
-        return toResponse(payment, buildCheckoutUrl(payment));
+        return PaymentStatusResponse.builder()
+                .id(payment.getId())
+                .status(payment.getStatus())
+                .paymentReference(payment.getPaymentReference())
+                .build();
     }
 
-    private String buildCheckoutUrl(PaymentEntity payment) {
-        if (payment.getProviderReference() == null) {
-            return null;
+    private void activatePolicyAfterPayment(PaymentEntity payment) {
+        PolicyEntity policy = policyRepository.findById(payment.getPolicyId())
+                .orElseThrow(() -> new NotFoundException("Policy", payment.getPolicyId()));
+        policy.setStatus("ACTIVE");
+        policy.setActivatedAt(LocalDateTime.now());
+        policyRepository.save(policy);
+
+        premiumScheduleService.createInitialSchedule(policy);
+        partnerRevenueService.recordPaymentCommission(
+                payment.getOrganizationId(),
+                payment.getId(),
+                payment.getAmount(),
+                payment.getCurrency());
+
+        if (policy.getApplicationId() != null) {
+            enrollmentService.markConverted(policy.getApplicationId());
         }
-        return "/api/v1/payments/sandbox/checkout/" + payment.getProviderReference();
+
+        notificationService.notifyPolicyActivated(payment.getCitizenProfileId(), policy.getPolicyNumber());
     }
 
-    private void recordEvent(UUID paymentId, PaymentEventType eventType, String payload) {
+    private void recordEvent(UUID paymentId, String eventType, String source) {
         PaymentEventEntity event = new PaymentEventEntity();
         event.setPaymentId(paymentId);
         event.setEventType(eventType);
-        event.setPayloadJson(payload);
-        event.setOccurredAt(Instant.now());
+        event.setSource(source);
         paymentEventRepository.save(event);
     }
 
     private String generatePaymentReference() {
         return "PAY-" + UUID.randomUUID().toString().substring(0, 12).toUpperCase();
-    }
-
-    private PaymentStatusResponse toResponse(PaymentEntity payment, String checkoutUrl) {
-        return new PaymentStatusResponse(
-                payment.getId(),
-                payment.getPaymentReference(),
-                payment.getPolicyId(),
-                payment.getAmount(),
-                payment.getCurrency(),
-                payment.getStatus(),
-                payment.getProvider(),
-                payment.getProviderReference(),
-                checkoutUrl,
-                payment.getInitiatedAt(),
-                payment.getCompletedAt());
     }
 }

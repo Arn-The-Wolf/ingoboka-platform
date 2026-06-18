@@ -1,26 +1,29 @@
 package rw.ingoboka.customer.application.service;
 
-import java.time.Instant;
+import jakarta.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rw.ingoboka.customer.application.dto.CitizenProfileResponse;
-import rw.ingoboka.customer.application.dto.CreateProfileRequest;
-import rw.ingoboka.customer.application.dto.DataRequestRequest;
-import rw.ingoboka.customer.application.dto.DataRequestResponse;
-import rw.ingoboka.customer.application.dto.RecordConsentRequest;
-import rw.ingoboka.customer.application.dto.UpdateProfileRequest;
-import rw.ingoboka.customer.infrastructure.persistence.CitizenProfileEntity;
-import rw.ingoboka.customer.infrastructure.persistence.CitizenProfileRepository;
-import rw.ingoboka.customer.infrastructure.persistence.ConsentEntity;
-import rw.ingoboka.customer.infrastructure.persistence.ConsentRepository;
-import rw.ingoboka.customer.infrastructure.persistence.DataRequestEntity;
-import rw.ingoboka.customer.infrastructure.persistence.DataRequestRepository;
-import rw.ingoboka.shared.exception.BadRequestException;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import rw.ingoboka.customer.api.dto.request.CreateProfileRequest;
+import rw.ingoboka.customer.api.dto.request.DataRequestRequest;
+import rw.ingoboka.customer.api.dto.request.RecordConsentRequest;
+import rw.ingoboka.customer.api.dto.request.UpdateProfileRequest;
+import rw.ingoboka.customer.api.dto.response.CitizenProfileResponse;
+import rw.ingoboka.customer.api.dto.response.ConsentResponse;
+import rw.ingoboka.customer.api.dto.response.DataRequestResponse;
+import rw.ingoboka.customer.infrastructure.persistence.entity.CitizenProfileEntity;
+import rw.ingoboka.customer.infrastructure.persistence.entity.ConsentEntity;
+import rw.ingoboka.customer.infrastructure.persistence.entity.DataRequestEntity;
+import rw.ingoboka.customer.infrastructure.persistence.repository.CitizenProfileRepository;
+import rw.ingoboka.customer.infrastructure.persistence.repository.ConsentRepository;
+import rw.ingoboka.customer.infrastructure.persistence.repository.DataRequestRepository;
 import rw.ingoboka.shared.exception.ConflictException;
 import rw.ingoboka.shared.exception.NotFoundException;
-import rw.ingoboka.shared.security.SecurityUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -31,143 +34,137 @@ public class CustomerProfileService {
     private final DataRequestRepository dataRequestRepository;
 
     @Transactional
-    public CitizenProfileResponse createProfile(CreateProfileRequest request) {
-        UUID userId = SecurityUtils.getCurrentUserId();
+    public CitizenProfileResponse createProfile(UUID userId, CreateProfileRequest request) {
         if (profileRepository.existsByUserId(userId)) {
             throw new ConflictException("Citizen profile already exists for this user");
         }
-        if (request.nationalId() != null && profileRepository.existsByNationalId(request.nationalId())) {
+        if (request.getNationalId() != null && profileRepository.existsByNationalId(request.getNationalId())) {
             throw new ConflictException("National ID is already registered");
         }
 
         CitizenProfileEntity profile = new CitizenProfileEntity();
         profile.setUserId(userId);
-        applyCreateRequest(profile, request);
+        profile.setNationalId(request.getNationalId());
+        profile.setDistrict(request.getDistrict());
+        profile.setOccupation(request.getOccupation());
+        profile.setGender(request.getGender());
+        profile.setKycStatus("PENDING");
         return toResponse(profileRepository.save(profile));
     }
 
     @Transactional
-    public CitizenProfileResponse updateProfile(UpdateProfileRequest request) {
-        CitizenProfileEntity profile = getProfileForCurrentUser();
-        if (request.nationalId() != null
-                && !request.nationalId().equals(profile.getNationalId())
-                && profileRepository.existsByNationalId(request.nationalId())) {
-            throw new ConflictException("National ID is already registered");
+    public CitizenProfileResponse updateProfile(UUID userId, UpdateProfileRequest request) {
+        CitizenProfileEntity profile = getProfileEntity(userId);
+        if (request.getDistrict() != null) {
+            profile.setDistrict(request.getDistrict());
         }
-        applyUpdateRequest(profile, request);
+        if (request.getSector() != null) {
+            profile.setSector(request.getSector());
+        }
+        if (request.getOccupation() != null) {
+            profile.setOccupation(request.getOccupation());
+        }
         return toResponse(profileRepository.save(profile));
     }
 
     @Transactional(readOnly = true)
-    public CitizenProfileResponse getProfile() {
-        return toResponse(getProfileForCurrentUser());
+    public CitizenProfileResponse getProfile(UUID userId) {
+        return toResponse(getProfileEntity(userId));
     }
 
     @Transactional
-    public void recordConsent(RecordConsentRequest request, String ipAddress) {
-        CitizenProfileEntity profile = getProfileForCurrentUser();
+    public void recordConsent(UUID userId, RecordConsentRequest request) {
+        CitizenProfileEntity profile = getProfileEntity(userId);
         ConsentEntity consent = new ConsentEntity();
-        consent.setProfileId(profile.getId());
-        consent.setConsentType(request.consentType());
-        consent.setGranted(request.granted());
-        consent.setConsentVersion(request.consentVersion());
-        consent.setIpAddress(ipAddress);
-        consent.setRecordedAt(Instant.now());
+        consent.setCitizenProfileId(profile.getId());
+        consent.setConsentType(request.getConsentType());
+        consent.setConsentVersion(request.getVersionRef());
+        consent.setGranted(request.isGranted());
+        consent.setGrantedAt(LocalDateTime.now());
+        consent.setIpAddress(resolveClientIp());
+        consent.setUserAgent(resolveUserAgent());
+        if (!request.isGranted()) {
+            consent.setRevokedAt(LocalDateTime.now());
+        }
         consentRepository.save(consent);
     }
 
-    @Transactional
-    public DataRequestResponse submitDataRequest(DataRequestRequest request) {
-        CitizenProfileEntity profile = getProfileForCurrentUser();
-        DataRequestEntity dataRequest = new DataRequestEntity();
-        dataRequest.setProfileId(profile.getId());
-        dataRequest.setRequestType(request.requestType());
-        dataRequest.setDetails(request.details());
-        dataRequest.setStatus(DataRequestEntity.RequestStatus.PENDING);
-        DataRequestEntity saved = dataRequestRepository.save(dataRequest);
-        return toDataRequestResponse(saved);
+    @Transactional(readOnly = true)
+    public List<ConsentResponse> getConsents(UUID userId) {
+        CitizenProfileEntity profile = getProfileEntity(userId);
+        return consentRepository.findByCitizenProfileIdOrderByGrantedAtDesc(profile.getId()).stream()
+                .map(this::toConsentResponse)
+                .toList();
     }
 
-    private CitizenProfileEntity getProfileForCurrentUser() {
-        UUID userId = SecurityUtils.getCurrentUserId();
+    @Transactional
+    public DataRequestResponse submitDataRequest(UUID userId, DataRequestRequest request) {
+        CitizenProfileEntity profile = getProfileEntity(userId);
+        DataRequestEntity dataRequest = new DataRequestEntity();
+        dataRequest.setCitizenProfileId(profile.getId());
+        dataRequest.setRequestType(request.getRequestType());
+        dataRequest.setDetails(request.getDetails());
+        dataRequest.setStatus(DataRequestEntity.RequestStatus.PENDING);
+        return toDataRequestResponse(dataRequestRepository.save(dataRequest));
+    }
+
+    private CitizenProfileEntity getProfileEntity(UUID userId) {
         return profileRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFoundException("Citizen profile", userId));
     }
 
-    private void applyCreateRequest(CitizenProfileEntity profile, CreateProfileRequest request) {
-        profile.setNationalId(request.nationalId());
-        profile.setDateOfBirth(request.dateOfBirth());
-        profile.setGender(request.gender());
-        profile.setDistrict(request.district());
-        profile.setSector(request.sector());
-        profile.setCell(request.cell());
-        profile.setVillage(request.village());
-        if (request.preferredLanguage() != null) {
-            profile.setPreferredLanguage(request.preferredLanguage());
-        }
-        profile.setEmergencyContactName(request.emergencyContactName());
-        profile.setEmergencyContactPhone(request.emergencyContactPhone());
-    }
-
-    private void applyUpdateRequest(CitizenProfileEntity profile, UpdateProfileRequest request) {
-        if (request.nationalId() != null) {
-            profile.setNationalId(request.nationalId());
-        }
-        if (request.dateOfBirth() != null) {
-            profile.setDateOfBirth(request.dateOfBirth());
-        }
-        if (request.gender() != null) {
-            profile.setGender(request.gender());
-        }
-        if (request.district() != null) {
-            profile.setDistrict(request.district());
-        }
-        if (request.sector() != null) {
-            profile.setSector(request.sector());
-        }
-        if (request.cell() != null) {
-            profile.setCell(request.cell());
-        }
-        if (request.village() != null) {
-            profile.setVillage(request.village());
-        }
-        if (request.preferredLanguage() != null) {
-            profile.setPreferredLanguage(request.preferredLanguage());
-        }
-        if (request.emergencyContactName() != null) {
-            profile.setEmergencyContactName(request.emergencyContactName());
-        }
-        if (request.emergencyContactPhone() != null) {
-            profile.setEmergencyContactPhone(request.emergencyContactPhone());
-        }
-    }
-
     private CitizenProfileResponse toResponse(CitizenProfileEntity profile) {
-        return new CitizenProfileResponse(
-                profile.getId(),
-                profile.getUserId(),
-                profile.getNationalId(),
-                profile.getDateOfBirth(),
-                profile.getGender(),
-                profile.getDistrict(),
-                profile.getSector(),
-                profile.getCell(),
-                profile.getVillage(),
-                profile.getPreferredLanguage(),
-                profile.getEmergencyContactName(),
-                profile.getEmergencyContactPhone(),
-                profile.getCreatedAt(),
-                profile.getUpdatedAt());
+        return CitizenProfileResponse.builder()
+                .id(profile.getId())
+                .userId(profile.getUserId())
+                .nationalId(profile.getNationalId())
+                .district(profile.getDistrict())
+                .sector(profile.getSector())
+                .occupation(profile.getOccupation())
+                .kycStatus(profile.getKycStatus())
+                .build();
+    }
+
+    private ConsentResponse toConsentResponse(ConsentEntity consent) {
+        return ConsentResponse.builder()
+                .id(consent.getId())
+                .consentType(consent.getConsentType())
+                .consentVersion(consent.getConsentVersion())
+                .granted(consent.isGranted())
+                .grantedAt(consent.getGrantedAt())
+                .revokedAt(consent.getRevokedAt())
+                .build();
     }
 
     private DataRequestResponse toDataRequestResponse(DataRequestEntity entity) {
-        return new DataRequestResponse(
-                entity.getId(),
-                entity.getProfileId(),
-                entity.getRequestType(),
-                entity.getStatus(),
-                entity.getDetails(),
-                entity.getCreatedAt(),
-                entity.getResolvedAt());
+        return DataRequestResponse.builder()
+                .id(entity.getId())
+                .requestType(entity.getRequestType())
+                .status(entity.getStatus())
+                .details(entity.getDetails())
+                .createdAt(entity.getCreatedAt())
+                .resolvedAt(entity.getResolvedAt())
+                .build();
+    }
+
+    private String resolveClientIp() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null) {
+            return null;
+        }
+        HttpServletRequest httpRequest = attributes.getRequest();
+        String forwarded = httpRequest.getHeader("X-Forwarded-For");
+        if (forwarded != null && !forwarded.isBlank()) {
+            return forwarded.split(",")[0].trim();
+        }
+        return httpRequest.getRemoteAddr();
+    }
+
+    private String resolveUserAgent() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null) {
+            return null;
+        }
+        return attributes.getRequest().getHeader("User-Agent");
     }
 }

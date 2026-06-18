@@ -9,4 +9,8 @@ import java.util.UUID;
 public interface PolicyRepository extends JpaRepository<PolicyEntity, UUID> {
 
     List<PolicyEntity> findByCitizenProfileId(UUID citizenProfileId);
+
+    List<PolicyEntity> findByCitizenProfileIdOrderByCreatedAtDesc(UUID citizenProfileId);
+
+    java.util.Optional<PolicyEntity> findByApplicationId(UUID applicationId);
 }

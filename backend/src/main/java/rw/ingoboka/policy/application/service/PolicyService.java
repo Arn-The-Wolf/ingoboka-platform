@@ -3,39 +3,35 @@ package rw.ingoboka.policy.application.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rw.ingoboka.customer.infrastructure.persistence.CitizenProfileEntity;
-import rw.ingoboka.customer.infrastructure.persistence.CitizenProfileRepository;
-import rw.ingoboka.policy.application.dto.ActivatePolicyRequest;
-import rw.ingoboka.policy.application.dto.PolicyCardResponse;
-import rw.ingoboka.policy.application.dto.PolicyDetailResponse;
-import rw.ingoboka.policy.application.dto.PolicySummaryResponse;
-import rw.ingoboka.policy.application.dto.VerificationTokenResponse;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyEntity;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyEntity.PolicyStatus;
+import rw.ingoboka.customer.infrastructure.persistence.entity.CitizenProfileEntity;
+import rw.ingoboka.customer.infrastructure.persistence.repository.CitizenProfileRepository;
+import rw.ingoboka.policy.api.dto.response.PolicyCardResponse;
+import rw.ingoboka.policy.api.dto.response.PolicyDetailResponse;
+import rw.ingoboka.policy.api.dto.response.PolicySummaryResponse;
 import rw.ingoboka.policy.infrastructure.persistence.PolicyEventEntity;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyEventEntity.PolicyEventType;
 import rw.ingoboka.policy.infrastructure.persistence.PolicyEventRepository;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyRepository;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyVerificationTokenEntity;
-import rw.ingoboka.policy.infrastructure.persistence.PolicyVerificationTokenRepository;
-import rw.ingoboka.product.infrastructure.persistence.InsurerEntity;
-import rw.ingoboka.product.infrastructure.persistence.InsurerRepository;
-import rw.ingoboka.product.infrastructure.persistence.ProductEntity;
-import rw.ingoboka.product.infrastructure.persistence.ProductRepository;
-import rw.ingoboka.product.infrastructure.persistence.ProductVersionEntity;
-import rw.ingoboka.product.infrastructure.persistence.ProductVersionRepository;
+import rw.ingoboka.policy.infrastructure.persistence.entity.PolicyEntity;
+import rw.ingoboka.policy.infrastructure.persistence.entity.PolicyVerificationTokenEntity;
+import rw.ingoboka.policy.infrastructure.persistence.repository.PolicyRepository;
+import rw.ingoboka.policy.infrastructure.persistence.repository.PolicyVerificationTokenRepository;
+import rw.ingoboka.product.infrastructure.persistence.entity.InsuranceProductEntity;
+import rw.ingoboka.product.infrastructure.persistence.entity.ProductPlanEntity;
+import rw.ingoboka.product.infrastructure.persistence.entity.ProductVersionEntity;
+import rw.ingoboka.product.infrastructure.persistence.repository.InsuranceProductRepository;
+import rw.ingoboka.product.infrastructure.persistence.repository.ProductPlanRepository;
+import rw.ingoboka.product.infrastructure.persistence.repository.ProductVersionRepository;
 import rw.ingoboka.shared.exception.BadRequestException;
 import rw.ingoboka.shared.exception.NotFoundException;
-import rw.ingoboka.shared.security.SecurityUtils;
+import rw.ingoboka.shared.infrastructure.persistence.entity.OrganizationEntity;
+import rw.ingoboka.shared.infrastructure.persistence.repository.OrganizationRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -46,112 +42,93 @@ public class PolicyService {
     private final PolicyRepository policyRepository;
     private final PolicyEventRepository policyEventRepository;
     private final PolicyVerificationTokenRepository verificationTokenRepository;
-    private final CitizenProfileRepository citizenProfileRepository;
-    private final ProductVersionRepository productVersionRepository;
-    private final ProductRepository productRepository;
-    private final InsurerRepository insurerRepository;
+    private final CitizenProfileRepository profileRepository;
+    private final ProductPlanRepository planRepository;
+    private final ProductVersionRepository versionRepository;
+    private final InsuranceProductRepository productRepository;
+    private final OrganizationRepository organizationRepository;
 
     @Transactional
-    public PolicyDetailResponse activatePolicy(ActivatePolicyRequest request) {
-        CitizenProfileEntity profile = citizenProfileRepository.findByUserId(SecurityUtils.getCurrentUserId())
-                .orElseThrow(() -> new NotFoundException("Citizen profile", SecurityUtils.getCurrentUserId()));
-
-        ProductVersionEntity version = productVersionRepository.findById(request.productVersionId())
-                .orElseThrow(() -> new NotFoundException("Product version", request.productVersionId()));
-        ProductEntity product = productRepository.findById(version.getProductId())
-                .orElseThrow(() -> new NotFoundException("Product", version.getProductId()));
-        if (product.getStatus() != ProductEntity.ProductStatus.PUBLISHED) {
-            throw new BadRequestException("Product is not published");
-        }
+    public PolicyEntity activateFromApplication(
+            UUID applicationId,
+            UUID citizenProfileId,
+            UUID productPlanId,
+            UUID organizationId,
+            java.math.BigDecimal premiumAmount,
+            String currency) {
+        ProductPlanEntity plan = planRepository.findById(productPlanId)
+                .orElseThrow(() -> new NotFoundException("Product plan", productPlanId));
 
         PolicyEntity policy = new PolicyEntity();
         policy.setPolicyNumber(generatePolicyNumber());
-        policy.setCitizenProfileId(profile.getId());
-        policy.setProductVersionId(version.getId());
-        policy.setStatus(PolicyStatus.ACTIVE);
-        policy.setEffectiveFrom(request.effectiveFrom());
-        policy.setEffectiveTo(request.effectiveTo());
-        policy.setPremiumAmount(request.premiumAmount());
-        if (request.currency() != null) {
-            policy.setCurrency(request.currency());
-        }
+        policy.setApplicationId(applicationId);
+        policy.setCitizenProfileId(citizenProfileId);
+        policy.setProductPlanId(productPlanId);
+        policy.setOrganizationId(organizationId);
+        policy.setStatus("PENDING_ACTIVATION");
+        policy.setCoverageStartDate(LocalDate.now());
+        policy.setCoverageEndDate(LocalDate.now().plusYears(1));
+        policy.setPremiumAmount(premiumAmount);
+        policy.setCurrency(currency != null ? currency : "RWF");
+        policy.setNextBillingDate(LocalDate.now().plusMonths(1));
         policy = policyRepository.save(policy);
 
-        recordEvent(policy.getId(), PolicyEventType.CREATED, "Policy created");
-        recordEvent(policy.getId(), PolicyEventType.ACTIVATED, "Policy activated");
-
-        return getPolicyDetail(policy.getId());
+        recordEvent(policy.getId(), "CREATED", null);
+        return policy;
     }
 
     @Transactional(readOnly = true)
-    public List<PolicySummaryResponse> listCitizenPolicies() {
-        CitizenProfileEntity profile = citizenProfileRepository.findByUserId(SecurityUtils.getCurrentUserId())
-                .orElseThrow(() -> new NotFoundException("Citizen profile", SecurityUtils.getCurrentUserId()));
+    public List<PolicySummaryResponse> listCitizenPolicies(UUID userId) {
+        CitizenProfileEntity profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("Citizen profile", userId));
         return policyRepository.findByCitizenProfileIdOrderByCreatedAtDesc(profile.getId()).stream()
                 .map(this::toSummary)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public PolicyDetailResponse getPolicyDetail(UUID policyId) {
-        PolicyEntity policy = getPolicyForCurrentCitizen(policyId);
+    public PolicyDetailResponse getPolicyDetail(UUID policyId, UUID userId) {
+        PolicyEntity policy = getPolicyForCitizen(policyId, userId);
         return toDetail(policy);
     }
 
-    @Transactional
-    public VerificationTokenResponse generateVerificationToken(UUID policyId) {
-        PolicyEntity policy = getPolicyForCurrentCitizen(policyId);
-        return issueVerificationToken(policy);
+    @Transactional(readOnly = true)
+    public PolicyCardResponse getPolicyCard(UUID policyId, UUID userId) {
+        PolicyEntity policy = getPolicyForCitizen(policyId, userId);
+        String productName = resolveProductName(policy.getProductPlanId());
+        String insurerName = organizationRepository.findById(policy.getOrganizationId())
+                .map(OrganizationEntity::getName)
+                .orElse("Unknown");
+        String rawToken = issueVerificationToken(policy);
+
+        return PolicyCardResponse.builder()
+                .policyNumber(policy.getPolicyNumber())
+                .productName(productName)
+                .insurerName(insurerName)
+                .status(policy.getStatus())
+                .validUntil(policy.getCoverageEndDate())
+                .verificationToken(rawToken)
+                .build();
     }
 
-    private VerificationTokenResponse issueVerificationToken(PolicyEntity policy) {
-        if (policy.getStatus() != PolicyStatus.ACTIVE) {
+    private String issueVerificationToken(PolicyEntity policy) {
+        if (!"ACTIVE".equals(policy.getStatus())) {
             throw new BadRequestException("Verification tokens can only be issued for active policies");
         }
-
-        String rawToken = UUID.randomUUID().toString().replace("-", "") + UUID.randomUUID().toString().replace("-", "");
-        Instant expiresAt = Instant.now().plus(TOKEN_TTL_DAYS, ChronoUnit.DAYS);
-
+        String rawToken = UUID.randomUUID().toString().replace("-", "");
         PolicyVerificationTokenEntity tokenEntity = new PolicyVerificationTokenEntity();
         tokenEntity.setPolicyId(policy.getId());
         tokenEntity.setTokenHash(hashToken(rawToken));
-        tokenEntity.setExpiresAt(expiresAt);
-        tokenEntity.setRevoked(false);
+        tokenEntity.setExpiresAt(LocalDateTime.now().plusDays(TOKEN_TTL_DAYS));
+        tokenEntity.setUsed(false);
         verificationTokenRepository.save(tokenEntity);
-
-        recordEvent(policy.getId(), PolicyEventType.VERIFICATION_TOKEN_ISSUED, "Verification token issued");
-
-        String verificationUrl = buildVerificationUrl(rawToken);
-        return new VerificationTokenResponse(rawToken, verificationUrl, expiresAt);
+        recordEvent(policy.getId(), "UPDATED", null);
+        return rawToken;
     }
 
-    @Transactional
-    public PolicyCardResponse getPolicyCard(UUID policyId) {
-        PolicyEntity policy = getPolicyForCurrentCitizen(policyId);
-        ProductVersionEntity version = productVersionRepository.findById(policy.getProductVersionId())
-                .orElseThrow(() -> new NotFoundException("Product version", policy.getProductVersionId()));
-        ProductEntity product = productRepository.findById(version.getProductId())
-                .orElseThrow(() -> new NotFoundException("Product", version.getProductId()));
-        String insurerName = insurerRepository.findById(product.getInsurerId())
-                .map(InsurerEntity::getName)
-                .orElse("Unknown");
-
-        VerificationTokenResponse token = issueVerificationToken(policy);
-
-        return new PolicyCardResponse(
-                policy.getPolicyNumber(),
-                product.getName(),
-                insurerName,
-                policy.getStatus(),
-                policy.getEffectiveFrom(),
-                policy.getEffectiveTo(),
-                token.verificationUrl(),
-                token.verificationUrl());
-    }
-
-    private PolicyEntity getPolicyForCurrentCitizen(UUID policyId) {
-        CitizenProfileEntity profile = citizenProfileRepository.findByUserId(SecurityUtils.getCurrentUserId())
-                .orElseThrow(() -> new NotFoundException("Citizen profile", SecurityUtils.getCurrentUserId()));
+    private PolicyEntity getPolicyForCitizen(UUID policyId, UUID userId) {
+        CitizenProfileEntity profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new NotFoundException("Citizen profile", userId));
         PolicyEntity policy = policyRepository.findById(policyId)
                 .orElseThrow(() -> new NotFoundException("Policy", policyId));
         if (!policy.getCitizenProfileId().equals(profile.getId())) {
@@ -160,12 +137,11 @@ public class PolicyService {
         return policy;
     }
 
-    private void recordEvent(UUID policyId, PolicyEventType eventType, String description) {
+    private void recordEvent(UUID policyId, String eventType, UUID performedBy) {
         PolicyEventEntity event = new PolicyEventEntity();
         event.setPolicyId(policyId);
         event.setEventType(eventType);
-        event.setDescription(description);
-        event.setOccurredAt(Instant.now());
+        event.setPerformedBy(performedBy);
         policyEventRepository.save(event);
     }
 
@@ -183,59 +159,30 @@ public class PolicyService {
         }
     }
 
-    private String buildVerificationUrl(String rawToken) {
-        return "/api/v1/public/verify/" + rawToken;
-    }
-
     private PolicySummaryResponse toSummary(PolicyEntity policy) {
-        String productName = resolveProductName(policy.getProductVersionId());
-        return new PolicySummaryResponse(
-                policy.getId(),
-                policy.getPolicyNumber(),
-                policy.getStatus(),
-                policy.getEffectiveFrom(),
-                policy.getEffectiveTo(),
-                policy.getPremiumAmount(),
-                policy.getCurrency(),
-                productName,
-                policy.getCreatedAt());
+        return PolicySummaryResponse.builder()
+                .id(policy.getId())
+                .policyNumber(policy.getPolicyNumber())
+                .status(policy.getStatus())
+                .productName(resolveProductName(policy.getProductPlanId()))
+                .build();
     }
 
     private PolicyDetailResponse toDetail(PolicyEntity policy) {
-        ProductVersionEntity version = productVersionRepository.findById(policy.getProductVersionId())
-                .orElseThrow(() -> new NotFoundException("Product version", policy.getProductVersionId()));
-        ProductEntity product = productRepository.findById(version.getProductId())
-                .orElseThrow(() -> new NotFoundException("Product", version.getProductId()));
-        String insurerName = insurerRepository.findById(product.getInsurerId())
-                .map(InsurerEntity::getName)
-                .orElse("Unknown");
-
-        List<PolicyDetailResponse.PolicyEventResponse> events = policyEventRepository
-                .findByPolicyIdOrderByOccurredAtDesc(policy.getId()).stream()
-                .map(e -> new PolicyDetailResponse.PolicyEventResponse(
-                        e.getEventType(),
-                        e.getDescription(),
-                        e.getOccurredAt()))
-                .toList();
-
-        return new PolicyDetailResponse(
-                policy.getId(),
-                policy.getPolicyNumber(),
-                policy.getStatus(),
-                policy.getEffectiveFrom(),
-                policy.getEffectiveTo(),
-                policy.getPremiumAmount(),
-                policy.getCurrency(),
-                product.getName(),
-                insurerName,
-                events,
-                policy.getCreatedAt());
+        return PolicyDetailResponse.builder()
+                .id(policy.getId())
+                .policyNumber(policy.getPolicyNumber())
+                .status(policy.getStatus())
+                .coverageStartDate(policy.getCoverageStartDate())
+                .coverageEndDate(policy.getCoverageEndDate())
+                .build();
     }
 
-    private String resolveProductName(UUID productVersionId) {
-        return productVersionRepository.findById(productVersionId)
-                .flatMap(v -> productRepository.findById(v.getProductId()))
-                .map(ProductEntity::getName)
+    private String resolveProductName(UUID productPlanId) {
+        return planRepository.findById(productPlanId)
+                .flatMap(plan -> versionRepository.findById(plan.getProductVersionId()))
+                .flatMap(version -> productRepository.findById(version.getProductId()))
+                .map(InsuranceProductEntity::getName)
                 .orElse("Unknown");
     }
 }

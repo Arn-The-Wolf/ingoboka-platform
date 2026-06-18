@@ -1,25 +1,31 @@
 package rw.ingoboka.product.application.service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import rw.ingoboka.product.application.dto.CreateProductRequest;
-import rw.ingoboka.product.application.dto.ProductDetailResponse;
-import rw.ingoboka.product.application.dto.ProductSummaryResponse;
-import rw.ingoboka.product.infrastructure.persistence.InsurerEntity;
-import rw.ingoboka.product.infrastructure.persistence.InsurerRepository;
-import rw.ingoboka.product.infrastructure.persistence.ProductCoverageEntity;
-import rw.ingoboka.product.infrastructure.persistence.ProductCoverageRepository;
-import rw.ingoboka.product.infrastructure.persistence.ProductEntity;
-import rw.ingoboka.product.infrastructure.persistence.ProductEntity.ProductStatus;
-import rw.ingoboka.product.infrastructure.persistence.ProductPremiumEntity;
-import rw.ingoboka.product.infrastructure.persistence.ProductPremiumRepository;
-import rw.ingoboka.product.infrastructure.persistence.ProductRepository;
-import rw.ingoboka.product.infrastructure.persistence.ProductVersionEntity;
-import rw.ingoboka.product.infrastructure.persistence.ProductVersionRepository;
+import rw.ingoboka.product.api.dto.request.CreateProductRequest;
+import rw.ingoboka.product.api.dto.response.ProductDetailResponse;
+import rw.ingoboka.product.api.dto.response.ProductPlanResponse;
+import rw.ingoboka.product.api.dto.response.ProductResponse;
+import rw.ingoboka.product.api.dto.response.ProductSummaryResponse;
+import rw.ingoboka.product.infrastructure.persistence.entity.InsuranceProductEntity;
+import rw.ingoboka.product.infrastructure.persistence.entity.ProductBenefitEntity;
+import rw.ingoboka.product.infrastructure.persistence.entity.ProductExclusionEntity;
+import rw.ingoboka.product.infrastructure.persistence.entity.ProductPlanEntity;
+import rw.ingoboka.product.infrastructure.persistence.entity.ProductRequiredDocumentEntity;
+import rw.ingoboka.product.infrastructure.persistence.entity.ProductVersionEntity;
+import rw.ingoboka.product.infrastructure.persistence.repository.InsuranceProductRepository;
+import rw.ingoboka.product.infrastructure.persistence.repository.ProductBenefitRepository;
+import rw.ingoboka.product.infrastructure.persistence.repository.ProductExclusionRepository;
+import rw.ingoboka.product.infrastructure.persistence.repository.ProductPlanRepository;
+import rw.ingoboka.product.infrastructure.persistence.repository.ProductRequiredDocumentRepository;
+import rw.ingoboka.product.infrastructure.persistence.repository.ProductVersionRepository;
+import rw.ingoboka.shared.domain.PageResponse;
 import rw.ingoboka.shared.exception.BadRequestException;
 import rw.ingoboka.shared.exception.ConflictException;
 import rw.ingoboka.shared.exception.NotFoundException;
@@ -28,157 +34,229 @@ import rw.ingoboka.shared.exception.NotFoundException;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private final InsurerRepository insurerRepository;
-    private final ProductRepository productRepository;
-    private final ProductVersionRepository productVersionRepository;
-    private final ProductCoverageRepository productCoverageRepository;
-    private final ProductPremiumRepository productPremiumRepository;
+    private static final String STATUS_ACTIVE = "ACTIVE";
+    private static final String STATUS_DRAFT = "DRAFT";
+    private static final String VERSION_PUBLISHED = "PUBLISHED";
+
+    private final InsuranceProductRepository productRepository;
+    private final ProductVersionRepository versionRepository;
+    private final ProductPlanRepository planRepository;
+    private final ProductBenefitRepository benefitRepository;
+    private final ProductExclusionRepository exclusionRepository;
+    private final ProductRequiredDocumentRepository documentRepository;
 
     @Transactional(readOnly = true)
-    public List<ProductSummaryResponse> listPublishedProducts() {
-        return productRepository.findByStatusOrderByNameAsc(ProductStatus.PUBLISHED).stream()
-                .map(this::toSummary)
-                .toList();
+    public PageResponse<ProductSummaryResponse> listPublishedProducts(Pageable pageable) {
+        Page<InsuranceProductEntity> page = productRepository.findByStatus(STATUS_ACTIVE, pageable);
+        return PageResponse.from(page.map(this::toSummary));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<ProductResponse> listOrganizationProducts(UUID organizationId, Pageable pageable) {
+        Page<InsuranceProductEntity> page =
+                productRepository.findByOrganizationIdOrderByNameAsc(organizationId, pageable);
+        return PageResponse.from(page.map(p -> ProductResponse.builder()
+                .id(p.getId())
+                .code(p.getCode())
+                .name(p.getName())
+                .status(p.getStatus())
+                .build()));
     }
 
     @Transactional(readOnly = true)
     public ProductDetailResponse getProductDetail(UUID productId) {
-        ProductEntity product = productRepository.findById(productId)
+        InsuranceProductEntity product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product", productId));
-        if (product.getStatus() != ProductStatus.PUBLISHED) {
+        if (!STATUS_ACTIVE.equals(product.getStatus())) {
             throw new NotFoundException("Product", productId);
         }
         return toDetail(product);
     }
 
     @Transactional
-    public ProductDetailResponse createProduct(CreateProductRequest request) {
-        if (productRepository.existsByCode(request.code())) {
-            throw new ConflictException("Product code already exists: " + request.code());
+    public ProductResponse createProduct(UUID organizationId, CreateProductRequest request) {
+        if (productRepository.existsByOrganizationIdAndCode(organizationId, request.getCode())) {
+            throw new ConflictException("Product code already exists: " + request.getCode());
         }
-        InsurerEntity insurer = insurerRepository.findById(request.insurerId())
-                .orElseThrow(() -> new NotFoundException("Insurer", request.insurerId()));
 
-        ProductEntity product = new ProductEntity();
-        product.setInsurerId(insurer.getId());
-        product.setCode(request.code());
-        product.setName(request.name());
-        product.setCategory(request.category());
-        product.setDescription(request.description());
-        product.setStatus(ProductStatus.DRAFT);
+        InsuranceProductEntity product = new InsuranceProductEntity();
+        product.setOrganizationId(organizationId);
+        product.setCode(request.getCode());
+        product.setName(request.getName());
+        product.setCategory(request.getCategory());
+        product.setDescription(request.getDescription());
+        product.setStatus(STATUS_DRAFT);
         product = productRepository.save(product);
 
         ProductVersionEntity version = new ProductVersionEntity();
         version.setProductId(product.getId());
         version.setVersionNumber(1);
-        version.setTermsSummary(request.termsSummary());
-        version.setEffectiveFrom(request.effectiveFrom());
-        version.setCurrent(true);
-        version = productVersionRepository.save(version);
+        version.setEffectiveFrom(request.getEffectiveFrom());
+        version.setTermsSummary(request.getTermsSummary());
+        version.setStatus("DRAFT");
+        version = versionRepository.save(version);
 
-        for (CreateProductRequest.CoverageRequest coverageRequest : request.coverages()) {
-            ProductCoverageEntity coverage = new ProductCoverageEntity();
-            coverage.setProductVersionId(version.getId());
-            coverage.setCoverageCode(coverageRequest.coverageCode());
-            coverage.setName(coverageRequest.name());
-            coverage.setDescription(coverageRequest.description());
-            coverage.setCoverageLimit(coverageRequest.coverageLimit());
-            coverage.setDeductible(coverageRequest.deductible());
-            productCoverageRepository.save(coverage);
+        for (CreateProductRequest.PlanRequest planRequest : request.getPlans()) {
+            ProductPlanEntity plan = new ProductPlanEntity();
+            plan.setProductVersionId(version.getId());
+            plan.setCode(planRequest.getCode());
+            plan.setName(planRequest.getName());
+            plan.setBillingFrequency(planRequest.getBillingFrequency());
+            plan.setPremiumAmount(planRequest.getPremiumAmount());
+            plan.setSumAssured(planRequest.getSumAssured());
+            plan.setDefault(planRequest.isDefault());
+            planRepository.save(plan);
         }
 
-        for (CreateProductRequest.PremiumRequest premiumRequest : request.premiums()) {
-            ProductPremiumEntity premium = new ProductPremiumEntity();
-            premium.setProductVersionId(version.getId());
-            premium.setBillingFrequency(premiumRequest.billingFrequency());
-            premium.setPremiumAmount(premiumRequest.premiumAmount());
-            premium.setCurrency(premiumRequest.currency());
-            productPremiumRepository.save(premium);
+        for (CreateProductRequest.BenefitRequest benefitRequest : request.getBenefits()) {
+            ProductBenefitEntity benefit = new ProductBenefitEntity();
+            benefit.setProductVersionId(version.getId());
+            benefit.setCode(benefitRequest.getBenefitCode());
+            benefit.setName(benefitRequest.getName());
+            benefit.setDescription(benefitRequest.getDescription());
+            benefit.setCoverageAmount(benefitRequest.getCoverageLimit());
+            benefit.setBenefitType("OTHER");
+            benefit.setSortOrder(benefitRequest.getSortOrder());
+            benefitRepository.save(benefit);
         }
 
-        product.setInsurerId(insurer.getId());
-        return toDetail(product);
+        for (CreateProductRequest.ExclusionRequest exclusionRequest : request.getExclusions()) {
+            ProductExclusionEntity exclusion = new ProductExclusionEntity();
+            exclusion.setProductVersionId(version.getId());
+            exclusion.setCode(exclusionRequest.getExclusionCode());
+            exclusion.setTitle(exclusionRequest.getName());
+            exclusion.setDescription(exclusionRequest.getDescription() != null
+                    ? exclusionRequest.getDescription()
+                    : exclusionRequest.getName());
+            exclusion.setSortOrder(exclusionRequest.getSortOrder());
+            exclusionRepository.save(exclusion);
+        }
+
+        for (CreateProductRequest.DocumentRequest documentRequest : request.getRequiredDocuments()) {
+            ProductRequiredDocumentEntity document = new ProductRequiredDocumentEntity();
+            document.setProductVersionId(version.getId());
+            document.setDocumentType(documentRequest.getDocumentCode());
+            document.setMandatory(documentRequest.isMandatory());
+            document.setDescription(documentRequest.getDescription() != null
+                    ? documentRequest.getDescription()
+                    : documentRequest.getName());
+            document.setSortOrder(documentRequest.getSortOrder());
+            documentRepository.save(document);
+        }
+
+        product.setCurrentVersionId(version.getId());
+        productRepository.save(product);
+
+        return ProductResponse.builder()
+                .id(product.getId())
+                .code(product.getCode())
+                .name(product.getName())
+                .status(product.getStatus())
+                .build();
     }
 
     @Transactional
-    public ProductDetailResponse publishProduct(UUID productId) {
-        ProductEntity product = productRepository.findById(productId)
+    public void publishProduct(UUID productId, UUID publishedBy) {
+        InsuranceProductEntity product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product", productId));
-        if (product.getStatus() == ProductStatus.PUBLISHED) {
+        if (STATUS_ACTIVE.equals(product.getStatus())) {
             throw new BadRequestException("Product is already published");
         }
-        if (product.getStatus() == ProductStatus.ARCHIVED) {
-            throw new BadRequestException("Archived products cannot be published");
+        ProductVersionEntity version = versionRepository.findByProductIdAndStatus(productId, VERSION_PUBLISHED)
+                .or(() -> versionRepository.findById(product.getCurrentVersionId()))
+                .orElseThrow(() -> new BadRequestException("Product must have a version before publishing"));
+
+        version.setStatus(VERSION_PUBLISHED);
+        version.setPublishedAt(LocalDateTime.now());
+        version.setPublishedBy(publishedBy);
+        versionRepository.save(version);
+
+        product.setStatus(STATUS_ACTIVE);
+        product.setCurrentVersionId(version.getId());
+        productRepository.save(product);
+    }
+
+    private ProductSummaryResponse toSummary(InsuranceProductEntity product) {
+        return ProductSummaryResponse.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .category(product.getCategory())
+                .description(product.getDescription())
+                .currency(product.getCurrency())
+                .startingPremium(resolveStartingPremium(product))
+                .build();
+    }
+
+    private ProductDetailResponse toDetail(InsuranceProductEntity product) {
+        ProductVersionEntity version = versionRepository.findById(product.getCurrentVersionId())
+                .orElseThrow(() -> new NotFoundException("Product version", product.getCurrentVersionId()));
+
+        List<ProductPlanResponse> plans = planRepository.findByProductVersionIdOrderByPremiumAmountAsc(version.getId())
+                .stream()
+                .map(p -> ProductPlanResponse.builder()
+                        .id(p.getId())
+                        .code(p.getCode())
+                        .name(p.getName())
+                        .billingFrequency(p.getBillingFrequency())
+                        .premiumAmount(p.getPremiumAmount())
+                        .build())
+                .toList();
+
+        List<ProductDetailResponse.BenefitResponse> benefits = benefitRepository
+                .findByProductVersionIdOrderBySortOrderAsc(version.getId()).stream()
+                .map(b -> ProductDetailResponse.BenefitResponse.builder()
+                        .id(b.getId())
+                        .benefitCode(b.getCode())
+                        .name(b.getName())
+                        .description(b.getDescription())
+                        .coverageLimit(b.getCoverageAmount())
+                        .build())
+                .toList();
+
+        List<ProductDetailResponse.ExclusionResponse> exclusions = exclusionRepository
+                .findByProductVersionIdOrderBySortOrderAsc(version.getId()).stream()
+                .map(e -> ProductDetailResponse.ExclusionResponse.builder()
+                        .id(e.getId())
+                        .exclusionCode(e.getCode())
+                        .name(e.getTitle())
+                        .description(e.getDescription())
+                        .build())
+                .toList();
+
+        List<ProductDetailResponse.RequiredDocumentResponse> documents = documentRepository
+                .findByProductVersionIdOrderBySortOrderAsc(version.getId()).stream()
+                .map(d -> ProductDetailResponse.RequiredDocumentResponse.builder()
+                        .id(d.getId())
+                        .documentCode(d.getDocumentType())
+                        .name(d.getDocumentType())
+                        .description(d.getDescription())
+                        .mandatory(d.isMandatory())
+                        .build())
+                .toList();
+
+        return ProductDetailResponse.builder()
+                .id(product.getId())
+                .code(product.getCode())
+                .name(product.getName())
+                .category(product.getCategory())
+                .description(product.getDescription())
+                .termsSummary(version.getTermsSummary())
+                .currency(product.getCurrency())
+                .plans(plans)
+                .benefits(benefits)
+                .exclusions(exclusions)
+                .requiredDocuments(documents)
+                .build();
+    }
+
+    private java.math.BigDecimal resolveStartingPremium(InsuranceProductEntity product) {
+        if (product.getCurrentVersionId() == null) {
+            return null;
         }
-        productVersionRepository.findByProductIdAndCurrentTrue(product.getId())
-                .orElseThrow(() -> new BadRequestException("Product must have a current version before publishing"));
-
-        product.setStatus(ProductStatus.PUBLISHED);
-        product.setPublishedAt(Instant.now());
-        return toDetail(productRepository.save(product));
-    }
-
-    private ProductSummaryResponse toSummary(ProductEntity product) {
-        String insurerName = insurerRepository.findById(product.getInsurerId())
-                .map(InsurerEntity::getName)
-                .orElse("Unknown");
-        return new ProductSummaryResponse(
-                product.getId(),
-                product.getCode(),
-                product.getName(),
-                product.getCategory(),
-                product.getDescription(),
-                product.getStatus(),
-                insurerName,
-                product.getPublishedAt());
-    }
-
-    private ProductDetailResponse toDetail(ProductEntity product) {
-        String insurerName = insurerRepository.findById(product.getInsurerId())
-                .map(InsurerEntity::getName)
-                .orElse("Unknown");
-        ProductVersionEntity version = productVersionRepository.findByProductIdAndCurrentTrue(product.getId())
+        return planRepository.findByProductVersionIdOrderByPremiumAmountAsc(product.getCurrentVersionId())
+                .stream()
+                .findFirst()
+                .map(ProductPlanEntity::getPremiumAmount)
                 .orElse(null);
-
-        ProductDetailResponse.ProductVersionResponse versionResponse = null;
-        if (version != null) {
-            List<ProductDetailResponse.CoverageResponse> coverages = productCoverageRepository
-                    .findByProductVersionIdOrderByNameAsc(version.getId()).stream()
-                    .map(c -> new ProductDetailResponse.CoverageResponse(
-                            c.getId(),
-                            c.getCoverageCode(),
-                            c.getName(),
-                            c.getDescription(),
-                            c.getCoverageLimit(),
-                            c.getDeductible()))
-                    .toList();
-            List<ProductDetailResponse.PremiumResponse> premiums = productPremiumRepository
-                    .findByProductVersionIdOrderByBillingFrequencyAsc(version.getId()).stream()
-                    .map(p -> new ProductDetailResponse.PremiumResponse(
-                            p.getId(),
-                            p.getBillingFrequency(),
-                            p.getPremiumAmount(),
-                            p.getCurrency()))
-                    .toList();
-            versionResponse = new ProductDetailResponse.ProductVersionResponse(
-                    version.getId(),
-                    version.getVersionNumber(),
-                    version.getTermsSummary(),
-                    version.getEffectiveFrom(),
-                    version.getEffectiveTo(),
-                    coverages,
-                    premiums);
-        }
-
-        return new ProductDetailResponse(
-                product.getId(),
-                product.getCode(),
-                product.getName(),
-                product.getCategory(),
-                product.getDescription(),
-                product.getStatus(),
-                insurerName,
-                product.getPublishedAt(),
-                versionResponse);
     }
 }

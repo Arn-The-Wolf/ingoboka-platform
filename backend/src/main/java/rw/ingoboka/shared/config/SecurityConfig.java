@@ -20,7 +20,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import rw.ingoboka.identity.infrastructure.adapter.CustomUserDetailsService;
-import rw.ingoboka.identity.infrastructure.security.JwtAuthenticationFilter;
+import rw.ingoboka.identity.infrastructure.adapter.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity

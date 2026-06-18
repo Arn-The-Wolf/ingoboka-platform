@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 const navItems = [
   { href: '/insurer/dashboard', icon: LayoutDashboard, labelKey: 'overview' as const },
   { href: '/insurer/dashboard', icon: FileText, labelKey: 'claimsQueue' as const },
-  { href: '/insurer/dashboard', icon: Package, labelKey: 'products' as const },
+  { href: '/insurer/products', icon: Package, labelKey: 'products' as const },
   { href: '/insurer/dashboard', icon: BarChart3, labelKey: 'reports' as const },
   { href: '/insurer/dashboard', icon: Settings, labelKey: 'settings' as const },
 ];

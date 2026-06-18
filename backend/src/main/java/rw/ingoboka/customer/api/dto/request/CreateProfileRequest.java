@@ -7,7 +7,11 @@ import lombok.Data;
 public class CreateProfileRequest {
 
     private String nationalId;
+
+    @NotBlank
     private String district;
+
     private String occupation;
+
     private String gender;
 }

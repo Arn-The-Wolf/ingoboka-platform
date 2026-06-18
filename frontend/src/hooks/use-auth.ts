@@ -16,6 +16,10 @@ export function useLogin() {
       setAuth(data.user, data.accessToken, data.refreshToken);
       if (data.user.role.startsWith('INSURER')) {
         router.push('/insurer/dashboard');
+      } else if (data.user.role === 'PLATFORM_ADMIN') {
+        router.push('/admin/dashboard');
+      } else if (data.user.role === 'AGENT') {
+        router.push('/agent/dashboard');
       } else if (!data.user.consentGiven) {
         router.push('/consent');
       } else {

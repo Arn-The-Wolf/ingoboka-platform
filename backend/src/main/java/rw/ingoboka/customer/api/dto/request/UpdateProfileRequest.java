@@ -6,6 +6,8 @@ import lombok.Data;
 public class UpdateProfileRequest {
 
     private String district;
+
     private String sector;
+
     private String occupation;
 }

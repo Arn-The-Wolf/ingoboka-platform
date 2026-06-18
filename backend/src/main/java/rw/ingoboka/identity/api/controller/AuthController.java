@@ -19,7 +19,7 @@ import rw.ingoboka.identity.api.dto.response.AuthResponse;
 import rw.ingoboka.identity.api.dto.response.UserResponse;
 import rw.ingoboka.identity.application.service.AuthService;
 import rw.ingoboka.identity.infrastructure.persistence.entity.UserEntity;
-import rw.ingoboka.shared.api.ApiResponse;
+import rw.ingoboka.shared.domain.ApiResponse;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -41,7 +41,7 @@ public class AuthController {
     @ApiResponses
     public ApiResponse<Void> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
         authService.verifyOtp(request);
-        return ApiResponse.ok("Account verified successfully", null);
+        return ApiResponse.ok(null, "Account verified successfully");
     }
 
     @PostMapping("/login")
@@ -65,7 +65,7 @@ public class AuthController {
             @AuthenticationPrincipal UserEntity user,
             @Valid @RequestBody RefreshTokenRequest request) {
         authService.logout(user.getId(), request.getRefreshToken());
-        return ApiResponse.ok("Logged out successfully", null);
+        return ApiResponse.ok(null, "Logged out successfully");
     }
 
     @GetMapping("/me")

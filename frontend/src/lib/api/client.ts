@@ -36,7 +36,18 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const body = response.data as Record<string, unknown> | undefined;
+    if (
+      body &&
+      typeof body === 'object' &&
+      'success' in body &&
+      'data' in body
+    ) {
+      response.data = body.data;
+    }
+    return response;
+  },
   (error: AxiosError<ApiError>) => {
     if (error.response?.status === 401) {
       onUnauthorized?.();

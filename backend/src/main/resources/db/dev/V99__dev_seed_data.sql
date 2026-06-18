@@ -20,7 +20,10 @@ VALUES
      'Diane', 'Uwase', 'INSURER_ADMIN', 'ACTIVE', 'EN', FALSE, TRUE),
     ('dddddddd-dddd-dddd-dddd-dddddddddddd', '11111111-1111-1111-1111-111111111111', 'admin@ingoboka.rw', NULL,
      '$2b$10$X1/sNfBQvx3nrMZvKZyFo.ycR9DgGKJRzVz4u95xSIyLHrG3ilAsq',
-     'Platform', 'Admin', 'PLATFORM_ADMIN', 'ACTIVE', 'EN', FALSE, TRUE);
+     'Platform', 'Admin', 'PLATFORM_ADMIN', 'ACTIVE', 'EN', FALSE, TRUE),
+    ('gggggggg-gggg-gggg-gggg-gggggggggggg', '22222222-2222-2222-2222-222222222222', 'agent@demo-insurer.rw', '0780000099',
+     '$2b$10$X1/sNfBQvx3nrMZvKZyFo.ycR9DgGKJRzVz4u95xSIyLHrG3ilAsq',
+     'Jean', 'Agent', 'AGENT', 'ACTIVE', 'RW', TRUE, FALSE);
 
 INSERT INTO citizen_profiles (id, user_id, national_id, date_of_birth, gender, kyc_status, district, occupation)
 VALUES
