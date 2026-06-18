@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+  pull_request:
+    branches:
+      - main
+      - 'feat/**'
+
+jobs:
+  backend-ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ingoboka
+          POSTGRES_USER: ingoboka
+          POSTGRES_PASSWORD: ingoboka_dev_secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ingoboka -d ingoboka"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Run tests
+        working-directory: backend
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/ingoboka
+          DB_USER: ingoboka
+          DB_PASSWORD: ingoboka_dev_secret
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_SECRET: test-jwt-secret-key-must-be-at-least-256-bits-long-for-hmac-sha256-algorithm
+        run: |
+          chmod +x mvnw
+          ./mvnw test
+          ./mvnw verify -DskipTests
+
+  frontend-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install and build
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run lint
+          npm run build

@@ -1,0 +1,11 @@
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/dev
+
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    rw.ingoboka: DEBUG
+    org.hibernate.SQL: DEBUG
