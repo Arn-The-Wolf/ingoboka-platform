@@ -16,6 +16,9 @@ const buttonVariants = cva(
         ghost: 'hover:bg-brand-primary-light text-brand-primary-dark',
         destructive: 'bg-brand-error text-white hover:bg-brand-error/90',
         accent: 'bg-brand-accent text-brand-primary-dark hover:bg-brand-accent-dark',
+        pill: 'rounded-full bg-brand-primary text-white hover:bg-brand-primary-dark shadow-sm',
+        'pill-accent':
+          'rounded-full bg-brand-accent text-brand-primary-dark hover:bg-brand-accent-dark shadow-sm font-semibold',
       },
       size: {
         default: 'h-10 px-4 py-2',

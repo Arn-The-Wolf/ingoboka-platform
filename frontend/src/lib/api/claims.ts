@@ -1,23 +1,28 @@
 import { apiClient, isNetworkError } from './client';
+import { isInsurerPortalRole, mapClaim, unwrapPage } from './mappers';
 import { mockData, paginate } from './mock-data';
 import type { Claim, ClaimDecisionRequest, InsurerStats, PaginatedResponse } from '@/types';
 import { useAuthStore } from '@/store/auth-store';
 
 function isInsurerRole() {
   const role = useAuthStore.getState().user?.role;
-  return role?.startsWith('INSURER');
+  return role ? isInsurerPortalRole(role) : false;
 }
 
 export const claimApi = {
   async list(page = 0, size = 20): Promise<PaginatedResponse<Claim>> {
     try {
-      const endpoint = isInsurerRole() ? '/admin/claims' : '/claims';
+      const endpoint = isInsurerRole() ? '/admin/claims' : '/claims/me';
       const { data } = await apiClient.get<PaginatedResponse<Record<string, unknown>>>(endpoint, {
         params: { page, size },
       });
+      const content = unwrapPage(data).map((raw) => mapClaim(raw as Record<string, unknown>));
       return {
-        ...data,
-        content: data.content.map((raw) => mapClaim(raw)),
+        content,
+        totalElements: data.totalElements ?? content.length,
+        totalPages: data.totalPages ?? 1,
+        page: data.page ?? page,
+        size: data.size ?? size,
       };
     } catch (error) {
       if (isNetworkError(error)) {
@@ -26,6 +31,7 @@ export const claimApi = {
       throw error;
     }
   },
+
   async create(payload: {
     policyId: string;
     claimType: string;
@@ -64,48 +70,32 @@ export const claimApi = {
         : payload.decision === 'REJECT'
           ? 'REJECTED'
           : payload.decision;
-    const { data } = await apiClient.post(`/admin/claims/${id}/decision`, {
+    const { data } = await apiClient.post<Record<string, unknown>>(`/admin/claims/${id}/decision`, {
       decision,
       reason: payload.notes ?? decision,
     });
-    return data as Claim;
+    return mapClaim(data);
   },
 
   async getInsurerStats(): Promise<InsurerStats> {
-    const { data: overview } = await apiClient.get<{
-      pendingClaims: number;
-      approvedClaims: number;
-      rejectedClaims: number;
-    }>('/admin/reports/overview');
-    const { data: breakdown } = await apiClient.get<{
-      resolvedToday: number;
-      avgResolutionDays: number;
-      claimsByStatus: { status: string; count: number }[];
-    }>('/admin/reports/claims-breakdown');
+    const [{ data: overview }, { data: breakdown }] = await Promise.all([
+      apiClient.get<Record<string, number>>('/admin/reports/overview'),
+      apiClient.get<Record<string, unknown>>('/admin/reports/claims-breakdown'),
+    ]);
+    const claimsByStatus = Array.isArray(breakdown.claimsByStatus)
+      ? breakdown.claimsByStatus.map((row) => {
+          const item = row as Record<string, unknown>;
+          return {
+            status: String(item.status ?? ''),
+            count: Number(item.count ?? 0),
+          };
+        })
+      : [];
     return {
-      openClaims: overview.pendingClaims ?? 0,
-      resolvedToday: breakdown.resolvedToday ?? 0,
-      avgResolutionDays: breakdown.avgResolutionDays ?? 0,
-      claimsByStatus: (breakdown.claimsByStatus ?? []).map((c) => ({
-        status: c.status,
-        count: c.count,
-      })),
+      openClaims: overview.openClaims ?? overview.pendingClaims ?? 0,
+      resolvedToday: Number(breakdown.resolvedToday ?? 0),
+      avgResolutionDays: Number(breakdown.avgResolutionDays ?? 0),
+      claimsByStatus,
     };
   },
 };
-
-function mapClaim(raw: Record<string, unknown>): Claim {
-  return {
-    id: String(raw.id),
-    claimNumber: String(raw.claimNumber ?? ''),
-    policyId: String(raw.policyId ?? ''),
-    policyNumber: String(raw.policyNumber ?? ''),
-    claimantName: String(raw.claimantName ?? 'Citizen'),
-    status: (raw.status as Claim['status']) ?? 'SUBMITTED',
-    amount: Number(raw.amount ?? 0),
-    currency: String(raw.currency ?? 'RWF'),
-    description: String(raw.description ?? ''),
-    submittedAt: String(raw.submittedAt ?? new Date().toISOString()),
-    updatedAt: String(raw.updatedAt ?? raw.submittedAt ?? new Date().toISOString()),
-  };
-}

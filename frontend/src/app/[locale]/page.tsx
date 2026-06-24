@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { OnboardingSplash } from '@/components/layout/onboarding-splash';
 
-export default function HomePage({ params }: { params: { locale: string } }) {
-  redirect(`/${params.locale}/login`);
+export default function HomePage() {
+  return <OnboardingSplash />;
 }

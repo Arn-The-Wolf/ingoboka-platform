@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss';
 
+/** Ingoboka design tokens — see design/.../ingoboka_design_system/DESIGN.md */
 const config: Config = {
   content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -10,33 +11,39 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          primary: '#0A7B4E',
-          'primary-dark': '#065A38',
+          primary: '#1B6B3A',
+          'primary-dark': '#005127',
           'primary-light': '#E8F5EF',
-          secondary: '#1A4B8C',
-          'secondary-light': '#E8EEF7',
-          accent: '#E8B923',
+          'primary-container': '#1B6B3A',
+          secondary: '#855300',
+          'secondary-container': '#F4A228',
+          accent: '#F4A228',
           'accent-dark': '#C99A0F',
-          background: '#F4F7F6',
+          background: '#F7FAF3',
           surface: '#FFFFFF',
-          muted: '#6B7280',
-          border: '#E2E8E6',
-          error: '#DC2626',
+          'surface-container': '#EBEFE8',
+          'surface-container-low': '#F1F5ED',
+          muted: '#404940',
+          border: '#BFC9BD',
+          outline: '#707A6F',
+          error: '#BA1A1A',
           success: '#16A34A',
           warning: '#F59E0B',
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         lg: '0.75rem',
         md: '0.5rem',
         sm: '0.375rem',
+        xl: '1rem',
       },
       boxShadow: {
         card: '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)',
-        elevated: '0 4px 12px 0 rgb(10 123 78 / 0.12)',
+        elevated: '0 4px 16px 0 rgb(27 107 58 / 0.12)',
+        modal: '0 12px 32px 0 rgb(0 0 0 / 0.1)',
       },
     },
   },

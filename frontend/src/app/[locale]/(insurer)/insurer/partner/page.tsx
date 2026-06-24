@@ -2,66 +2,128 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
+import { FileText, Handshake, Receipt, Wallet } from 'lucide-react';
 import { insurerApi } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
+import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 
 export default function InsurerPartnerPage() {
   const t = useTranslations('insurer');
+
   const { data: contracts, isLoading: cLoading } = useQuery({
     queryKey: ['partner', 'contracts'],
     queryFn: () => insurerApi.listPartnerContracts(),
   });
+
   const { data: invoices, isLoading: iLoading } = useQuery({
     queryKey: ['partner', 'invoices'],
     queryFn: () => insurerApi.listPartnerInvoices(),
   });
+
   const { data: ledger, isLoading: lLoading } = useQuery({
     queryKey: ['partner', 'ledger'],
     queryFn: () => insurerApi.listPartnerLedger(),
   });
 
+  const contractList = (contracts as Array<{ contractNumber: string; status: string }>) ?? [];
+  const invoiceList =
+    (invoices as Array<{ invoiceNumber: string; totalAmount: number; status: string }>) ?? [];
+  const ledgerList =
+    (ledger as Array<{ description: string; amount: number; currency: string }>) ?? [];
+
   return (
-    <div className="p-8">
-      <h1 className="mb-6 text-2xl font-bold">{t('partner')}</h1>
+    <div className="p-6 lg:p-8">
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-brand-primary-dark">{t('partner')}</h1>
+        <p className="text-sm text-brand-muted">Contracts, invoices, and revenue ledger.</p>
+      </header>
 
-      <h2 className="mb-3 font-semibold">{t('contracts')}</h2>
-      {cLoading ? <Spinner /> : (
-        <div className="mb-8 grid gap-2">
-          {(contracts as Array<{ contractNumber: string; status: string }> ?? []).map((c, i) => (
-            <Card key={i}><CardContent className="p-4">{c.contractNumber} — {c.status}</CardContent></Card>
-          ))}
+      <section className="mb-8">
+        <div className="mb-4 flex items-center gap-2">
+          <Handshake className="h-5 w-5 text-brand-primary" />
+          <h2 className="text-lg font-semibold text-brand-primary-dark">{t('contracts')}</h2>
         </div>
-      )}
+        {cLoading ? (
+          <Spinner />
+        ) : contractList.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-8 text-center text-sm text-brand-muted">No contracts found.</CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {contractList.map((c, i) => (
+              <Card key={i} className="border-brand-border/60">
+                <CardContent className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-brand-primary" />
+                    <span className="font-medium text-brand-primary-dark">{c.contractNumber}</span>
+                  </div>
+                  <Badge variant={c.status === 'ACTIVE' ? 'active' : 'pending'}>{c.status}</Badge>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
 
-      <h2 className="mb-3 font-semibold">{t('invoices')}</h2>
-      {iLoading ? <Spinner /> : (
-        <div className="mb-8 grid gap-2">
-          {(invoices as Array<{ invoiceNumber: string; totalAmount: number; status: string }> ?? []).map((inv, i) => (
-            <Card key={i}>
-              <CardContent className="flex justify-between p-4">
-                <span>{inv.invoiceNumber}</span>
-                <span>{formatCurrency(inv.totalAmount, 'RWF')} — {inv.status}</span>
-              </CardContent>
-            </Card>
-          ))}
+      <section className="mb-8">
+        <div className="mb-4 flex items-center gap-2">
+          <Receipt className="h-5 w-5 text-brand-primary" />
+          <h2 className="text-lg font-semibold text-brand-primary-dark">{t('invoices')}</h2>
         </div>
-      )}
+        {iLoading ? (
+          <Spinner />
+        ) : invoiceList.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-8 text-center text-sm text-brand-muted">No invoices yet.</CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {invoiceList.map((inv, i) => (
+              <Card key={i} className="border-brand-border/60">
+                <CardContent className="flex items-center justify-between p-4">
+                  <span className="font-medium">{inv.invoiceNumber}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-brand-primary">
+                      {formatCurrency(inv.totalAmount, 'RWF')}
+                    </span>
+                    <Badge>{inv.status}</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
 
-      <h2 className="mb-3 font-semibold">{t('revenueLedger')}</h2>
-      {lLoading ? <Spinner /> : (
-        <div className="grid gap-2">
-          {(ledger as Array<{ description: string; amount: number; currency: string }> ?? []).map((e, i) => (
-            <Card key={i}>
-              <CardContent className="flex justify-between p-4">
-                <span>{e.description}</span>
-                <span>{formatCurrency(e.amount, e.currency)}</span>
-              </CardContent>
-            </Card>
-          ))}
+      <section>
+        <div className="mb-4 flex items-center gap-2">
+          <Wallet className="h-5 w-5 text-brand-primary" />
+          <h2 className="text-lg font-semibold text-brand-primary-dark">{t('revenueLedger')}</h2>
         </div>
-      )}
+        {lLoading ? (
+          <Spinner />
+        ) : ledgerList.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="py-8 text-center text-sm text-brand-muted">No ledger entries.</CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-3">
+            {ledgerList.map((e, i) => (
+              <Card key={i} className="border-brand-border/60">
+                <CardContent className="flex items-center justify-between p-4">
+                  <span className="text-sm text-brand-primary-dark">{e.description}</span>
+                  <span className="font-semibold text-brand-primary">
+                    {formatCurrency(e.amount, e.currency)}
+                  </span>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

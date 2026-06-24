@@ -56,12 +56,13 @@ apiClient.interceptors.response.use(
   }
 );
 
-function normalizeApiError(error: AxiosError<ApiError>): ApiError {
-  if (error.response?.data?.message) {
+function normalizeApiError(error: AxiosError<ApiError & { success?: boolean }>): ApiError {
+  const body = error.response?.data;
+  if (body?.message) {
     return {
-      message: error.response.data.message,
-      code: error.response.data.code,
-      status: error.response.status,
+      message: body.message,
+      code: body.code,
+      status: error.response?.status,
     };
   }
   if (error.code === 'ECONNABORTED') {

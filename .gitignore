@@ -64,3 +64,11 @@ jacoco.exec
 *.tmp
 *.bak
 .cache/
+
+# Local-only (not published)
+design/
+docs/
+*.pdf
+frontend-auth-without-sms.md
+frontend-user-management-and-onboarding.md
+Untitled

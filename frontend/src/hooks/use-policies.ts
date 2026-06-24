@@ -34,3 +34,10 @@ export function usePublicVerification(token: string) {
     retry: false,
   });
 }
+
+export function usePolicyActivity() {
+  return useQuery({
+    queryKey: ['policies', 'activity'],
+    queryFn: () => policyApi.listActivity(),
+  });
+}

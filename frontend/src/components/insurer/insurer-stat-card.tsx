@@ -1,0 +1,48 @@
+'use client';
+
+import { LucideIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface InsurerStatCardProps {
+  icon: LucideIcon;
+  label: string;
+  value: string | number;
+  trend?: string;
+  trendUp?: boolean;
+  className?: string;
+}
+
+/** KPI stat card — matches insurer_dashboard_overview design. */
+export function InsurerStatCard({
+  icon: Icon,
+  label,
+  value,
+  trend,
+  trendUp,
+  className,
+}: InsurerStatCardProps) {
+  return (
+    <div
+      className={cn(
+        'flex flex-col justify-between rounded-xl border border-brand-border/60 bg-white p-4 shadow-card',
+        className
+      )}
+    >
+      <Icon className="mb-2 h-5 w-5 text-brand-primary" />
+      <div>
+        <p className="text-xs text-brand-muted">{label}</p>
+        <p className="text-2xl font-bold text-brand-primary-dark">{value}</p>
+        {trend && (
+          <p
+            className={cn(
+              'mt-1 text-xs font-medium',
+              trendUp ? 'text-brand-success' : 'text-brand-muted'
+            )}
+          >
+            {trend}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

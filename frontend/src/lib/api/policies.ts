@@ -1,12 +1,14 @@
 import { apiClient, isNetworkError } from './client';
+import { mapPolicy, mapPolicyActivity, mapPolicyCard, mapPublicVerification, unwrapPage } from './mappers';
 import { mockData } from './mock-data';
-import type { Policy, PolicyCard, PublicVerification } from '@/types';
+import type { Policy, PolicyActivity, PolicyCard, PublicVerification } from '@/types';
 
 export const policyApi = {
   async list() {
     try {
-      const { data } = await apiClient.get<Policy[]>('/policies');
-      return { content: data ?? [], totalElements: data?.length ?? 0 };
+      const { data } = await apiClient.get<{ content?: Record<string, unknown>[] } | Record<string, unknown>[]>('/policies');
+      const items = unwrapPage(data).map((raw) => mapPolicy(raw as Record<string, unknown>));
+      return { content: items, totalElements: items.length };
     } catch (error) {
       if (isNetworkError(error)) {
         return { content: mockData.policies, totalElements: mockData.policies.length };
@@ -17,8 +19,8 @@ export const policyApi = {
 
   async getById(id: string): Promise<Policy> {
     try {
-      const { data } = await apiClient.get<Policy>(`/policies/${id}`);
-      return data;
+      const { data } = await apiClient.get<Record<string, unknown>>(`/policies/${id}`);
+      return mapPolicy(data);
     } catch (error) {
       if (isNetworkError(error)) {
         const policy = mockData.policies.find((p) => p.id === id);
@@ -31,8 +33,8 @@ export const policyApi = {
 
   async getCard(id: string): Promise<PolicyCard> {
     try {
-      const { data } = await apiClient.get<PolicyCard>(`/policies/${id}/card`);
-      return data;
+      const { data } = await apiClient.get<Record<string, unknown>>(`/policies/${id}/card`);
+      return mapPolicyCard(data);
     } catch (error) {
       if (isNetworkError(error)) {
         const card = mockData.getPolicyCard(id);
@@ -45,13 +47,22 @@ export const policyApi = {
 
   async verifyPublic(token: string): Promise<PublicVerification> {
     try {
-      const { data } = await apiClient.get<PublicVerification>(`/verify/${token}`);
-      return data;
+      const { data } = await apiClient.get<Record<string, unknown>>(`/verify/${token}`);
+      return mapPublicVerification(data);
     } catch (error) {
       if (isNetworkError(error)) {
         return mockData.getPublicVerification(token);
       }
       throw error;
     }
+  },
+
+  async listActivity(page = 0, size = 20): Promise<{ content: PolicyActivity[]; totalElements: number }> {
+    const { data } = await apiClient.get<{ content?: Record<string, unknown>[]; totalElements?: number }>(
+      '/policies/me/activity',
+      { params: { page, size } }
+    );
+    const content = unwrapPage(data).map((raw) => mapPolicyActivity(raw as Record<string, unknown>));
+    return { content, totalElements: data.totalElements ?? content.length };
   },
 };

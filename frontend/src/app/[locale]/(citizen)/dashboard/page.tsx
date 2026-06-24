@@ -1,18 +1,20 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/i18n/routing';
 import { useAuthStore } from '@/store/auth-store';
-import { usePolicies } from '@/hooks/use-policies';
+import { usePolicies, usePolicyActivity } from '@/hooks/use-policies';
+import { PolicyHeroCard } from '@/components/citizen/policy-hero-card';
 import { PolicyListItem } from '@/components/citizen/policy-list-item';
+import { QuickActionCard } from '@/components/citizen/quick-action-card';
+import { CitizenHeader } from '@/components/layout/citizen-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { LocaleSwitcher } from '@/components/layout/locale-switcher';
 import { useLogout } from '@/hooks/use-auth';
-import { formatCurrency } from '@/lib/utils';
-import { Shield, LogOut } from 'lucide-react';
+import { CreditCard, FileText, LogOut, Megaphone, Clock } from 'lucide-react';
+import { formatDate } from '@/lib/utils';
 import type { ApiError } from '@/types';
 
 export default function CitizenDashboardPage() {
@@ -20,107 +22,115 @@ export default function CitizenDashboardPage() {
   const tCommon = useTranslations('common');
   const user = useAuthStore((s) => s.user);
   const { data, isLoading, error, refetch } = usePolicies();
+  const { data: activityData } = usePolicyActivity();
   const logout = useLogout();
 
   const policies = data?.content ?? [];
-  const totalCoverage = policies
-    .filter((p) => p.status === 'ACTIVE')
-    .reduce((sum, p) => sum + p.coverageAmount, 0);
+  const activities = activityData?.content ?? [];
+  const activePolicies = policies.filter((p) => p.status === 'ACTIVE');
+  const heroPolicy = activePolicies[0];
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-6">
-      <header className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-primary text-white">
-            <Shield className="h-5 w-5" />
+    <>
+      <CitizenHeader
+        title={t('policyWallet')}
+        subtitle={t('welcome', { name: user?.fullName?.split(' ')[0] ?? 'Citizen' })}
+      />
+      <div className="mx-auto max-w-lg px-4 pb-6 pt-4">
+        <div className="mb-4 flex justify-end">
+          <Button variant="ghost" size="sm" onClick={() => logout.mutate()} loading={logout.isPending}>
+            <LogOut className="mr-1 h-4 w-4" />
+            {tCommon('logout')}
+          </Button>
+        </div>
+
+        <section className="mb-6 py-2">
+          <h2 className="text-2xl font-bold text-brand-primary-dark">{t('dashboard')}</h2>
+          <p className="text-sm text-brand-muted">
+            Protecting what matters most with community-driven care.
+          </p>
+        </section>
+
+        {heroPolicy && <PolicyHeroCard policy={heroPolicy} />}
+
+        <section className="mb-6 grid grid-cols-2 gap-3">
+          <QuickActionCard
+            href="/products"
+            icon={CreditCard}
+            iconBgClass="bg-brand-accent/25"
+            iconClass="text-brand-secondary"
+            title={t('browseProducts')}
+            subtitle="Explore plans"
+          />
+          <QuickActionCard
+            href="/claims/new"
+            icon={Megaphone}
+            iconBgClass="bg-brand-primary-light"
+            iconClass="text-brand-primary"
+            title={t('claims')}
+            subtitle="Report incident"
+          />
+        </section>
+
+        {isLoading && (
+          <div className="flex justify-center py-12">
+            <Spinner />
           </div>
-          <div>
-            <p className="text-sm text-brand-muted">{t('policyWallet')}</p>
-            <h1 className="text-lg font-bold">
-              {t('welcome', { name: user?.fullName?.split(' ')[0] ?? 'Citizen' })}
-            </h1>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <LocaleSwitcher />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => logout.mutate()}
-            aria-label={tCommon('logout')}
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
-      </header>
+        )}
 
-      <div className="mb-6 grid grid-cols-2 gap-3">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-brand-muted">{t('activePolicies')}</p>
-            <p className="text-2xl font-bold text-brand-primary">
-              {policies.filter((p) => p.status === 'ACTIVE').length}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-brand-muted">{t('totalCoverage')}</p>
-            <p className="text-lg font-bold text-brand-primary">
-              {formatCurrency(totalCoverage)}
-            </p>
-          </CardContent>
-        </Card>
+        {error && (
+          <Alert variant="error" className="mb-4">
+            {(error as ApiError).message ?? tCommon('error')}
+            <Button variant="outline" size="sm" className="mt-2" onClick={() => refetch()}>
+              {tCommon('retry')}
+            </Button>
+          </Alert>
+        )}
+
+        {!isLoading && policies.length === 0 && (
+          <Card className="border-dashed border-brand-border">
+            <CardContent className="py-10 text-center">
+              <FileText className="mx-auto mb-3 h-10 w-10 text-brand-muted" />
+              <p className="text-brand-muted">{t('noPolicies')}</p>
+              <Link href="/products">
+                <Button className="mt-4" variant="pill-accent">
+                  {t('browseProducts')}
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
+        {policies.length > 0 && (
+          <section className="mb-6">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-base font-bold text-brand-primary-dark">Policy History</h3>
+              <span className="text-sm font-semibold text-brand-primary">{tCommon('viewAll')}</span>
+            </div>
+            {activities.length > 0 ? (
+              <div className="mb-4 space-y-2">
+                {activities.slice(0, 5).map((event, index) => (
+                  <div
+                    key={`${event.type}-${event.occurredAt}-${index}`}
+                    className="flex items-start gap-3 rounded-lg border border-brand-border bg-white p-3"
+                  >
+                    <Clock className="mt-0.5 h-4 w-4 shrink-0 text-brand-primary" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-brand-primary-dark">{event.label}</p>
+                      <p className="text-xs text-brand-muted">{formatDate(event.occurredAt)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            <div className="space-y-2">
+              {policies.map((policy) => (
+                <PolicyListItem key={policy.id} policy={policy} />
+              ))}
+            </div>
+          </section>
+        )}
       </div>
-
-      <div className="mb-4 flex gap-2">
-        <Link href="/products">
-          <Button variant="outline" size="sm">
-            {t('browseProducts')}
-          </Button>
-        </Link>
-        <Link href="/claims/new">
-          <Button variant="outline" size="sm">
-            File a claim
-          </Button>
-        </Link>
-      </div>
-
-      <h2 className="mb-3 text-sm font-semibold text-brand-muted">{t('dashboard')}</h2>
-
-      {isLoading && (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
-      )}
-
-      {error && (
-        <Alert variant="error" className="mb-4">
-          {(error as ApiError).message ?? tCommon('error')}
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => refetch()}>
-            {tCommon('retry')}
-          </Button>
-        </Alert>
-      )}
-
-      {!isLoading && policies.length === 0 && (
-        <Card>
-          <CardContent className="py-8 text-center">
-            <p className="text-brand-muted">{t('noPolicies')}</p>
-            <Link href="/products">
-              <Button className="mt-4" variant="outline">
-                {t('browseProducts')}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="space-y-3">
-        {policies.map((policy) => (
-          <PolicyListItem key={policy.id} policy={policy} />
-        ))}
-      </div>
-    </div>
+    </>
   );
 }

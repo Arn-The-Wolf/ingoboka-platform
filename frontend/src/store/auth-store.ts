@@ -8,9 +8,13 @@ interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   pendingPhone: string | null;
+  pendingEmail: string | null;
+  verifyHint: string | null;
   isAuthenticated: boolean;
   setAuth: (user: User, accessToken: string, refreshToken: string) => void;
   setPendingPhone: (phone: string | null) => void;
+  setPendingEmail: (email: string | null) => void;
+  setVerifyHint: (hint: string | null) => void;
   updateUser: (user: Partial<User>) => void;
   logout: () => void;
 }
@@ -22,6 +26,8 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       pendingPhone: null,
+      pendingEmail: null,
+      verifyHint: null,
       isAuthenticated: false,
 
       setAuth: (user, accessToken, refreshToken) => {
@@ -30,6 +36,8 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setPendingPhone: (phone) => set({ pendingPhone: phone }),
+      setPendingEmail: (email) => set({ pendingEmail: email }),
+      setVerifyHint: (hint) => set({ verifyHint: hint }),
 
       updateUser: (updates) =>
         set((state) => ({
@@ -43,6 +51,8 @@ export const useAuthStore = create<AuthState>()(
           accessToken: null,
           refreshToken: null,
           pendingPhone: null,
+          pendingEmail: null,
+          verifyHint: null,
           isAuthenticated: false,
         });
       },

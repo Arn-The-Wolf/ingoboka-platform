@@ -30,6 +30,7 @@ export interface LoginRequest {
 export interface RegisterRequest {
   fullName: string;
   phone: string;
+  email?: string;
   nationalId: string;
   password: string;
 }
@@ -83,6 +84,13 @@ export interface PublicVerification {
   validTo?: string;
 }
 
+export interface ClaimStatusHistoryItem {
+  status: string;
+  label?: string;
+  occurredAt: string;
+  note?: string;
+}
+
 export interface Claim {
   id: string;
   claimNumber: string;
@@ -95,6 +103,37 @@ export interface Claim {
   description: string;
   submittedAt: string;
   updatedAt: string;
+  statusHistory?: ClaimStatusHistoryItem[];
+}
+
+export interface PolicyActivity {
+  type: string;
+  label: string;
+  occurredAt: string;
+  policyId?: string;
+  claimId?: string;
+}
+
+export interface RecommendedProduct {
+  id: string;
+  name: string;
+  category: string;
+  startingPremium: number;
+  currency: string;
+  matchScore: number;
+  reason?: string;
+}
+
+export interface NeedsAssessmentResult {
+  score: number;
+  guidance: string;
+  recommendedCategories?: string[];
+  recommendedProducts?: RecommendedProduct[];
+}
+
+export interface PolicyReportSummary {
+  activePolicies: number;
+  citizensEnrolled: number;
 }
 
 export interface ClaimDecisionRequest {

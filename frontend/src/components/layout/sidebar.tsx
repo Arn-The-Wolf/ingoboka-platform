@@ -31,14 +31,14 @@ export function Sidebar() {
   const logout = useLogout();
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-brand-border bg-white">
-      <div className="flex items-center gap-2 border-b border-brand-border px-6 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-primary text-white">
+    <aside className="flex h-screen w-64 flex-col border-r border-brand-primary-dark/20 bg-brand-primary-dark text-white">
+      <div className="flex items-center gap-2 border-b border-white/10 px-6 py-5">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/15 text-white">
           <Shield className="h-5 w-5" />
         </div>
         <div>
-          <p className="font-semibold text-brand-primary-dark">Ingoboka</p>
-          <p className="text-xs text-brand-muted">Insurer Portal</p>
+          <p className="font-semibold">Ingoboka</p>
+          <p className="text-xs text-white/70">Insurer Portal</p>
         </div>
       </div>
 
@@ -51,10 +51,10 @@ export function Sidebar() {
               key={item.labelKey}
               href={item.href}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-brand-primary-light text-brand-primary'
-                  : 'text-brand-muted hover:bg-brand-background hover:text-brand-primary-dark'
+                  ? 'bg-white/15 text-white'
+                  : 'text-white/75 hover:bg-white/10 hover:text-white'
               )}
             >
               <Icon className="h-4 w-4" />

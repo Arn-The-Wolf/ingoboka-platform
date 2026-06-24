@@ -1,31 +1,53 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { useCallback } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { AuthHeader } from '@/components/layout/auth-header';
+import { ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useVerifyOtp } from '@/hooks/use-auth';
+import { OtpPinInput } from '@/components/ui/otp-pin-input';
+import { AuthBackButton } from '@/components/layout/auth-back-button';
+import { MailhogInboxHint } from '@/components/auth/mailhog-inbox-hint';
+import { StepIndicator } from '@/components/ui/step-indicator';
+import { useResendOtp, useVerifyOtp } from '@/hooks/use-auth';
+import { useOtpDeliveryConfig } from '@/hooks/use-otp-config';
 import { useAuthStore } from '@/store/auth-store';
+import { maskEmail } from '@/lib/auth/phone';
 import { otpSchema, type OtpFormData } from '@/lib/validators';
 import type { ApiError } from '@/types';
 
 export default function VerifyPage() {
   const t = useTranslations('auth');
   const pendingPhone = useAuthStore((s) => s.pendingPhone);
+  const pendingEmail = useAuthStore((s) => s.pendingEmail);
+  const verifyHint = useAuthStore((s) => s.verifyHint);
   const verify = useVerifyOtp();
+  const resend = useResendOtp();
+  const { data: otpConfig } = useOtpDeliveryConfig();
+
+  const isEmailMode = otpConfig?.deliveryChannel === 'EMAIL' || otpConfig?.requiresEmail;
+  const isLogMode = otpConfig?.deliveryChannel === 'LOG';
 
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors },
   } = useForm<OtpFormData>({
     resolver: zodResolver(otpSchema),
+    defaultValues: { code: '' },
   });
+
+  const submitCode = useCallback(
+    (code: string) => {
+      if (code.length === 6 && !verify.isPending) {
+        verify.mutate(code);
+      }
+    },
+    [verify]
+  );
 
   const onSubmit = (data: OtpFormData) => {
     verify.mutate(data.code);
@@ -33,42 +55,83 @@ export default function VerifyPage() {
 
   const error = verify.error as ApiError | null;
 
+  const description = (() => {
+    if (verifyHint) return verifyHint;
+    if (isEmailMode && pendingEmail) {
+      return t('verifyCodeToEmail', { email: maskEmail(pendingEmail) });
+    }
+    if (pendingPhone) {
+      return isEmailMode
+        ? t('verifyEmailWithPhoneLogin', { phone: pendingPhone })
+        : t('otpSent', { phone: pendingPhone });
+    }
+    return t('verifySubtitle');
+  })();
+
+  if (!pendingPhone) {
+    return (
+      <div className="space-y-6">
+        <AuthBackButton href="/register" />
+        <Alert variant="warning">{t('verifyNoPendingPhone')}</Alert>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8">
-      <AuthHeader />
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('verify')}</CardTitle>
-          <CardDescription>
-            {pendingPhone
-              ? t('otpSent', { phone: pendingPhone })
-              : t('verifySubtitle')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {error && <Alert variant="error">{error.message}</Alert>}
-            <div className="space-y-2">
-              <Label htmlFor="code">{t('otp')}</Label>
-              <Input
-                id="code"
-                inputMode="numeric"
-                maxLength={6}
-                placeholder="000000"
-                className="text-center text-lg tracking-widest"
+    <div className="space-y-6">
+      <AuthBackButton href="/register" />
+      <header className="space-y-2 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-primary-light">
+          <ShieldCheck className="h-6 w-6 text-brand-primary" />
+        </div>
+        <h1 className="text-2xl font-bold text-brand-primary">{t('verifyAccount')}</h1>
+        <p className="text-sm text-brand-muted">{description}</p>
+      </header>
+
+      <StepIndicator totalSteps={3} currentStep={2} />
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {error && <Alert variant="error">{error.message}</Alert>}
+        {isLogMode && <Alert variant="warning">{t('otpLogModeWarning')}</Alert>}
+        <MailhogInboxHint />
+        {resend.isSuccess && (
+          <Alert variant="success">
+            {isEmailMode ? t('resendCodeToEmailSuccess') : t('resendCodeSuccess')}
+          </Alert>
+        )}
+        <div className="space-y-3">
+          <Label htmlFor="otp-pin" className="sr-only">
+            {t('otp')}
+          </Label>
+          <Controller
+            name="code"
+            control={control}
+            render={({ field }) => (
+              <OtpPinInput
+                id="otp-pin"
+                value={field.value}
+                onChange={field.onChange}
+                onComplete={submitCode}
+                disabled={verify.isPending}
                 error={errors.code?.message}
-                {...register('code')}
               />
-            </div>
-            <Button type="submit" className="w-full" loading={verify.isPending}>
-              {t('verify')}
-            </Button>
-            <Button type="button" variant="ghost" className="w-full">
-              {t('resendOtp')}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+            )}
+          />
+          <p className="text-center text-xs text-brand-muted">{t('otpPinHint')}</p>
+        </div>
+        <Button type="submit" className="w-full py-6" variant="pill" loading={verify.isPending}>
+          {t('verify')}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          className="w-full text-brand-primary"
+          loading={resend.isPending}
+          onClick={() => resend.mutate()}
+        >
+          {isEmailMode ? t('resendCodeToEmail') : t('resendOtp')}
+        </Button>
+      </form>
     </div>
   );
 }

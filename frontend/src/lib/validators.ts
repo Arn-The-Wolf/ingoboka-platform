@@ -5,23 +5,62 @@ export const phoneSchema = z
   .min(10, 'Phone number is required')
   .regex(/^07\d{8}$/, 'Use format 07XXXXXXXX');
 
-export const loginSchema = z.object({
-  identifier: z.string().min(1, 'Phone or email is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
-
-export const registerSchema = z
+export const loginSchema = z
   .object({
-    fullName: z.string().min(2, 'Full name is required'),
-    phone: phoneSchema,
-    nationalId: z.string().min(16, 'National ID must be 16 digits').max(16),
-    password: z.string().min(8, 'Password must be at least 8 characters'),
-    confirmPassword: z.string(),
+    loginMethod: z.enum(['phone', 'email']),
+    phone: z.string(),
+    email: z.string(),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
   })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
+  .superRefine((data, ctx) => {
+    if (data.loginMethod === 'phone') {
+      const result = phoneSchema.safeParse(data.phone);
+      if (!result.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: result.error.errors[0]?.message ?? 'Invalid phone number',
+          path: ['phone'],
+        });
+      }
+    } else {
+      const result = emailSchema.safeParse(data.email);
+      if (!result.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: result.error.errors[0]?.message ?? 'Invalid email',
+          path: ['email'],
+        });
+      }
+    }
   });
+
+export const emailSchema = z.string().email('Enter a valid email address');
+
+export function createRegisterSchema(requiresEmail: boolean) {
+  const optionalEmail = z
+    .string()
+    .trim()
+    .refine((v) => v === '' || emailSchema.safeParse(v).success, {
+      message: 'Enter a valid email address',
+    });
+
+  return z
+    .object({
+      fullName: z.string().min(2, 'Full name is required'),
+      phone: phoneSchema,
+      email: requiresEmail ? emailSchema : optionalEmail,
+      nationalId: z.string().min(16, 'National ID must be 16 digits').max(16),
+      password: z.string().min(8, 'Password must be at least 8 characters'),
+      confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: 'Passwords do not match',
+      path: ['confirmPassword'],
+    });
+}
+
+/** Default: email required (no SMS budget). */
+export const registerSchema = createRegisterSchema(true);
 
 export const otpSchema = z.object({
   code: z
@@ -41,6 +80,6 @@ export const consentSchema = z.object({
 });
 
 export type LoginFormData = z.infer<typeof loginSchema>;
-export type RegisterFormData = z.infer<typeof registerSchema>;
+export type RegisterFormData = z.infer<ReturnType<typeof createRegisterSchema>>;
 export type OtpFormData = z.infer<typeof otpSchema>;
 export type ConsentFormData = z.infer<typeof consentSchema>;

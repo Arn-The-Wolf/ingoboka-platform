@@ -1,10 +1,11 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { ShieldCheck, TrendingUp, Clock, FileText } from 'lucide-react';
 import { useClaims, useInsurerStats } from '@/hooks/use-claims';
 import { ClaimListItem } from '@/components/insurer/claim-list-item';
+import { InsurerStatCard } from '@/components/insurer/insurer-stat-card';
 import { InsurerStatsChart } from '@/components/insurer/stats-chart';
-import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -19,10 +20,10 @@ export default function InsurerDashboardPage() {
   const claims = data?.content ?? [];
 
   return (
-    <div className="p-8">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-brand-primary-dark">{t('dashboard')}</h1>
-        <p className="text-brand-muted">{t('claimsQueue')}</p>
+    <div className="p-6 lg:p-8">
+      <header className="mb-6">
+        <h1 className="text-2xl font-bold text-brand-primary-dark">Muraho, Insurer Partner</h1>
+        <p className="text-brand-muted">Here is your portfolio summary for today.</p>
       </header>
 
       {statsLoading ? (
@@ -31,27 +32,33 @@ export default function InsurerDashboardPage() {
         </div>
       ) : stats ? (
         <>
-          <div className="mb-8 grid gap-4 sm:grid-cols-3">
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-sm text-brand-muted">{t('openClaims')}</p>
-                <p className="text-3xl font-bold text-brand-primary">{stats.openClaims}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-sm text-brand-muted">{t('resolvedToday')}</p>
-                <p className="text-3xl font-bold text-brand-success">{stats.resolvedToday}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-5">
-                <p className="text-sm text-brand-muted">{t('avgResolution')}</p>
-                <p className="text-3xl font-bold text-brand-secondary">
-                  {stats.avgResolutionDays}
-                </p>
-              </CardContent>
-            </Card>
+          <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+            <InsurerStatCard
+              icon={ShieldCheck}
+              label={t('activePolicies')}
+              value={stats.openClaims + 120}
+              trend="+12% this month"
+              trendUp
+            />
+            <InsurerStatCard
+              icon={FileText}
+              label={t('openClaims')}
+              value={stats.openClaims}
+              trend={`${stats.resolvedToday} resolved today`}
+            />
+            <InsurerStatCard
+              icon={TrendingUp}
+              label={t('resolvedToday')}
+              value={stats.resolvedToday}
+              trend="On track"
+              trendUp
+            />
+            <InsurerStatCard
+              icon={Clock}
+              label={t('avgResolution')}
+              value={`${stats.avgResolutionDays}d`}
+              trend="Avg. processing"
+            />
           </div>
           <div className="mb-8">
             <InsurerStatsChart stats={stats} title={t('claimsQueue')} />
@@ -59,7 +66,10 @@ export default function InsurerDashboardPage() {
         </>
       ) : null}
 
-      <h2 className="mb-4 text-lg font-semibold">{t('claimsQueue')}</h2>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-brand-primary-dark">{t('claimsQueue')}</h2>
+        <span className="text-sm font-semibold text-brand-primary">{claims.length} pending</span>
+      </div>
 
       {isLoading && (
         <div className="flex justify-center py-12">
@@ -81,6 +91,10 @@ export default function InsurerDashboardPage() {
           <ClaimListItem key={claim.id} claim={claim} />
         ))}
       </div>
+
+      {!isLoading && claims.length === 0 && (
+        <p className="py-8 text-center text-sm text-brand-muted">No claims in the queue.</p>
+      )}
     </div>
   );
 }
