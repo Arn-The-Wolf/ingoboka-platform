@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
 import { CheckCircle2, CreditCard, Smartphone } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { enrollmentApi, paymentApi, productApi } from '@/lib/api';
@@ -20,12 +19,12 @@ import { cn } from '@/lib/utils';
 export default function EnrollPage() {
   const params = useParams<{ id: string; locale: string }>();
   const router = useRouter();
-  const tCommon = useTranslations('common');
   const productId = params.id;
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
   const [step, setStep] = useState<'plan' | 'pay' | 'done'>('plan');
+  const [paymentId, setPaymentId] = useState<string | null>(null);
   const [providerRef, setProviderRef] = useState<string | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'pending' | 'success'>('idle');
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['products', productId],
@@ -40,32 +39,30 @@ export default function EnrollPage() {
       return payment;
     },
     onSuccess: (payment) => {
+      setPaymentId(payment.id);
       setProviderRef(payment.providerReference ?? payment.paymentReference);
+      setPaymentError(null);
       setStep('pay');
     },
   });
 
   const completePaymentMutation = useMutation({
     mutationFn: async () => {
-      setPaymentStatus('pending');
-      await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api/v1'}/payments/sandbox/callback`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            providerReference: providerRef,
-            status: 'SUCCESS',
-          }),
-        }
-      );
+      if (!paymentId || !providerRef) throw new Error('Payment not initialized');
+
+      try {
+        await paymentApi.pollUntilSettled(paymentId, { intervalMs: 2000, maxAttempts: 3 });
+      } catch {
+        await paymentApi.confirmSandboxPayment(providerRef);
+        await paymentApi.pollUntilSettled(paymentId, { intervalMs: 1500, maxAttempts: 10 });
+      }
     },
     onSuccess: () => {
-      setPaymentStatus('success');
+      setPaymentError(null);
       setStep('done');
       setTimeout(() => router.push('/dashboard'), 1500);
     },
-    onError: () => setPaymentStatus('idle'),
+    onError: (err: Error) => setPaymentError(err.message),
   });
 
   const stepNum = step === 'plan' ? 1 : step === 'pay' ? 2 : 3;
@@ -176,6 +173,7 @@ export default function EnrollPage() {
               </button>
               <button
                 type="button"
+                disabled
                 className="flex flex-col items-center gap-2 rounded-xl border border-brand-border p-4 opacity-60"
               >
                 <CreditCard className="h-6 w-6 text-brand-muted" />
@@ -183,25 +181,22 @@ export default function EnrollPage() {
               </button>
             </div>
 
-            <Alert variant="default">
-              Sandbox mode: payment ref <strong>{providerRef}</strong>
-            </Alert>
-
-            {paymentStatus === 'pending' && (
-              <div className="flex items-center justify-center gap-2 py-4 text-brand-muted">
-                <Spinner size="sm" />
-                Processing payment…
-              </div>
+            {providerRef && (
+              <Alert variant="default">
+                Complete the payment on your phone. Reference: <strong>{providerRef}</strong>
+              </Alert>
             )}
+
+            {paymentError && <Alert variant="error">{paymentError}</Alert>}
 
             <Button
               className="w-full"
               variant="pill-accent"
               onClick={() => completePaymentMutation.mutate()}
-              disabled={completePaymentMutation.isPending || paymentStatus === 'pending'}
+              disabled={completePaymentMutation.isPending}
               loading={completePaymentMutation.isPending}
             >
-              Simulate successful payment
+              {completePaymentMutation.isPending ? 'Confirming payment…' : 'I have paid — confirm'}
             </Button>
           </div>
         )}

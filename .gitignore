@@ -67,3 +67,4 @@ Untitled
 .cache/
 .tmp-api/
 .tmp-api/
+.env*

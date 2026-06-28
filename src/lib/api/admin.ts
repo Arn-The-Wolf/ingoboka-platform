@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import { mapAuthUser, unwrapPage } from './mappers';
+import { getWithFallback, mapApplicationStatusFilter, PENDING_APPLICATION_STATUSES } from './integration-helpers';
 import type { ApplicationResponse } from './products';
 import type { PolicyReportSummary, UserRole } from '@/types';
 
@@ -104,10 +105,10 @@ export const adminApi = {
   },
 
   async listAuditLog(page = 0, size = 50): Promise<{ content: AuditLogEntry[]; totalElements: number }> {
-    const { data } = await apiClient.get<{
+    const data = await getWithFallback<{
       content?: Record<string, unknown>[];
       totalElements?: number;
-    }>('/admin/audit-logs', { params: { page, size } });
+    }>('/audit/logs', '/admin/audit-logs', { page, size });
     const content = unwrapPage(data).map((raw) => ({
       id: String(raw.id ?? ''),
       action: String(raw.action ?? raw.eventType ?? 'ACTION'),
@@ -120,14 +121,25 @@ export const adminApi = {
   },
 
   async getPlatformSettings(): Promise<PlatformSettings> {
-    const { data } = await apiClient.get<Record<string, unknown>>('/admin/platform/settings');
-    return {
-      platformName: String(data.platformName ?? 'Ingoboka'),
-      defaultLocale: String(data.defaultLocale ?? 'rw'),
-      maintenanceMode: Boolean(data.maintenanceMode),
-      apiBaseUrl: String(data.apiBaseUrl ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? ''),
-      supportEmail: String(data.supportEmail ?? 'support@ingoboka.rw'),
+    const fallback: PlatformSettings = {
+      platformName: 'Ingoboka',
+      defaultLocale: 'rw',
+      maintenanceMode: false,
+      apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api/v1',
+      supportEmail: 'support@ingoboka.rw',
     };
+    try {
+      const { data } = await apiClient.get<Record<string, unknown>>('/admin/platform/settings');
+      return {
+        platformName: String(data.platformName ?? fallback.platformName),
+        defaultLocale: String(data.defaultLocale ?? fallback.defaultLocale),
+        maintenanceMode: Boolean(data.maintenanceMode),
+        apiBaseUrl: String(data.apiBaseUrl ?? fallback.apiBaseUrl),
+        supportEmail: String(data.supportEmail ?? fallback.supportEmail),
+      };
+    } catch {
+      return fallback;
+    }
   },
 };
 
@@ -247,19 +259,49 @@ export const insurerApi = {
   },
 
   async listApplications(page = 0, size = 20, status = 'PENDING') {
-    const { data } = await apiClient.get<{
-      content?: Record<string, unknown>[];
-      totalElements?: number;
-    }>('/insurer/applications', { params: { page, size, status } });
-    const content = unwrapPage(data).map(mapApplication);
-    return { content, totalElements: data.totalElements ?? content.length };
+    const backendStatus = mapApplicationStatusFilter(status);
+    const params: Record<string, string | number> = { page, size };
+    if (backendStatus) params.status = backendStatus;
+
+    const fetchPage = async (path: string) => {
+      const { data } = await apiClient.get<{
+        content?: Record<string, unknown>[];
+        totalElements?: number;
+      }>(path, { params });
+      return data;
+    };
+
+    let data: { content?: Record<string, unknown>[]; totalElements?: number };
+    try {
+      data = await fetchPage('/applications');
+    } catch {
+      data = await fetchPage('/insurer/applications');
+    }
+
+    let content = unwrapPage(data).map(mapApplication);
+    if (status === 'PENDING') {
+      content = content.filter((app) => PENDING_APPLICATION_STATUSES.has(app.status));
+    }
+    return { content, totalElements: content.length };
   },
 
   async reviewApplication(id: string, decision: 'APPROVE' | 'REJECT', reason?: string) {
-    const { data } = await apiClient.post<Record<string, unknown>>(`/insurer/applications/${id}/decision`, {
-      decision: decision === 'APPROVE' ? 'APPROVED' : 'REJECTED',
-      reason,
-    });
-    return mapApplication(data);
+    const body = {
+      status: decision === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+      decisionReason: reason,
+    };
+    try {
+      const { data } = await apiClient.patch<Record<string, unknown>>(
+        `/applications/${id}/review`,
+        body
+      );
+      return mapApplication(data);
+    } catch {
+      const { data } = await apiClient.post<Record<string, unknown>>(
+        `/insurer/applications/${id}/decision`,
+        { decision: body.status, reason: body.decisionReason }
+      );
+      return mapApplication(data);
+    }
   },
 };

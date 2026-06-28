@@ -8,28 +8,17 @@ import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
-import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 
 export default function AdminSettingsPage() {
   const t = useTranslations('admin');
-  const tCommon = useTranslations('common');
 
-  const { data: settings, isLoading, error } = useQuery({
+  const { data: settings, isLoading } = useQuery({
     queryKey: ['admin', 'settings'],
     queryFn: () => adminApi.getPlatformSettings(),
-    retry: false,
   });
 
-  const fallbackSettings = {
-    platformName: 'Ingoboka',
-    defaultLocale: 'rw',
-    maintenanceMode: false,
-    apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api/v1',
-    supportEmail: 'support@ingoboka.rw',
-  };
-
-  const config = settings ?? (error ? fallbackSettings : null);
+  const config = settings;
 
   return (
     <PageContainer narrow>
@@ -39,12 +28,6 @@ export default function AdminSettingsPage() {
         <div className="flex justify-center py-12">
           <Spinner />
         </div>
-      )}
-
-      {error && !isLoading && (
-        <Alert variant="error" className="mb-4">
-          {tCommon('error')}
-        </Alert>
       )}
 
       {config && (

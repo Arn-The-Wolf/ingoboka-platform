@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { uploadClaimEvidence } from './documents';
 import { isInsurerPortalRole, mapClaim, unwrapPage } from './mappers';
 import type { Claim, ClaimDecisionRequest, InsurerStats, PaginatedResponse } from '@/types';
 import { useAuthStore } from '@/store/auth-store';
@@ -47,12 +48,15 @@ export const claimApi = {
   },
 
   async decide(id: string, payload: ClaimDecisionRequest): Promise<Claim> {
-    const decision =
-      payload.decision === 'APPROVE'
-        ? 'APPROVED'
-        : payload.decision === 'REJECT'
-          ? 'REJECTED'
-          : payload.decision;
+    if (payload.decision === 'REQUEST_INFO') {
+      const { data } = await apiClient.patch<Record<string, unknown>>(`/claims/${id}/status`, {
+        status: 'INFORMATION_REQUIRED',
+        reason: payload.notes ?? 'Additional information requested',
+      });
+      return mapClaim(data);
+    }
+
+    const decision = payload.decision === 'APPROVE' ? 'APPROVED' : 'REJECTED';
     const { data } = await apiClient.post<Record<string, unknown>>(`/admin/claims/${id}/decision`, {
       decision,
       reason: payload.notes ?? decision,
@@ -66,12 +70,7 @@ export const claimApi = {
   },
 
   async uploadDocuments(id: string, files: File[]) {
-    const formData = new FormData();
-    files.forEach((file) => formData.append('files', file));
-    const { data } = await apiClient.post(`/claims/${id}/documents`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
-    return data;
+    await uploadClaimEvidence(id, files);
   },
 
   async getInsurerStats(): Promise<InsurerStats> {

@@ -34,6 +34,10 @@ http://localhost:3000
 
 Default locale: `rw` — e.g. http://localhost:3000/rw/login
 
+## Backend handoff (Rodin)
+
+[`docs/RODIN_BACKEND_REMAINING_WORK.md`](docs/RODIN_BACKEND_REMAINING_WORK.md) — remaining API work, endpoint contracts, completion estimates (frontend **84%**, backend **68%**, integration **47%**).
+
 ## Scripts
 
 - `npm run dev` — development server

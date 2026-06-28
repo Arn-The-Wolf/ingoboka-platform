@@ -1,6 +1,7 @@
 import { apiClient } from './client';
 import { normalizeCitizenPhone } from '@/lib/auth/phone';
 import { mapAuthResponse, mapAuthUser, type BackendAuthPayload } from './mappers';
+import { useAuthStore } from '@/store/auth-store';
 import type {
   AuthTokens,
   ConsentRequest,
@@ -122,8 +123,19 @@ export const authApi = {
 
 export const customerApi = {
   async getMe(): Promise<User> {
-    await apiClient.get('/customers/me');
-    return mapAuthUser(null);
+    const stored = useAuthStore.getState().user;
+    try {
+      const { data } = await apiClient.get<Record<string, unknown>>('/customers/me');
+      if (!stored) return mapAuthUser(null);
+      const kycStatus = String(data.kycStatus ?? '');
+      return {
+        ...stored,
+        verified: stored.verified || kycStatus === 'VERIFIED',
+      };
+    } catch (error) {
+      if (stored) return stored;
+      throw error;
+    }
   },
 
   async submitConsent(payload: ConsentRequest): Promise<Partial<User>> {

@@ -170,13 +170,16 @@ function mapStatusHistory(raw: unknown): Claim['statusHistory'] {
 }
 
 export function mapClaim(raw: Record<string, unknown>): Claim {
+  const rawStatus = String(raw.status ?? 'SUBMITTED');
+  const status =
+    rawStatus === 'INFORMATION_REQUIRED' ? 'INFO_REQUESTED' : (rawStatus as Claim['status']);
   return {
     id: String(raw.id),
     claimNumber: String(raw.claimNumber ?? ''),
     policyId: String(raw.policyId ?? ''),
     policyNumber: String(raw.policyNumber ?? ''),
     claimantName: String(raw.claimantName ?? 'Citizen'),
-    status: (raw.status as Claim['status']) ?? 'SUBMITTED',
+    status: status ?? 'SUBMITTED',
     amount: Number(raw.claimedAmount ?? raw.amount ?? 0),
     currency: String(raw.currency ?? 'RWF'),
     description: String(raw.description ?? ''),

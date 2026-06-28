@@ -37,4 +37,33 @@ export const paymentApi = {
       paymentReference: String(data.paymentReference ?? data.providerReference ?? ''),
     };
   },
+
+  /** Poll until payment reaches a terminal state. */
+  async pollUntilSettled(
+    paymentId: string,
+    options?: { intervalMs?: number; maxAttempts?: number }
+  ): Promise<string> {
+    const intervalMs = options?.intervalMs ?? 3000;
+    const maxAttempts = options?.maxAttempts ?? 20;
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const { status } = await this.getStatus(paymentId);
+      const normalized = status.toUpperCase();
+      if (['SUCCESS', 'COMPLETED', 'PAID', 'SUCCESSFUL'].includes(normalized)) {
+        return status;
+      }
+      if (['FAILED', 'CANCELLED', 'EXPIRED'].includes(normalized)) {
+        throw new Error('Payment failed');
+      }
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+    throw new Error('Payment timed out — check your mobile money prompt or try again');
+  },
+
+  async confirmSandboxPayment(providerReference: string) {
+    await apiClient.post('/payments/sandbox/callback', {
+      providerReference,
+      status: 'SUCCESS',
+    });
+  },
 };

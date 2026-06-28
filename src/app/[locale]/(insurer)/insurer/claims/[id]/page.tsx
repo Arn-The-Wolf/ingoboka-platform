@@ -41,7 +41,7 @@ export default function ClaimDetailPage() {
   return (
     <div className="p-6 lg:p-8">
       <Link
-        href="/insurer/dashboard"
+        href="/insurer/claims"
         className="mb-4 inline-flex items-center gap-1 text-sm text-brand-primary hover:underline"
       >
         <ArrowLeft className="h-4 w-4" />
