@@ -15,6 +15,7 @@ import {
 import { Link } from '@/i18n/routing';
 import { productApi } from '@/lib/api';
 import { CitizenHeader } from '@/components/layout/citizen-header';
+import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { formatCurrency, cn } from '@/lib/utils';
@@ -105,8 +106,10 @@ export default function ProductDetailPage() {
   return (
     <>
       <CitizenHeader title={product.name} />
-      <div className="mx-auto max-w-lg pb-28">
-        <section className="relative h-64 overflow-hidden">
+      <PageContainer>
+      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+      <div>
+        <section className="relative mb-8 h-64 overflow-hidden rounded-2xl lg:h-80">
           {product.heroImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -301,7 +304,10 @@ export default function ProductDetailPage() {
           </section>
         )}
 
-        <section className="mb-6 px-4">
+      </div>
+
+      <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
+        <section className="mb-6">
           <h3 className="mb-3 text-sm font-semibold text-brand-primary-dark">Quick Check</h3>
           <div className="space-y-4">
             {QUIZ.map((q) => (
@@ -334,8 +340,7 @@ export default function ProductDetailPage() {
           </div>
         </section>
 
-        <section className="fixed bottom-0 left-0 right-0 z-30 border-t border-brand-border bg-white px-4 py-4">
-          <div className="mx-auto max-w-lg">
+        <div className="rounded-2xl border border-brand-border bg-white p-6 shadow-card">
             <Button
               className="w-full"
               variant="pill-accent"
@@ -361,8 +366,9 @@ export default function ProductDetailPage() {
               Not sure? Take the needs assessment first
             </Link>
           </div>
-        </section>
+      </aside>
       </div>
+      </PageContainer>
     </>
   );
 }

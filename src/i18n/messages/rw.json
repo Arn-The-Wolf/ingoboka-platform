@@ -39,8 +39,7 @@
     "resendCodeSuccess": "Kode nshya yoherejwe.",
     "registerEmailMode": "Twohereza kode y'imibare 6 kuri imeyili yawe. Uzinjira ukoresheje numero ya telefoni.",
     "registerSmsMode": "Twohereza kode kuri telefoni yawe binyuze muri SMS.",
-    "registerEmailHint": "Koresha imeyili ukoresha ukunda. Mu bukoresha bw'ibanze, reba Mailhog kuri localhost:8025.",
-    "mailhogHint": "Mu bukoresha bw'ibanze: kode ntizoherezwa kuri imeyili yawe nyayo. Fungura isanduku yo kugerageza kuri",
+    "registerEmailHint": "Koresha imeyili ukoresha — tuzohereza kode yo kwemeza aho.",
     "phoneLoginHint": "Numero ya telefoni ni indangamuntu yawe yo kwinjira nyuma yo kwemeza.",
     "emailLoginHint": "Injira ukoresheje imeyili yahujwe na konti yawe.",
     "loginMethod": "Injira ukoresheje",
@@ -52,7 +51,6 @@
     "optional": "bishoboka",
     "verifyCodeToEmail": "Andika kode twohereje kuri {email}",
     "verifyEmailWithPhoneLogin": "Kode yoherejwe kuri imeyili. Nyuma yo kwemeza, injira ukoresheje {phone}.",
-    "otpLogModeWarning": "Imiterere y'iterambere: kode iboneka mu byanditswe bya API gusa.",
     "noAccount": "Nta konti ufite?",
     "hasAccount": "Usanzwe ufite konti?",
     "loginSubtitle": "Injira mu gitabo cyawe cy'ubwishingizi",
@@ -84,7 +82,48 @@
     "validUntil": "Irangira",
     "scanQr": "Sikana kugira ngo wemeze",
     "home": "Ahabanza",
-    "claims": "Ibyifuzo",
+    "claims": {
+      "nav": "Ibyifuzo",
+      "title": "Ibyifuzo byanjye",
+      "subtitle": "Kurikirana kandi ucunge ibyifuzo byawe by'ubwishingizi",
+      "newClaim": "Icyifuzo gishya",
+      "noClaims": "Nta byifuzo birahari",
+      "emptyHint": "Ohereza icyifuzo gishya igihe ukeneye gutanga raporo y'ibyabaye bishingiwe n'ubwishingizi bwawe.",
+      "backToClaims": "Subira ku byifuzo",
+      "detailTitle": "Imiterere y'icyifuzo",
+      "policyLabel": "Ubwishingizi",
+      "amountLabel": "Amafaranga",
+      "submittedLabel": "Yoherejwe",
+      "timelineTitle": "Urutonde rw'imiterere",
+      "infoRequested": "Habasabwe andi makuru",
+      "appealTitle": "Gusaba gusuzumwa bundi bushya",
+      "appealReason": "Impamvu yo gusaba gusuzumwa",
+      "appealReasonPlaceholder": "Sobanura impamvu uzi ko icyifuzo cyawe gikwiye gusuzumwa bundi bushya…",
+      "appealSubmit": "Ohereza gusaba gusuzumwa",
+      "appealSuccess": "Gusaba gusuzumwa byoherejwe kandi bizasuzumwa.",
+      "uploadLabel": "Inyandiko zishingira (bishoboka)",
+      "uploadHint": "Shyiraho inyemezabuguzi, amafoto, cyangwa ibindi bimenyetso (PDF, JPG, PNG)",
+      "uploadPartialSuccess": "Icyifuzo cyoherejwe neza. Inyandiko zimwe ntizashoboye koherezwa — uzazishyiraho nyuma uhereye ku bisobanuro by'icyifuzo.",
+      "filesSelected": "{count, plural, one {Dosiye # yatoranyijwe} other {Dosiye # zatoranyijwe}}",
+      "step1Title": "Ni iki cyabaye?",
+      "step1Subtitle": "Hitamo ubwoko bw'ibyabaye ushaka gutanga raporo.",
+      "step2Title": "Hitamo ubwishingizi",
+      "step2Subtitle": "Hitamo ubwishingizi bukora bwo gukoresha kuri iri cyifuzo.",
+      "step3Title": "Sobanura ibyabaye",
+      "step3Subtitle": "Tanga ibisobanuro byuzuye kugira ngo icyifuzo cyawe gikorwe.",
+      "step4Title": "Suzuma & ohereza",
+      "step4Subtitle": "Emeza ibisobanuro by'icyifuzo cyawe mbere yo kohereza.",
+      "descriptionLabel": "Ibisobanuro",
+      "descriptionPlaceholder": "Ni iki cyabaye kandi ryari?",
+      "amountInputLabel": "Amafaranga yasabwe (RWF)",
+      "review": "Suzuma",
+      "submitClaim": "Ohereza icyifuzo",
+      "typeLabel": "Ubwoko",
+      "incidentAccident": "Impanuka",
+      "incidentIllness": "Indwara",
+      "incidentHospital": "Gusura ibitaro",
+      "incidentOther": "Ikindi"
+    },
     "profile": "Umwirondoro",
     "dependants": "Abagize"
   },
@@ -117,7 +156,15 @@
     "invoices": "Inyemezabuguzi",
     "revenueLedger": "Inyandiko y'amafaranga",
     "activePolicies": "Ubwishingizi bukora",
-    "enrolledCitizens": "Abaturage biyandikishije"
+    "enrolledCitizens": "Abaturage biyandikishije",
+    "greeting": "Muraho, Mufatanyabikorwa w'ubwishingizi",
+    "portfolioSummary": "Dore incamake y'ubwishingizi bwawe uyu munsi.",
+    "trendThisMonth": "+12% uku kwezi",
+    "resolvedTodayTrend": "{count} byakemuwe uyu munsi",
+    "onTrack": "Biri mu nzira",
+    "avgProcessing": "Impuzandengo yo gukora",
+    "pendingCount": "{count} birategereje",
+    "noClaimsInQueue": "Nta byifuzo biri mu rutonde."
   },
   "admin": {
     "dashboard": "Ubuyobozi bwa platform",
@@ -136,6 +183,12 @@
     "productPlan": "ID y'igishushanyo",
     "createApplication": "Tangira ubusabe"
   },
+  "error": {
+    "title": "Habaye ikosa",
+    "message": "Habaye ikosa ritunguranye. Nyamuneka ongera ugerageze.",
+    "retry": "Ongera ugerageze",
+    "goHome": "Subira ahabanza"
+  },
   "verify": {
     "title": "Kwemeza ubwishingizi",
     "valid": "Ubu bwishingizi burakora",
@@ -152,15 +205,323 @@
     "dashboard": "Ikibaho"
   },
   "landing": {
-    "taglineRw": "Ubwishingizi bworoshye, bwumvikana kandi bugera kuri bose",
-    "taglineEn": "Simple, understandable insurance for everyone",
+    "tagline": "Ubwishingizi bworoshye, bwumvikana kandi bugera kuri bose",
     "getStarted": "Tangira",
-    "skip": "Simbuka",
+    "skip": "Injira",
+    "login": "Injira",
+    "openMenu": "Fungura menu",
+    "closeMenu": "Funga menu",
     "onboardingSlide1Title": "Menya ubwishingizi bwawe",
     "onboardingSlide1Body": "Menya ubwishingizi bwawe mu buryo bworoheje, bitagusaba amagambo akomeye.",
     "onboardingSlide2Title": "Kingira umuryango wawe",
     "onboardingSlide2Body": "Ubwishingizi buke bwateguwe ku miryango y'u Rwanda.",
     "onboardingSlide3Title": "Gusaba byoroshye",
-    "onboardingSlide3Body": "Ohereza kandi ukurikirane ibyifuzo byawe mu minota."
+    "onboardingSlide3Body": "Ohereza kandi ukurikirane ibyifuzo byawe mu minota.",
+    "nav": {
+      "home": "Ahabanza",
+      "features": "Ibiranga",
+      "howItWorks": "Uko bikora",
+      "plans": "Gahunda",
+      "about": "Twebwe",
+      "faq": "Ibibazo bikunze kubazwa",
+      "contact": "Twandikire",
+      "products": "Ibicuruzwa"
+    },
+    "hero": {
+      "headline": "Ubwishingizi buke bworoshye ku Rwanda",
+      "subheadline": "Ubwishingizi buciriritse, bwumvikana, ugura kuri telefoni yawe kandi usaba mu minsi mike — bwateguwe ku miryango n'imiryango yose mu Rwanda.",
+      "statAffordable": "Guhera kuri FRW 500/ukwezi",
+      "statClaims": "Gusaba mu masaha 48",
+      "statDigital": "100% kuri digitale"
+    },
+    "features": {
+      "title": "Impamvu Ingoboka",
+      "subtitle": "Ubwishingizi buhuje n'ubuzima bwawe — burumvikana, buciriritse kandi buhora hafi yawe.",
+      "understandCover": {
+        "title": "Menya ubwishingizi bwawe",
+        "body": "Amasezerano mu rurimi rusanzwe kugira ngo umenye neza ibiri mu bwishingizi n'ibitari."
+      },
+      "protectFamily": {
+        "title": "Kingira umuryango wawe",
+        "body": "Ongeraho abagize umuryango wawe kandi uhitemo gahunda zateguwe ku miryango y'u Rwanda."
+      },
+      "mobileMoney": {
+        "title": "Wishyura ukoresheje Mobile Money",
+        "body": "Wishyura umusanzu ukoresheje MTN MoMo cyangwa Airtel Money — nta konti ya banki ukeneye."
+      },
+      "easyClaims": {
+        "title": "Gusaba byoroshye",
+        "body": "Ohereza ibyifuzo kuri telefoni yawe, shyiraho inyandiko, kandi ukurikirane imiterere mu gihe nyacyo."
+      },
+      "digitalWallet": {
+        "title": "Igitabo cy'ubwishingizi cya digitale",
+        "body": "Bika ubwishingizi bwawe bwose ahantu hamwe hamwe n'ikarita yo kwemeza ya QR ushobora kwerekana aho ari ho."
+      },
+      "localSupport": {
+        "title": "Ubufasha bw'ahantu",
+        "body": "Bona ubufasha mu Kinyarwanda cyangwa Icyongereza uhereye ku ikipe yacu n'abakozi bo mu murima mu Rwanda."
+      }
+    },
+    "howItWorks": {
+      "title": "Uko bikora",
+      "subtitle": "Wishingirwa mu ntambwe enye zoroshye — abantu benshi barangiza mu minota icumi.",
+      "stepLabel": "Intambwe {step}",
+      "step1Title": "Iyandikishe",
+      "step1Body": "Fungura konti yawe ukoresheje numero ya telefoni cyangwa imeyili.",
+      "step2Title": "Hitamo gahunda",
+      "step2Body": "Reba ibicuruzwa by'ubwishingizi buke uhitemo ubwishingizi buhuje n'ibyo ukeneye.",
+      "step3Title": "Wishyura umusanzu",
+      "step3Body": "Wishyura buri kwezi ukoresheje Mobile Money — umusanzu uciriritse uhera kuri FRW 500.",
+      "step4Title": "Wishingiwe",
+      "step4Body": "Akira ikarita yawe y'ubwishingizi ya digitale kandi usabe igihe cyose uhereye mu gitabo cyawe."
+    },
+    "products": {
+      "title": "Gahunda zikunzwe",
+      "subtitle": "Ibicuruzwa by'ubwishingizi buke — iyandikishe nyuma yo gufungura konti yawe y'ubuntu.",
+      "fromPrice": "Guhera kuri {price}/ukwezi",
+      "personalAccident": {
+        "name": "Ubwishingizi buke bw'impanuka ku muntu",
+        "description": "Ubwishingizi bw'urupfu n'ubumuga buvuka mu mpanuka ku muntu ku giti cye — bukwiriye abakora imirimo ya buri munsi n'abikorera.",
+        "price": "FRW 500"
+      },
+      "familyHealth": {
+        "name": "Ukurinda ubuzima bw'umuryango",
+        "description": "Inyungu zo mu bitaro n'amafaranga y'ubuvuzi ku muntu n'abagize umuryango batanu.",
+        "price": "FRW 2,500"
+      },
+      "funeralCover": {
+        "name": "Ubwishingizi bw'imisanzu busanzwe",
+        "description": "Inyungu y'imisanzu yose yo gufasha umuryango wawe mu bihe bigoye.",
+        "price": "FRW 1,000"
+      },
+      "enrollCta": "Tangira"
+    },
+    "trust": {
+      "title": "Kwizera n'ubunyangamugayo",
+      "subtitle": "Amakuru yawe n'ubwishyu byitabwaho neza.",
+      "dataProtection": {
+        "title": "Kurinda amakuru",
+        "body": "Dukoresha amakuru y'umuntu mu buryo buhuje n'itegeko ry'u Rwanda N° 058/2021 ryo kurinda amakuru y'umuntu n'ubuzima bwite. Wigenzura uburenganzira bwawe kandi usome politiki y'ubuzima bwite igihe wiyandikisha."
+      },
+      "licensedPartners": {
+        "title": "Abafatanyabikorwa b'ubwishingizi bemewe",
+        "body": "Ibicuruzwa byemezwa n'abafatanyabikorwa b'ubwishingizi bemewe mu Rwanda, hamwe n'amasezerano asobanutse ushobora gusoma mbere yo kwiyandikisha."
+      },
+      "securePayments": {
+        "title": "Kwishyura byizewe",
+        "body": "Umusanzu ukusanywa binyuze mu nzira z'izi Mobile Money. Igitabo cyawe cy'ubwishingizi n'amakode ya QR yo kwemeza akora hatagaragazwa amakuru yihariye y'umuntu."
+      },
+      "verifyPolicy": "Emeza ubwishingizi ukoresheje kode ya QR ku ikarita yawe y'ubwishingizi ya digitale."
+    },
+    "faq": {
+      "title": "Ibibazo bikunze kubazwa",
+      "subtitle": "Ibisubizo byihuse ku bwishingizi buke kuri Ingoboka.",
+      "q1": "Ubwishingizi buke ni iki?",
+      "a1": "Ubwishingizi buke butanga ubwishingizi buciriritse, busobanutse bufite umusanzu muto n'inyungu zisobanutse — bwateguwe ku bantu bafite ubwishingizi busanzwe. Ingoboka izana ibi bicuruzwa kuri telefoni yawe.",
+      "q2": "Nishyura gute?",
+      "a2": "Nyuma yo guhitamo gahunda, wishyura umusanzu w'ukwezi ukoresheje MTN MoMo cyangwa Airtel Money mu buryo butaziguye. Nta konti ya banki ukeneye.",
+      "q3": "Nasaba gute?",
+      "a3": "Fungura ubwishingizi bwawe mu app, kanda Gusaba gishya, sobanura ibyabaye, kandi shyiraho inyandiko zisabwa. Urashobora gukurikirana imiterere yo gusuzuma uhereye ku kibaho cyawe.",
+      "q4": "Amakuru yanjye aratekanye?",
+      "a4": "Yego. Dukurikiza amategeko yo kurinda amakuru mu Rwanda, dukoresha imiyoboro yizewe, kandi dukusanya gusa ibyo dukeneye mu gutanga serivisi z'ubwishingizi. Uha uburenganzira mu buryo butaziguye igihe wiyandikisha.",
+      "q5": "Ni nde ushobora kwiyandikisha?",
+      "a5": "Abatuye mu Rwanda bafite imyaka 18 n'irindi bashobora kwiyandikisha. Ibicuruzwa bimwe byemera kongeramo abagize umuryango nka bana cyangwa abashakanye. Abakozi nabo bashobora gufasha abakiriya kwiyandikisha mu murima.",
+      "q6": "Nshobora kongeramo abagize umuryango?",
+      "a6": "Yego. Gahunda nyinshi zemerera kongeramo abagize umuryango nka bana n'abashakanye. Ubuyobozi bw'abagize umuryango bukorerwa ku kibaho cyawe cy'umunyagihugu nyuma yo kwiyandikisha.",
+      "q7": "Niba ntishyuye umusanzu w'ukwezi?",
+      "a7": "Turakumenyesha mbere y'itariki yo kwishyura. Niba wishyuye utishyuye, ubwishingizi bwawe bushobora kwinjira mu gihe cy'ubuntu. Reba amasezerano y'ubwishingizi bwawe cyangwa twandikire ubufasha.",
+      "q8": "Nemeza gute ubwishingizi?",
+      "a8": "Buri ikarita y'ubwishingizi ya digitale ifite kode ya QR. Uwo ari we wese arashobora kuyisikana kugira ngo yemeze ko ubwishingizi burimo akora hatagaragazwa amakuru y'umuntu."
+    },
+    "cta": {
+      "title": "Witeguye kwishingirwa?",
+      "subtitle": "Fungura konti yawe y'ubuntu kandi uhitemo gahunda mu minota mike.",
+      "button": "Tangira"
+    },
+    "footer": {
+      "tagline": "Ubwishingizi buke bwa digitale ku Rwanda",
+      "company": "Ikigo",
+      "product": "Igicuruzwa",
+      "legal": "Amategeko",
+      "support": "Ubufasha",
+      "careers": "Akazi (bizaza vuba)",
+      "privacy": "Politiki y'ubuzima bwite",
+      "terms": "Amasezerano ya serivisi",
+      "lawMention": "Bihuje n'itegeko ry'u Rwanda N° 058/2021 ryo kurinda amakuru y'umuntu.",
+      "social": "Dukurikire",
+      "login": "Injira",
+      "register": "Iyandikishe",
+      "verifyPolicy": "Emeza ubwishingizi",
+      "contact": "Twandikire",
+      "contactEmail": "hello@ingoboka.rw",
+      "copyright": "© {year} Ingoboka. Uburenganzira bwose burabitswe."
+    },
+    "home": {
+      "highlights": {
+        "title": "Menya Ingoboka",
+        "subtitle": "Menya uko dutuma ubwishingizi buke buba bworoshye, buciriritse kandi bugera kuri bose mu Rwanda.",
+        "learnMore": "Menya byinshi",
+        "viewPlans": "Reba gahunda",
+        "features": {
+          "title": "Impamvu wahitamo",
+          "body": "Amasezerano mu rurimi rusanzwe, kwishyura ukoresheje Mobile Money, n'igitabo cya digitale — byateguwe ku Banyarwanda b'umunsi wose."
+        },
+        "howItWorks": {
+          "title": "Wishingirwa vuba",
+          "body": "Iyandikishe, hitamo gahunda, wishyure ukoresheje MoMo, kandi wakire ikarita yawe y'ubwishingizi ya digitale mu minota."
+        },
+        "plans": {
+          "title": "Gahunda ziciriritse",
+          "body": "Ubwishingizi bw'impanuka ku muntu, ubuzima bw'umuryango, n'imisanzu uhereye kuri FRW 500 ku kwezi."
+        }
+      }
+    },
+    "pages": {
+      "features": {
+        "heroTitle": "Ibiranga byateguwe ku Rwanda",
+        "heroSubtitle": "Ibyo ukeneye byose kugira ngo umenye, ugure kandi ukoreshe ubwishingizi buke kuri telefoni yawe."
+      },
+      "howItWorks": {
+        "heroTitle": "Uko Ingoboka ikora",
+        "heroSubtitle": "Kuva kwiyandikisha kugeza ku byifuzo byawe bya mbere — urugendo rworoshye mu ntambwe enye."
+      },
+      "plans": {
+        "heroTitle": "Gahunda z'ubwishingizi",
+        "heroSubtitle": "Ibicuruzwa by'ubwishingizi buke bifite inyungu zisobanutse n'umusanzu w'ukwezi uciriritse."
+      },
+      "about": {
+        "heroTitle": "Twebwe — Ingoboka",
+        "heroSubtitle": "Gutuma ubwishingizi burumvikana kandi bugera ku miryango yose y'u Rwanda."
+      },
+      "faq": {
+        "heroTitle": "Ikigo cy'ubufasha",
+        "heroSubtitle": "Ibisubizo ku bibazo bikunze kubazwa ku bwishingizi buke kuri Ingoboka."
+      },
+      "contact": {
+        "heroTitle": "Twandikire",
+        "heroSubtitle": "Turi hano kugufasha — twandikire ibibazo ku bicuruzwa, ibyifuzo, cyangwa konti yawe."
+      },
+      "privacy": {
+        "heroTitle": "Politiki y'ubuzima bwite",
+        "heroSubtitle": "Uko dukusanya, dukoresha, kandi turinda amakuru yawe y'umuntu."
+      },
+      "terms": {
+        "heroTitle": "Amasezerano ya serivisi",
+        "heroSubtitle": "Amategeko n'ibisabwa byo gukoresha urubuga rwa Ingoboka."
+      }
+    },
+    "about": {
+      "mission": {
+        "title": "Intego yacu",
+        "body": "Kuzanira buri muryango w'u Rwanda ubwishingizi buke bworoshye kandi buciriritse binyuze ku rubuga rwa digitale uwo ari we wese ashobora gukoresha — nta magambo akomeye, nta mbogama."
+      },
+      "vision": {
+        "title": "Icyerekezo cyacu",
+        "body": "U Rwanda aho buri muryango ufite ubwishingizi burumvikana, bwishyurwa ukoresheje Mobile Money kandi bubahirizwa kuri telefoni."
+      },
+      "rwanda": {
+        "title": "Byateguwe ku Rwanda",
+        "body": "Ingoboka yateguwe hashingiwe ku buzima bw'u Rwanda — kwishyura ukoresheje Mobile Money, ubufasha mu Kinyarwanda, abafatanyabikorwa b'ubwishingizi bemewe, n'ibicuruzwa byiciriritse ku bajyejwe n'ubuzima bwa buri munsi."
+      },
+      "values": {
+        "title": "Indangagaciro zacu",
+        "subtitle": "Ingingo zituma dutera imbere ibyo dukora byose.",
+        "clarity": {
+          "title": "Kumvikana",
+          "body": "Ubwishingizi bugomba kuba bworoshye gusobanukirwa. Dukoresha ururimi rusanzwe n'ibiciro byumvikana."
+        },
+        "access": {
+          "title": "Kugera kuri bose",
+          "body": "Ubwishingizi bugomba kuba buciriritse kandi bugera kuri bose, atari abafite gusa konti za banki."
+        },
+        "community": {
+          "title": "Umuryango",
+          "body": "Dukorana n'abakozi n'abafatanyabikorwa mu Rwanda hose kugira ngo tugere ku miryango aho ziba."
+        }
+      }
+    },
+    "contact": {
+      "form": {
+        "name": "Amazina yawe",
+        "email": "Aderesi ya imeyili",
+        "message": "Ubutumwa",
+        "submit": "Ohereza ubutumwa",
+        "success": "Murakoze! Ubutumwa bwawe bwakiriwe. Tuzagusubiza vuba."
+      },
+      "office": {
+        "title": "Ibiro",
+        "address": "Kigali, u Rwanda",
+        "hours": "Kuwa mbere – Kuwa gatanu, 8:00 – 17:00 (CAT)",
+        "note": "Ku bufasha bwihuse ku bwishingizi cyangwa ibyifuzo, injira kuri konti yawe cyangwa utwandikire kuri imeyili."
+      }
+    },
+    "privacy": {
+      "lastUpdated": "Byavuguruwe bwa nyuma: Kamena 2026",
+      "sections": {
+        "intro": {
+          "title": "Intangiriro",
+          "p1": "Ingoboka (\"twe\", \"twebwe\") ikora urubuga rwa digitale rw'ubwishingizi buke mu Rwanda. Iyi Politiki y'ubuzima bwite isobanura uko dukusanya, dukoresha, tubika, kandi turinda amakuru yawe y'umuntu igihe ukoresha urubuga rwacu n'ibikoresho bya telefoni.",
+          "p2": "Ukoresheje Ingoboka, wemera imikorere isobanurwa muri iyi politiki. Turagutera inkunga gusoma neza kandi utwandikire niba ufite ibibazo."
+        },
+        "data": {
+          "title": "Amakuru dukusanya",
+          "p1": "Dukusanya amakuru utanga igihe wiyandikisha no gukoresha serivisi zacu, harimo amazina yawe, numero ya telefoni, imeyili, indangamuntu (aho bisabwa ku bwishingizi), amakuru y'abagize umuryango, amakuru y'ubwishingizi, inyandiko z'ibyifuzo, n'amakuru yo kwishyura binyuze muri Mobile Money.",
+          "p2": "Dukusanya kandi amakuru ya tekiniki nka ubwoko bwa mudasobwa, mushakisha, aderesi ya IP, n'inyandiko z'imikoreshereze kugira ngo urubuga rube rwizewe kandi rinoze."
+        },
+        "law": {
+          "title": "Shingiro ry'amategeko — Itegeko 058/2021",
+          "p1": "Dukoresha amakuru y'umuntu mu buryo buhuje n'itegeko ry'u Rwanda N° 058/2021 rishya ku kurinda amakuru y'umuntu n'ubuzima bwite. Harimo kubona uburenganzira bwawe aho bisabwa, gukoresha amakuru gusa ku ntego zisobanuwe, no kubaha uburenganzira bwawe nk'uwufite amakuru.",
+          "p2": "Amakuru ajyanye n'ubwishingizi ashobora gukorwaho kugira ngo hashyirwe mu bikorwa amasezerano n'abafatanyabikorwa b'ubwishingizi bemewe bemera ibicuruzwa dutanga ku rubuga."
+        },
+        "rights": {
+          "title": "Uburenganzira bwawe",
+          "p1": "Mu mategeko akurikizwa, ufite uburenganzira bwo kugera ku makuru yawe, kuyakosora cyangwa gukuraho, gukuramo uburenganzira, kwivanga ku bikorwa bimwe, no gusaba koherezwa amakuru aho bishoboka mu buryo bwa tekiniki.",
+          "p2": "Kugira ngo ukoreshe izi nshingano, twandikire kuri hello@ingoboka.rw. Tuzasubiza mu gihe cyagenwe n'amategeko."
+        },
+        "security": {
+          "title": "Umutekano",
+          "p1": "Dukoresha ubushobozi bwo gushyiraho ibanga, imigenzo yo kugera ku makuru, n'uburyo bwizewe bwo kurinda amakuru yawe. Nubwo nta sisitemu itagira ibyago, dukomeza gusuzuma imikorere yacu y'umutekano."
+        },
+        "contact": {
+          "title": "Twandikire",
+          "p1": "Ku bibazo bijyanye n'ubuzima bwite, twandikire kuri hello@ingoboka.rw cyangwa uandikire Ingoboka, Kigali, u Rwanda."
+        }
+      }
+    },
+    "terms": {
+      "lastUpdated": "Byavuguruwe bwa nyuma: Kamena 2026",
+      "sections": {
+        "acceptance": {
+          "title": "Kwemera amasezerano",
+          "p1": "Ukoresheje urubuga rwa Ingoboka, wemera aya Masezerano ya Serivisi na Politiki yacu y'ubuzima bwite. Niba utabyemera, nyamuneka ntukoreshe serivisi zacu."
+        },
+        "services": {
+          "title": "Serivisi zacu",
+          "p1": "Ingoboka itanga urubuga rwa digitale rwo gushakisha, kwiyandikisha, no gucunga ibicuruzwa by'ubwishingizi buke byemezwa n'abafatanyabikorwa b'ubwishingizi bemewe mu Rwanda.",
+          "p2": "Turi urubuga rwa tekinoloji — amasezerano y'ubwishingizi ari hagati yawe n'uwatanga ubwishingizi. Amasezerano y'ubwishingizi, ibishingiwe, ibitari mu bwishingizi, n'ibyemezo by'ibyifuzo bigengwa n'inyandiko z'ubwishingizi z'uwatanga ubwishingizi."
+        },
+        "accounts": {
+          "title": "Konti",
+          "p1": "Ugombwa gutanga amakuru y'ukuri igihe wiyandikisha. Ufite inshingano zo kurinda amakuru yawe yo kwinjira no gukora byose kuri konti yawe.",
+          "p2": "Ugombwa kuba ufite nibura imyaka 18 kandi utuye mu Rwanda kugira ngo wiyandikishe, keretse kwiyandikisha nk'umuryango w'undi munyamuryango."
+        },
+        "payments": {
+          "title": "Kwishyura",
+          "p1": "Umusanzu wishyurwa binyuze mu nzira za Mobile Money zemewe. Kutishyura bishobora gutuma ubwishingizi buhagarara ukurikije amasezerano y'ubwishingizi bwawe. Amafaranga yose n'ibiciro byerekanwa mbere yo kwemeza kwiyandikisha."
+        },
+        "claims": {
+          "title": "Ibyifuzo",
+          "p1": "Ibyifuzo byoherejwe binyuze muri Ingoboka byoherezwa ku watanga ubwishingizi ukwiye kugira ngo bisuzumwe. Tugufasha gukurikirana imiterere ariko ntitufata ibyemezo by'ubwishingizi cyangwa by'ibyifuzo."
+        },
+        "liability": {
+          "title": "Imipaka y'inshingano",
+          "p1": "Ingoboka itangwa \"nk'uko iri\" mu rugero rwemewe n'amategeko. Ntabwo dushinzwe ibyemezo by'uwatanga ubwishingizi, guhagarara kwa serivisi biturutse ku bintu tutabasha kugenzura, cyangwa igihombo gituruka ku makuru atari yo watanze."
+        },
+        "changes": {
+          "title": "Impinduka",
+          "p1": "Dushobora guhindura aya masezerano rimwe na rimwe. Gukomeza gukoresha nyuma yo gushyiraho impinduka bivuze ko wabyemera. Impinduka zikomeye zizamenyeshwa binyuze ku rubuga cyangwa kuri imeyili."
+        }
+      }
+    }
   }
 }

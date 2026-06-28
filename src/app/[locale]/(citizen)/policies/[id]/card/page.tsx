@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { usePolicyCard } from '@/hooks/use-policies';
 import { PolicyCardDisplay } from '@/components/citizen/policy-card-display';
 import { CitizenHeader } from '@/components/layout/citizen-header';
+import { PageContainer } from '@/components/layout/page-container';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -21,8 +22,10 @@ export default function PolicyCardPage() {
   return (
     <>
       <CitizenHeader title={t('policyCard')} />
-      <div className="mx-auto flex max-w-lg flex-col items-center px-4 pb-6 pt-4">
-        <PageHeader title={t('policyCard')} backHref="/dashboard" />
+      <PageContainer narrow className="flex flex-col items-center">
+        <div className="w-full">
+          <PageHeader title={t('policyCard')} backHref="/dashboard" />
+        </div>
 
         {isLoading && (
           <div className="flex justify-center py-12">
@@ -40,7 +43,7 @@ export default function PolicyCardPage() {
         )}
 
         {data && <PolicyCardDisplay card={data} />}
-      </div>
+      </PageContainer>
     </>
   );
 }

@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/routing';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { claimApi, policyApi } from '@/lib/api';
 import { CitizenHeader } from '@/components/layout/citizen-header';
+import { PageContainer } from '@/components/layout/page-container';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,19 +23,22 @@ import {
 } from 'lucide-react';
 
 const INCIDENT_TYPES = [
-  { id: 'ACCIDENT', label: 'Accident', icon: Car },
-  { id: 'ILLNESS', label: 'Illness', icon: Stethoscope },
-  { id: 'HOSPITAL', label: 'Hospital visit', icon: HeartPulse },
-  { id: 'OTHER', label: 'Other', icon: AlertTriangle },
+  { id: 'ACCIDENT', labelKey: 'incidentAccident' as const, icon: Car },
+  { id: 'ILLNESS', labelKey: 'incidentIllness' as const, icon: Stethoscope },
+  { id: 'HOSPITAL', labelKey: 'incidentHospital' as const, icon: HeartPulse },
+  { id: 'OTHER', labelKey: 'incidentOther' as const, icon: AlertTriangle },
 ] as const;
 
 export default function NewClaimPage() {
   const router = useRouter();
+  const t = useTranslations('citizen.claims');
+  const tCommon = useTranslations('common');
   const [step, setStep] = useState(1);
   const [policyId, setPolicyId] = useState('');
   const [claimType, setClaimType] = useState('ACCIDENT');
   const [description, setDescription] = useState('');
   const [claimedAmount, setClaimedAmount] = useState('50000');
+  const [files, setFiles] = useState<File[]>([]);
 
   const { data: policies, isLoading } = useQuery({
     queryKey: ['policies'],
@@ -49,20 +54,39 @@ export default function NewClaimPage() {
         incidentDate: new Date().toISOString().slice(0, 10),
         claimedAmount: Number(claimedAmount),
       });
-      await claimApi.submit((created as { id: string }).id);
-      return created;
+      const claimId = (created as { id: string }).id;
+      await claimApi.submit(claimId);
+
+      let uploadFailed = false;
+      if (files.length > 0) {
+        try {
+          await claimApi.uploadDocuments(claimId, files);
+        } catch {
+          uploadFailed = true;
+        }
+      }
+
+      return { uploadFailed };
     },
-    onSuccess: () => router.push('/dashboard'),
+    onSuccess: ({ uploadFailed }) => {
+      router.push(uploadFailed ? '/claims?uploadPartial=1' : '/claims');
+    },
   });
 
   const activePolicies = (policies?.content ?? []).filter((p) => p.status === 'ACTIVE');
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFiles(Array.from(e.target.files));
+    }
+  };
+
   return (
     <>
-      <CitizenHeader title="Claims" />
-      <div className="mx-auto max-w-lg px-4 pb-6 pt-4">
-        <Link href="/dashboard" className="text-sm font-medium text-brand-muted hover:text-brand-primary">
-          ← Back
+      <CitizenHeader title={t('nav')} />
+      <PageContainer narrow>
+        <Link href="/claims" className="text-sm font-medium text-brand-muted hover:text-brand-primary">
+          ← {t('backToClaims')}
         </Link>
 
         <StepIndicator totalSteps={4} currentStep={step} className="my-6" />
@@ -74,11 +98,11 @@ export default function NewClaimPage() {
             {step === 1 && (
               <section className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-brand-primary-dark">What happened?</h2>
-                  <p className="text-sm text-brand-muted">Select the type of incident you want to report.</p>
+                  <h2 className="text-xl font-semibold text-brand-primary-dark">{t('step1Title')}</h2>
+                  <p className="text-sm text-brand-muted">{t('step1Subtitle')}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {INCIDENT_TYPES.map(({ id, label, icon: Icon }) => (
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                  {INCIDENT_TYPES.map(({ id, labelKey, icon: Icon }) => (
                     <button
                       key={id}
                       type="button"
@@ -91,12 +115,12 @@ export default function NewClaimPage() {
                       )}
                     >
                       <Icon className="h-8 w-8 text-brand-primary" />
-                      <span className="text-sm font-semibold">{label}</span>
+                      <span className="text-sm font-semibold">{t(labelKey)}</span>
                     </button>
                   ))}
                 </div>
                 <Button className="w-full" variant="pill" onClick={() => setStep(2)}>
-                  Continue
+                  {tCommon('continue')}
                 </Button>
               </section>
             )}
@@ -104,8 +128,8 @@ export default function NewClaimPage() {
             {step === 2 && (
               <section className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-brand-primary-dark">Select policy</h2>
-                  <p className="text-sm text-brand-muted">Choose the active policy for this claim.</p>
+                  <h2 className="text-xl font-semibold text-brand-primary-dark">{t('step2Title')}</h2>
+                  <p className="text-sm text-brand-muted">{t('step2Subtitle')}</p>
                 </div>
                 <div className="space-y-2">
                   {activePolicies.map((p) => (
@@ -126,7 +150,7 @@ export default function NewClaimPage() {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1" onClick={() => setStep(1)}>
-                    Back
+                    {tCommon('back')}
                   </Button>
                   <Button
                     className="flex-1"
@@ -134,7 +158,7 @@ export default function NewClaimPage() {
                     disabled={!policyId}
                     onClick={() => setStep(3)}
                   >
-                    Continue
+                    {tCommon('continue')}
                   </Button>
                 </div>
               </section>
@@ -143,22 +167,22 @@ export default function NewClaimPage() {
             {step === 3 && (
               <section className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-brand-primary-dark">Describe the incident</h2>
-                  <p className="text-sm text-brand-muted">Provide details to help process your claim.</p>
+                  <h2 className="text-xl font-semibold text-brand-primary-dark">{t('step3Title')}</h2>
+                  <p className="text-sm text-brand-muted">{t('step3Subtitle')}</p>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">{t('descriptionLabel')}</Label>
                   <textarea
                     id="description"
                     className="w-full rounded-lg border border-brand-border bg-white px-3 py-2 text-sm focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
                     rows={4}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="What happened and when?"
+                    placeholder={t('descriptionPlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="amount">Claimed amount (RWF)</Label>
+                  <Label htmlFor="amount">{t('amountInputLabel')}</Label>
                   <Input
                     id="amount"
                     type="number"
@@ -166,9 +190,25 @@ export default function NewClaimPage() {
                     onChange={(e) => setClaimedAmount(e.target.value)}
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="documents">{t('uploadLabel')}</Label>
+                  <Input
+                    id="documents"
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleFileChange}
+                  />
+                  <p className="text-xs text-brand-muted">{t('uploadHint')}</p>
+                  {files.length > 0 && (
+                    <p className="text-xs text-brand-primary">
+                      {t('filesSelected', { count: files.length })}
+                    </p>
+                  )}
+                </div>
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1" onClick={() => setStep(2)}>
-                    Back
+                    {tCommon('back')}
                   </Button>
                   <Button
                     className="flex-1"
@@ -176,7 +216,7 @@ export default function NewClaimPage() {
                     disabled={!description}
                     onClick={() => setStep(4)}
                   >
-                    Review
+                    {t('review')}
                   </Button>
                 </div>
               </section>
@@ -185,31 +225,37 @@ export default function NewClaimPage() {
             {step === 4 && (
               <section className="space-y-4">
                 <div>
-                  <h2 className="text-xl font-semibold text-brand-primary-dark">Review &amp; submit</h2>
-                  <p className="text-sm text-brand-muted">Confirm your claim details before submitting.</p>
+                  <h2 className="text-xl font-semibold text-brand-primary-dark">{t('step4Title')}</h2>
+                  <p className="text-sm text-brand-muted">{t('step4Subtitle')}</p>
                 </div>
                 <Card>
                   <CardContent className="space-y-2 p-4 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-brand-muted">Type</span>
+                      <span className="text-brand-muted">{t('typeLabel')}</span>
                       <span className="font-medium">{claimType}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-brand-muted">Policy</span>
+                      <span className="text-brand-muted">{t('policyLabel')}</span>
                       <span className="font-medium">
                         {activePolicies.find((p) => p.id === policyId)?.policyNumber}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-brand-muted">Amount</span>
+                      <span className="text-brand-muted">{t('amountLabel')}</span>
                       <span className="font-medium">{Number(claimedAmount).toLocaleString()} RWF</span>
                     </div>
+                    {files.length > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-brand-muted">{t('uploadLabel')}</span>
+                        <span className="font-medium">{t('filesSelected', { count: files.length })}</span>
+                      </div>
+                    )}
                     <p className="border-t border-brand-border pt-2 text-brand-muted">{description}</p>
                   </CardContent>
                 </Card>
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1" onClick={() => setStep(3)}>
-                    Back
+                    {tCommon('back')}
                   </Button>
                   <Button
                     className="flex-1"
@@ -218,14 +264,14 @@ export default function NewClaimPage() {
                     loading={mutation.isPending}
                     onClick={() => mutation.mutate()}
                   >
-                    Submit claim
+                    {t('submitClaim')}
                   </Button>
                 </div>
               </section>
             )}
           </div>
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }

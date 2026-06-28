@@ -1,4 +1,4 @@
-{
+﻿{
   "common": {
     "appName": "Ingoboka",
     "loading": "Loading...",
@@ -39,8 +39,7 @@
     "resendCodeSuccess": "A new code was sent.",
     "registerEmailMode": "We'll send a 6-digit code to your email. You'll sign in with your phone number.",
     "registerSmsMode": "We'll send a 6-digit code to your phone by SMS.",
-    "registerEmailHint": "Use a real email you can access. In local dev, open Mailhog at localhost:8025.",
-    "mailhogHint": "Local dev: OTP emails are not sent to your real inbox. Open your test inbox at",
+    "registerEmailHint": "Use an email you can access — we'll send your verification code there.",
     "phoneLoginHint": "Your phone number is your login ID after verification.",
     "emailLoginHint": "Sign in with the email address linked to your account.",
     "loginMethod": "Sign in with",
@@ -52,7 +51,6 @@
     "optional": "optional",
     "verifyCodeToEmail": "Enter the code we sent to {email}",
     "verifyEmailWithPhoneLogin": "Code sent to your email. After verifying, log in with phone {phone}.",
-    "otpLogModeWarning": "Development mode: the OTP is written to API server logs only (no email/SMS).",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "loginSubtitle": "Access your policy wallet",
@@ -84,7 +82,48 @@
     "validUntil": "Valid until",
     "scanQr": "Scan to verify",
     "home": "Home",
-    "claims": "Claims",
+    "claims": {
+      "nav": "Claims",
+      "title": "My claims",
+      "subtitle": "Track and manage your insurance claims",
+      "newClaim": "New claim",
+      "noClaims": "No claims yet",
+      "emptyHint": "File a new claim when you need to report an incident covered by your policy.",
+      "backToClaims": "Back to claims",
+      "detailTitle": "Claim status",
+      "policyLabel": "Policy",
+      "amountLabel": "Amount",
+      "submittedLabel": "Submitted",
+      "timelineTitle": "Status timeline",
+      "infoRequested": "Information requested",
+      "appealTitle": "Appeal this decision",
+      "appealReason": "Reason for appeal",
+      "appealReasonPlaceholder": "Explain why you believe this claim should be reconsidered…",
+      "appealSubmit": "Submit appeal",
+      "appealSuccess": "Your appeal has been submitted and will be reviewed.",
+      "uploadLabel": "Supporting documents (optional)",
+      "uploadHint": "Upload receipts, photos, or other evidence (PDF, JPG, PNG)",
+      "uploadPartialSuccess": "Claim submitted successfully. Some documents could not be uploaded — you can add them later from the claim details.",
+      "filesSelected": "{count, plural, one {# file selected} other {# files selected}}",
+      "step1Title": "What happened?",
+      "step1Subtitle": "Select the type of incident you want to report.",
+      "step2Title": "Select policy",
+      "step2Subtitle": "Choose the active policy for this claim.",
+      "step3Title": "Describe the incident",
+      "step3Subtitle": "Provide details to help process your claim.",
+      "step4Title": "Review & submit",
+      "step4Subtitle": "Confirm your claim details before submitting.",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "What happened and when?",
+      "amountInputLabel": "Claimed amount (RWF)",
+      "review": "Review",
+      "submitClaim": "Submit claim",
+      "typeLabel": "Type",
+      "incidentAccident": "Accident",
+      "incidentIllness": "Illness",
+      "incidentHospital": "Hospital visit",
+      "incidentOther": "Other"
+    },
     "profile": "Profile",
     "dependants": "Dependants"
   },
@@ -117,7 +156,15 @@
     "invoices": "Invoices",
     "revenueLedger": "Revenue ledger",
     "activePolicies": "Active policies",
-    "enrolledCitizens": "Enrolled citizens"
+    "enrolledCitizens": "Enrolled citizens",
+    "greeting": "Muraho, Insurer Partner",
+    "portfolioSummary": "Here is your portfolio summary for today.",
+    "trendThisMonth": "+12% this month",
+    "resolvedTodayTrend": "{count} resolved today",
+    "onTrack": "On track",
+    "avgProcessing": "Avg. processing",
+    "pendingCount": "{count} pending",
+    "noClaimsInQueue": "No claims in the queue."
   },
   "admin": {
     "dashboard": "Platform admin",
@@ -136,6 +183,12 @@
     "productPlan": "Product plan ID",
     "createApplication": "Start application"
   },
+  "error": {
+    "title": "Something went wrong",
+    "message": "An unexpected error occurred. Please try again.",
+    "retry": "Try again",
+    "goHome": "Go home"
+  },
   "verify": {
     "title": "Policy verification",
     "valid": "This policy is valid",
@@ -152,15 +205,323 @@
     "dashboard": "Dashboard"
   },
   "landing": {
-    "taglineRw": "Simple, understandable insurance for everyone",
-    "taglineEn": "Ubwishingizi bworoshye, bwumvikana kandi bugera kuri bose",
+    "tagline": "Simple, understandable insurance for everyone",
     "getStarted": "Get Started",
-    "skip": "Skip",
+    "skip": "Log in",
+    "login": "Log in",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
     "onboardingSlide1Title": "Understand your cover",
     "onboardingSlide1Body": "Know your insurance in simple terms, without complicated jargon.",
     "onboardingSlide2Title": "Protect your family",
     "onboardingSlide2Body": "Affordable microinsurance designed for Rwanda's communities.",
     "onboardingSlide3Title": "Claims made easy",
-    "onboardingSlide3Body": "Submit and track claims from your phone in minutes."
+    "onboardingSlide3Body": "Submit and track claims from your phone in minutes.",
+    "nav": {
+      "home": "Home",
+      "features": "Features",
+      "howItWorks": "How it works",
+      "plans": "Plans",
+      "about": "About",
+      "faq": "FAQ",
+      "contact": "Contact",
+      "products": "Products"
+    },
+    "hero": {
+      "headline": "Microinsurance made simple for Rwanda",
+      "subheadline": "Affordable cover you can understand, buy on your phone, and claim in days — built for families and communities across Rwanda.",
+      "statAffordable": "From RWF 500/month",
+      "statClaims": "Claims in 48h",
+      "statDigital": "100% digital"
+    },
+    "features": {
+      "title": "Why Ingoboka",
+      "subtitle": "Insurance that fits your life — clear, affordable, and always within reach.",
+      "understandCover": {
+        "title": "Understand your cover",
+        "body": "Plain-language policies so you always know what is included and what is not."
+      },
+      "protectFamily": {
+        "title": "Protect your family",
+        "body": "Add dependants and choose plans designed for Rwandan households and communities."
+      },
+      "mobileMoney": {
+        "title": "Pay with Mobile Money",
+        "body": "Pay premiums with MTN MoMo or Airtel Money — no bank account required."
+      },
+      "easyClaims": {
+        "title": "Easy claims",
+        "body": "Submit claims from your phone, upload documents, and track status in real time."
+      },
+      "digitalWallet": {
+        "title": "Digital policy wallet",
+        "body": "Keep all your policies in one place with QR verification cards you can show anywhere."
+      },
+      "localSupport": {
+        "title": "Local support",
+        "body": "Get help in Kinyarwanda or English from our team and field agents across Rwanda."
+      }
+    },
+    "howItWorks": {
+      "title": "How it works",
+      "subtitle": "Get covered in four simple steps — most people finish in under 10 minutes.",
+      "stepLabel": "Step {step}",
+      "step1Title": "Register",
+      "step1Body": "Create your account with your phone number or email.",
+      "step2Title": "Choose a plan",
+      "step2Body": "Browse microinsurance products and pick the cover that fits your needs.",
+      "step3Title": "Pay premium",
+      "step3Body": "Pay monthly via Mobile Money — affordable premiums from RWF 500.",
+      "step4Title": "You're covered",
+      "step4Body": "Receive your digital policy card and file claims anytime from your wallet."
+    },
+    "products": {
+      "title": "Popular plans",
+      "subtitle": "Starter microinsurance products — enroll after creating your free account.",
+      "fromPrice": "From {price}/month",
+      "personalAccident": {
+        "name": "Personal Accident Micro",
+        "description": "Accidental death and disability cover for individuals — ideal for daily workers and self-employed.",
+        "price": "RWF 500"
+      },
+      "familyHealth": {
+        "name": "Family Health Guard",
+        "description": "Outpatient and hospital cash benefits for you and up to four dependants.",
+        "price": "RWF 2,500"
+      },
+      "funeralCover": {
+        "name": "Funeral Cover Basic",
+        "description": "Lump-sum funeral benefit to support your family during difficult times.",
+        "price": "RWF 1,000"
+      },
+      "enrollCta": "Get started"
+    },
+    "trust": {
+      "title": "Trust & compliance",
+      "subtitle": "Your data and payments are handled with care.",
+      "dataProtection": {
+        "title": "Data protection",
+        "body": "We process personal data in line with Rwanda Law No. 058/2021 on personal data protection and privacy. You control your consent and can review our privacy policy at registration."
+      },
+      "licensedPartners": {
+        "title": "Licensed partner insurers",
+        "body": "Products are underwritten by licensed insurance partners in Rwanda, with clear policy terms you can read before you enroll."
+      },
+      "securePayments": {
+        "title": "Secure payments",
+        "body": "Premiums are collected through trusted Mobile Money channels. Your policy wallet and verification QR codes work without exposing sensitive personal data publicly."
+      },
+      "verifyPolicy": "Verify a policy via the QR code on your digital policy card."
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "subtitle": "Quick answers about microinsurance on Ingoboka.",
+      "q1": "What is microinsurance?",
+      "a1": "Microinsurance offers affordable, simple cover with low premiums and clear benefits — designed for people who may not have traditional insurance. Ingoboka brings these products to your phone.",
+      "q2": "How do I pay?",
+      "a2": "After choosing a plan, pay your monthly premium with MTN MoMo or Airtel Money directly from the app. No bank account is required.",
+      "q3": "How do I claim?",
+      "a3": "Open your policy in the app, tap New claim, describe what happened, and upload any required documents. You can track review status from your dashboard.",
+      "q4": "Is my data safe?",
+      "a4": "Yes. We follow Rwanda's data protection law, use secure connections, and only collect what is needed to provide insurance services. You give explicit consent during registration.",
+      "q5": "Who can enroll?",
+      "a5": "Rwandan residents aged 18 and over can register. Some products allow adding dependants such as children or spouses. Agents can also help enroll clients in the field.",
+      "q6": "Can I add family members?",
+      "a6": "Yes. Many plans let you add dependants such as children and spouses. You manage dependants from your citizen dashboard after enrolling.",
+      "q7": "What if I miss a premium payment?",
+      "a7": "We send reminders before your due date. If a payment is missed, your policy may enter a grace period. Check your policy terms or contact support for help catching up.",
+      "q8": "How do I verify a policy?",
+      "a8": "Each digital policy card includes a QR code. Anyone can scan it to confirm the policy is valid without seeing personal details."
+    },
+    "cta": {
+      "title": "Ready to get covered?",
+      "subtitle": "Create your free account and choose a plan in minutes.",
+      "button": "Get Started"
+    },
+    "footer": {
+      "tagline": "Digital microinsurance for Rwanda",
+      "company": "Company",
+      "product": "Product",
+      "legal": "Legal",
+      "support": "Support",
+      "careers": "Careers (coming soon)",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "lawMention": "Aligned with Rwanda Law No. 058/2021 on personal data protection.",
+      "social": "Follow us",
+      "login": "Log in",
+      "register": "Register",
+      "verifyPolicy": "Verify policy",
+      "contact": "Contact",
+      "contactEmail": "hello@ingoboka.rw",
+      "copyright": "© {year} Ingoboka. All rights reserved."
+    },
+    "home": {
+      "highlights": {
+        "title": "Explore Ingoboka",
+        "subtitle": "Learn how we make microinsurance simple, affordable, and accessible across Rwanda.",
+        "learnMore": "Learn more",
+        "viewPlans": "View plans",
+        "features": {
+          "title": "Why choose us",
+          "body": "Plain-language policies, Mobile Money payments, and a digital wallet — built for everyday Rwandans."
+        },
+        "howItWorks": {
+          "title": "Get covered fast",
+          "body": "Register, pick a plan, pay via MoMo, and receive your digital policy card in minutes."
+        },
+        "plans": {
+          "title": "Affordable plans",
+          "body": "Personal accident, family health, and funeral cover starting from RWF 500 per month."
+        }
+      }
+    },
+    "pages": {
+      "features": {
+        "heroTitle": "Features built for Rwanda",
+        "heroSubtitle": "Everything you need to understand, buy, and use microinsurance from your phone."
+      },
+      "howItWorks": {
+        "heroTitle": "How Ingoboka works",
+        "heroSubtitle": "From sign-up to your first claim — a simple journey in four steps."
+      },
+      "plans": {
+        "heroTitle": "Insurance plans",
+        "heroSubtitle": "Starter microinsurance products with clear benefits and affordable monthly premiums."
+      },
+      "about": {
+        "heroTitle": "About Ingoboka",
+        "heroSubtitle": "Making insurance understandable and accessible for every Rwandan family."
+      },
+      "faq": {
+        "heroTitle": "Help centre",
+        "heroSubtitle": "Answers to common questions about microinsurance on Ingoboka."
+      },
+      "contact": {
+        "heroTitle": "Contact us",
+        "heroSubtitle": "We're here to help — reach out with questions about products, claims, or your account."
+      },
+      "privacy": {
+        "heroTitle": "Privacy Policy",
+        "heroSubtitle": "How we collect, use, and protect your personal data."
+      },
+      "terms": {
+        "heroTitle": "Terms of Service",
+        "heroSubtitle": "The rules and conditions for using the Ingoboka platform."
+      }
+    },
+    "about": {
+      "mission": {
+        "title": "Our mission",
+        "body": "To bring simple, affordable microinsurance to every Rwandan household through a digital platform anyone can use — no jargon, no barriers."
+      },
+      "vision": {
+        "title": "Our vision",
+        "body": "A Rwanda where every family has access to understandable insurance cover, paid for with Mobile Money and managed from a phone."
+      },
+      "rwanda": {
+        "title": "Built for Rwanda",
+        "body": "Ingoboka is designed around the realities of Rwandan life — Mobile Money payments, Kinyarwanda support, licensed local insurer partners, and products priced for everyday budgets."
+      },
+      "values": {
+        "title": "Our values",
+        "subtitle": "The principles that guide everything we build.",
+        "clarity": {
+          "title": "Clarity",
+          "body": "Insurance should be easy to understand. We use plain language and transparent pricing."
+        },
+        "access": {
+          "title": "Access",
+          "body": "Cover should be affordable and available to everyone, not just those with bank accounts."
+        },
+        "community": {
+          "title": "Community",
+          "body": "We work with agents and partners across Rwanda to reach families where they are."
+        }
+      }
+    },
+    "contact": {
+      "form": {
+        "name": "Your name",
+        "email": "Email address",
+        "message": "Message",
+        "submit": "Send message",
+        "success": "Thank you! Your message has been received. We'll get back to you soon."
+      },
+      "office": {
+        "title": "Office",
+        "address": "Kigali, Rwanda",
+        "hours": "Monday – Friday, 8:00 AM – 5:00 PM (CAT)",
+        "note": "For urgent policy or claims support, log in to your account or email us directly."
+      }
+    },
+    "privacy": {
+      "lastUpdated": "Last updated: June 2026",
+      "sections": {
+        "intro": {
+          "title": "Introduction",
+          "p1": "Ingoboka (\"we\", \"us\") operates a digital microinsurance platform in Rwanda. This Privacy Policy explains how we collect, use, store, and protect your personal data when you use our website and mobile services.",
+          "p2": "By using Ingoboka, you agree to the practices described in this policy. We encourage you to read it carefully and contact us if you have questions."
+        },
+        "data": {
+          "title": "Data we collect",
+          "p1": "We collect information you provide during registration and use of our services, including your name, phone number, email address, national ID (where required for insurance), dependant details, policy information, claim documents, and payment records via Mobile Money.",
+          "p2": "We also collect technical data such as device type, browser, IP address, and usage logs to keep the platform secure and improve our services."
+        },
+        "law": {
+          "title": "Legal basis — Law 058/2021",
+          "p1": "We process personal data in accordance with Rwanda Law No. 058/2021 relating to the protection of personal data and privacy. This includes obtaining your explicit consent where required, processing data only for specified purposes, and respecting your rights as a data subject.",
+          "p2": "Insurance-related data may also be processed to fulfil contractual obligations with licensed insurer partners who underwrite the products offered on our platform."
+        },
+        "rights": {
+          "title": "Your rights",
+          "p1": "Under applicable law, you have the right to access, correct, or delete your personal data, withdraw consent, object to certain processing, and request data portability where technically feasible.",
+          "p2": "To exercise these rights, contact us at hello@ingoboka.rw. We will respond within the timeframe required by law."
+        },
+        "security": {
+          "title": "Security",
+          "p1": "We use encryption, access controls, and secure infrastructure to protect your data. While no system is completely immune to risk, we continuously review our security practices."
+        },
+        "contact": {
+          "title": "Contact",
+          "p1": "For privacy-related enquiries, email hello@ingoboka.rw or write to Ingoboka, Kigali, Rwanda."
+        }
+      }
+    },
+    "terms": {
+      "lastUpdated": "Last updated: June 2026",
+      "sections": {
+        "acceptance": {
+          "title": "Acceptance of terms",
+          "p1": "By accessing or using the Ingoboka platform, you agree to these Terms of Service and our Privacy Policy. If you do not agree, please do not use our services."
+        },
+        "services": {
+          "title": "Our services",
+          "p1": "Ingoboka provides a digital platform to browse, enroll in, and manage microinsurance products offered by licensed insurance partners in Rwanda.",
+          "p2": "We are a technology platform — the insurance contract is between you and the underwriting insurer. Policy terms, coverage, exclusions, and claims decisions are governed by the insurer's policy documents."
+        },
+        "accounts": {
+          "title": "Accounts",
+          "p1": "You must provide accurate information when registering. You are responsible for keeping your login credentials secure and for all activity on your account.",
+          "p2": "You must be at least 18 years old and a resident of Rwanda to register, unless enrolling as a dependant on another member's policy."
+        },
+        "payments": {
+          "title": "Payments",
+          "p1": "Premiums are paid via approved Mobile Money channels. Failure to pay may result in lapse of cover according to your policy terms. All fees and pricing are shown before you confirm enrollment."
+        },
+        "claims": {
+          "title": "Claims",
+          "p1": "Claims submitted through Ingoboka are forwarded to the relevant insurer for assessment. We help you track status but do not make underwriting or claims decisions."
+        },
+        "liability": {
+          "title": "Limitation of liability",
+          "p1": "Ingoboka is provided \"as is\" to the extent permitted by law. We are not liable for insurer decisions, service interruptions beyond our control, or losses arising from inaccurate information you provide."
+        },
+        "changes": {
+          "title": "Changes",
+          "p1": "We may update these terms from time to time. Continued use after changes are posted constitutes acceptance. Material changes will be communicated via the platform or email."
+        }
+      }
+    }
   }
 }

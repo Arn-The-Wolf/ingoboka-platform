@@ -65,3 +65,5 @@ frontend-auth-without-sms.md
 frontend-user-management-and-onboarding.md
 Untitled
 .cache/
+.tmp-api/
+.tmp-api/

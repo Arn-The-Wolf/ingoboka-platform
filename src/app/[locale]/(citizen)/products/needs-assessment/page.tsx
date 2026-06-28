@@ -17,6 +17,7 @@ import { Link } from '@/i18n/routing';
 import { enrollmentApi } from '@/lib/api';
 import { setRecommendedProductIds } from '@/lib/recommended-products';
 import { CitizenHeader } from '@/components/layout/citizen-header';
+import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
@@ -146,7 +147,7 @@ export default function NeedsAssessmentPage() {
     return (
       <>
         <CitizenHeader title="Needs Assessment" />
-        <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-16 text-center">
+        <PageContainer narrow className="flex flex-col items-center py-16 text-center">
           <div className="relative mb-8 h-32 w-32">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="h-20 w-20 animate-spin rounded-full border-4 border-brand-primary border-t-transparent" />
@@ -178,7 +179,7 @@ export default function NeedsAssessmentPage() {
             </>
           )}
           {assessmentMutation.isPending && <Spinner className="mt-6" />}
-        </div>
+        </PageContainer>
       </>
     );
   }
@@ -186,7 +187,7 @@ export default function NeedsAssessmentPage() {
   return (
     <>
       <CitizenHeader title="Needs Assessment" />
-      <div className="mx-auto flex min-h-[calc(100vh-8rem)] max-w-lg flex-col px-4 pb-28 pt-4">
+      <PageContainer narrow className="flex min-h-[calc(100vh-8rem)] flex-col pb-28">
         <Link href="/products" className="mb-4 text-sm font-medium text-brand-primary hover:underline">
           ← Back to products
         </Link>
@@ -245,10 +246,10 @@ export default function NeedsAssessmentPage() {
             })}
           </div>
         </div>
-      </div>
+      </PageContainer>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-30 border-t border-brand-border bg-brand-surface-container-low px-4 py-4">
-        <div className="mx-auto flex max-w-lg gap-3">
+      <footer className="fixed bottom-0 left-0 right-0 z-30 border-t border-brand-border bg-brand-surface-container-low px-4 py-4 lg:static lg:border-t-0 lg:bg-transparent lg:px-0 lg:py-0">
+        <div className="mx-auto flex max-w-3xl gap-3">
           <Button variant="outline" className="flex-1 rounded-full" onClick={handleSkip}>
             Skip for now
           </Button>
@@ -256,6 +257,7 @@ export default function NeedsAssessmentPage() {
             variant="pill-accent"
             className="flex-1 gap-1 rounded-full"
             disabled={!selected}
+            loading={assessmentMutation.isPending}
             onClick={handleNext}
           >
             {step === QUESTIONS.length - 1 ? 'See results' : 'Continue'}

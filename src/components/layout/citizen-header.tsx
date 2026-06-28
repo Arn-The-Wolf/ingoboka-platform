@@ -1,6 +1,5 @@
 'use client';
 
-import { Menu } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { LocaleSwitcher } from './locale-switcher';
 
@@ -9,29 +8,22 @@ interface CitizenHeaderProps {
   subtitle?: string;
 }
 
-/** Top app bar — matches policy_wallet_dashboard / product_catalog design. */
+/** Top app bar for citizen portal — full-width web header. */
 export function CitizenHeader({ title, subtitle }: CitizenHeaderProps) {
   const t = useTranslations('common');
 
   return (
-    <header className="sticky top-0 z-40 border-b border-brand-border/40 bg-brand-background">
-      <div className="mx-auto flex h-16 max-w-lg items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="rounded-full p-2 text-brand-primary transition-colors hover:bg-brand-surface-container-low"
-            aria-label="Menu"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-lg font-bold text-brand-primary">{t('appName')}</h1>
-            {(title !== t('appName') || subtitle) && (
-              <p className="text-xs text-brand-muted">{subtitle ?? title}</p>
-            )}
-          </div>
+    <header className="sticky top-0 z-40 border-b border-brand-border/40 bg-white/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 lg:px-8">
+        <div>
+          <h1 className="text-xl font-bold text-brand-primary-dark lg:text-2xl">
+            {title === t('appName') ? title : title}
+          </h1>
+          {subtitle && <p className="text-sm text-brand-muted">{subtitle}</p>}
         </div>
-        <LocaleSwitcher />
+        <div className="lg:hidden">
+          <LocaleSwitcher />
+        </div>
       </div>
     </header>
   );

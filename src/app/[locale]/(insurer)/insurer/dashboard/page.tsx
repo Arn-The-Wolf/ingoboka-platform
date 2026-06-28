@@ -22,8 +22,8 @@ export default function InsurerDashboardPage() {
   return (
     <div className="p-6 lg:p-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-primary-dark">Muraho, Insurer Partner</h1>
-        <p className="text-brand-muted">Here is your portfolio summary for today.</p>
+        <h1 className="text-2xl font-bold text-brand-primary-dark">{t('greeting')}</h1>
+        <p className="text-brand-muted">{t('portfolioSummary')}</p>
       </header>
 
       {statsLoading ? (
@@ -36,28 +36,28 @@ export default function InsurerDashboardPage() {
             <InsurerStatCard
               icon={ShieldCheck}
               label={t('activePolicies')}
-              value={stats.openClaims + 120}
-              trend="+12% this month"
+              value={stats.activePolicies ?? stats.openClaims}
+              trend={t('trendThisMonth')}
               trendUp
             />
             <InsurerStatCard
               icon={FileText}
               label={t('openClaims')}
               value={stats.openClaims}
-              trend={`${stats.resolvedToday} resolved today`}
+              trend={t('resolvedTodayTrend', { count: stats.resolvedToday })}
             />
             <InsurerStatCard
               icon={TrendingUp}
               label={t('resolvedToday')}
               value={stats.resolvedToday}
-              trend="On track"
+              trend={t('onTrack')}
               trendUp
             />
             <InsurerStatCard
               icon={Clock}
               label={t('avgResolution')}
               value={`${stats.avgResolutionDays}d`}
-              trend="Avg. processing"
+              trend={t('avgProcessing')}
             />
           </div>
           <div className="mb-8">
@@ -68,7 +68,9 @@ export default function InsurerDashboardPage() {
 
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-brand-primary-dark">{t('claimsQueue')}</h2>
-        <span className="text-sm font-semibold text-brand-primary">{claims.length} pending</span>
+        <span className="text-sm font-semibold text-brand-primary">
+          {t('pendingCount', { count: claims.length })}
+        </span>
       </div>
 
       {isLoading && (
@@ -93,7 +95,7 @@ export default function InsurerDashboardPage() {
       </div>
 
       {!isLoading && claims.length === 0 && (
-        <p className="py-8 text-center text-sm text-brand-muted">No claims in the queue.</p>
+        <p className="py-8 text-center text-sm text-brand-muted">{t('noClaimsInQueue')}</p>
       )}
     </div>
   );

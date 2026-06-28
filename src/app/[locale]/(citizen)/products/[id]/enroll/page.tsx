@@ -8,6 +8,7 @@ import { CheckCircle2, CreditCard, Smartphone } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { enrollmentApi, paymentApi, productApi } from '@/lib/api';
 import { CitizenHeader } from '@/components/layout/citizen-header';
+import { PageContainer } from '@/components/layout/page-container';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -48,7 +49,7 @@ export default function EnrollPage() {
     mutationFn: async () => {
       setPaymentStatus('pending');
       await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:9090/api/v1'}/payments/sandbox/callback`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api/v1'}/payments/sandbox/callback`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -82,7 +83,7 @@ export default function EnrollPage() {
   return (
     <>
       <CitizenHeader title={product.name} />
-      <div className="mx-auto max-w-lg px-4 pb-6 pt-4">
+      <PageContainer narrow>
         <Link href="/products" className="text-sm font-medium text-brand-primary hover:underline">
           ← Back to products
         </Link>
@@ -212,7 +213,7 @@ export default function EnrollPage() {
             <p className="mt-2 text-sm text-brand-muted">Redirecting to your policy wallet…</p>
           </div>
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }

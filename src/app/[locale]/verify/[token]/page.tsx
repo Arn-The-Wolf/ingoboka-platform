@@ -30,7 +30,7 @@ export default function PublicVerifyPage() {
         <LocaleSwitcher />
       </header>
 
-      <main className="mx-auto w-full max-w-md flex-1 px-4 py-8">
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 lg:px-8">
         <h1 className="mb-2 text-center text-xl font-bold">{t('title')}</h1>
         <p className="mb-8 text-center text-sm text-brand-muted">{t('noPii')}</p>
 

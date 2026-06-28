@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
 import { OtpPinInput } from '@/components/ui/otp-pin-input';
 import { AuthBackButton } from '@/components/layout/auth-back-button';
-import { MailhogInboxHint } from '@/components/auth/mailhog-inbox-hint';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import { useResendOtp, useVerifyOtp } from '@/hooks/use-auth';
 import { useOtpDeliveryConfig } from '@/hooks/use-otp-config';
@@ -29,7 +28,6 @@ export default function VerifyPage() {
   const { data: otpConfig } = useOtpDeliveryConfig();
 
   const isEmailMode = otpConfig?.deliveryChannel === 'EMAIL' || otpConfig?.requiresEmail;
-  const isLogMode = otpConfig?.deliveryChannel === 'LOG';
 
   const {
     control,
@@ -92,8 +90,6 @@ export default function VerifyPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {error && <Alert variant="error">{error.message}</Alert>}
-        {isLogMode && <Alert variant="warning">{t('otpLogModeWarning')}</Alert>}
-        <MailhogInboxHint />
         {resend.isSuccess && (
           <Alert variant="success">
             {isEmailMode ? t('resendCodeToEmailSuccess') : t('resendCodeSuccess')}

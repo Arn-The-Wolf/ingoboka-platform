@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { LoadingLink } from '@/components/navigation/loading-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
@@ -134,9 +134,9 @@ export default function LoginPage() {
       </form>
       <p className="text-center text-sm text-brand-muted">
         {t('noAccount')}{' '}
-        <Link href="/register" className="font-bold text-brand-primary hover:underline">
+        <LoadingLink href="/register" className="font-bold text-brand-primary hover:underline">
           {t('register')}
-        </Link>
+        </LoadingLink>
       </p>
     </div>
   );

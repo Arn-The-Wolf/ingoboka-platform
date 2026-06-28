@@ -143,6 +143,7 @@ export interface ClaimDecisionRequest {
 
 export interface InsurerStats {
   openClaims: number;
+  activePolicies?: number;
   resolvedToday: number;
   avgResolutionDays: number;
   claimsByStatus: { status: string; count: number }[];

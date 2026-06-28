@@ -1,12 +1,31 @@
-/** Normalize Rwanda MSISDN to 07XXXXXXXX (matches backend storage). */
+/**
+ * Normalize Rwanda MSISDN for Rodin API (stored as E.164: +2507XXXXXXXX).
+ * UI may show 0780000001 with a +250 prefix; login must send +250780000001.
+ */
 export function normalizeCitizenPhone(phone: string): string {
   const trimmed = phone.trim();
-  if (trimmed.startsWith('+250')) {
-    return `0${trimmed.slice(4)}`;
+  if (!trimmed || trimmed.includes('@')) {
+    return trimmed;
   }
-  if (trimmed.startsWith('250') && trimmed.length >= 12) {
-    return `0${trimmed.slice(3)}`;
+
+  const digits = trimmed.replace(/\D/g, '');
+
+  if (digits.startsWith('250') && digits.length >= 12) {
+    return `+${digits.slice(0, 12)}`;
   }
+
+  if (digits.startsWith('0') && digits.length >= 10) {
+    return `+250${digits.slice(1, 10)}`;
+  }
+
+  if (digits.length === 9 && digits.startsWith('7')) {
+    return `+250${digits}`;
+  }
+
+  if (trimmed.startsWith('+')) {
+    return trimmed;
+  }
+
   return trimmed;
 }
 

@@ -5,14 +5,13 @@ import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
+import { LoadingLink } from '@/components/navigation/loading-link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
 import { AuthBackButton } from '@/components/layout/auth-back-button';
-import { MailhogInboxHint } from '@/components/auth/mailhog-inbox-hint';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import { useRegister } from '@/hooks/use-auth';
 import { useOtpDeliveryConfig } from '@/hooks/use-otp-config';
@@ -24,7 +23,6 @@ export default function RegisterPage() {
   const registerMutation = useRegister();
   const { data: otpConfig } = useOtpDeliveryConfig();
   const requiresEmail = otpConfig?.requiresEmail ?? true;
-  const isLogMode = otpConfig?.deliveryChannel === 'LOG';
   const isEmailMode = otpConfig?.deliveryChannel === 'EMAIL' || requiresEmail;
 
   const schema = useMemo(() => createRegisterSchema(requiresEmail), [requiresEmail]);
@@ -64,9 +62,7 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {error && <Alert variant="error">{error.message}</Alert>}
-        {isLogMode && <Alert variant="warning">{t('otpLogModeWarning')}</Alert>}
-        {isEmailMode && !isLogMode && <Alert variant="default">{t('registerEmailHint')}</Alert>}
-        <MailhogInboxHint />
+        {isEmailMode && <Alert variant="default">{t('registerEmailHint')}</Alert>}
 
         <div className="space-y-2">
           <Label htmlFor="fullName">{t('fullName')}</Label>
@@ -141,9 +137,9 @@ export default function RegisterPage() {
       </form>
       <p className="text-center text-sm text-brand-muted">
         {t('hasAccount')}{' '}
-        <Link href="/login" className="font-bold text-brand-primary hover:underline">
+        <LoadingLink href="/login" className="font-bold text-brand-primary hover:underline">
           {t('login')}
-        </Link>
+        </LoadingLink>
       </p>
     </div>
   );

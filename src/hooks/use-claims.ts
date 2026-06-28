@@ -26,6 +26,18 @@ export function useInsurerStats() {
   });
 }
 
+export function useClaimAppeal(id: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (reason: string) => claimApi.appeal(id, reason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claims', id] });
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+    },
+  });
+}
+
 export function useClaimDecision(id: string) {
   const queryClient = useQueryClient();
 

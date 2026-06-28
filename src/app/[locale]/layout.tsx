@@ -5,6 +5,7 @@ import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { Providers } from '@/components/providers';
+import { NavigationProgress } from '@/components/navigation/navigation-progress';
 import '../globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -24,7 +25,6 @@ export const viewport: Viewport = {
   themeColor: '#0A7B4E',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export function generateStaticParams() {
@@ -47,10 +47,13 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={inter.variable}>
+    <html lang={locale} className={`${inter.variable} scroll-smooth`}>
       <body className="min-h-screen font-sans">
         <NextIntlClientProvider messages={messages}>
-          <Providers>{children}</Providers>
+          <Providers>
+            <NavigationProgress />
+            {children}
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>

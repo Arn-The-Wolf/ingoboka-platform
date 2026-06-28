@@ -1,7 +1,7 @@
 'use client';
 
 import { LucideIcon } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { LoadingLink } from '@/components/navigation/loading-link';
 import { cn } from '@/lib/utils';
 
 interface QuickActionCardProps {
@@ -14,7 +14,7 @@ interface QuickActionCardProps {
   className?: string;
 }
 
-/** Bento-style quick action tile — matches policy_wallet_dashboard design. */
+/** Quick action tile for dashboard — web-friendly card with hover state. */
 export function QuickActionCard({
   href,
   icon: Icon,
@@ -25,21 +25,21 @@ export function QuickActionCard({
   className,
 }: QuickActionCardProps) {
   return (
-    <Link href={href}>
+    <LoadingLink href={href}>
       <div
         className={cn(
-          'flex aspect-square flex-col justify-between rounded-xl border border-brand-border/60 bg-white p-4 transition-all hover:bg-brand-surface-container-low hover:shadow-md active:scale-[0.98]',
+          'flex flex-col justify-between rounded-xl border border-brand-border/60 bg-white p-5 transition-all hover:border-brand-primary/30 hover:bg-brand-surface-container-low hover:shadow-md',
           className
         )}
       >
-        <div className={cn('flex h-10 w-10 items-center justify-center rounded-full', iconBgClass)}>
+        <div className={cn('mb-4 flex h-11 w-11 items-center justify-center rounded-full', iconBgClass)}>
           <Icon className={cn('h-5 w-5', iconClass)} />
         </div>
         <div>
-          <p className="text-sm font-semibold text-brand-primary-dark">{title}</p>
-          {subtitle && <p className="text-xs text-brand-muted">{subtitle}</p>}
+          <p className="font-semibold text-brand-primary-dark">{title}</p>
+          {subtitle && <p className="text-sm text-brand-muted">{subtitle}</p>}
         </div>
       </div>
-    </Link>
+    </LoadingLink>
   );
 }

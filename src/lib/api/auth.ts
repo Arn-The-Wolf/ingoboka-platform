@@ -1,15 +1,44 @@
-import { apiClient, isNetworkError } from './client';
+import { apiClient } from './client';
 import { normalizeCitizenPhone } from '@/lib/auth/phone';
 import { mapAuthResponse, mapAuthUser, type BackendAuthPayload } from './mappers';
-import { mockData } from './mock-data';
 import type {
   AuthTokens,
   ConsentRequest,
   LoginRequest,
   OtpVerifyRequest,
+  PaginatedResponse,
   RegisterRequest,
   User,
 } from '@/types';
+
+interface ConsentRecord {
+  consentType: string;
+  granted: boolean;
+  revokedAt?: string | null;
+}
+
+async function filterConsentPayload(payload: ConsentRequest): Promise<ConsentRequest> {
+  const { data } = await apiClient.get<PaginatedResponse<ConsentRecord>>(
+    '/customers/me/consents',
+    { params: { page: 0, size: 20 } }
+  );
+
+  const active = new Set(
+    data.content
+      .filter((c) => c.granted && !c.revokedAt)
+      .map((c) => c.consentType)
+  );
+
+  return {
+    termsAccepted: payload.termsAccepted && !active.has('TERMS_OF_SERVICE'),
+    dataProcessing: payload.dataProcessing && !active.has('DATA_PROCESSING'),
+    marketing: payload.marketing && !active.has('MARKETING'),
+  };
+}
+
+function hasConsentToSubmit(body: ConsentRequest): boolean {
+  return Boolean(body.termsAccepted || body.dataProcessing || body.marketing);
+}
 
 export interface OtpDeliveryConfig {
   deliveryChannel: 'EMAIL' | 'SMS' | 'LOG';
@@ -36,32 +65,11 @@ export const authApi = {
   async login(payload: LoginRequest): Promise<AuthTokens & { user: User }> {
     const raw = payload.email ?? payload.phone ?? '';
     const identifier = raw.includes('@') ? raw.trim().toLowerCase() : normalizeCitizenPhone(raw);
-    try {
-      const { data } = await apiClient.post<BackendAuthPayload>('/auth/login', {
-        identifier,
-        password: payload.password,
-      });
-      return mapAuthResponse(data);
-    } catch (error) {
-      if (isNetworkError(error)) {
-        const isInsurer =
-          identifier.includes('insurer') || identifier.includes('admin@ingoboka');
-        return {
-          accessToken: 'mock-access-token',
-          refreshToken: 'mock-refresh-token',
-          expiresIn: 900,
-          user: {
-            ...mockData.user,
-            fullName: isInsurer ? 'Eric Demo' : mockData.user.fullName,
-            email: payload.email,
-            phone: payload.phone,
-            role: isInsurer ? 'INSURER_CLAIMS_OFFICER' : 'CITIZEN',
-            consentGiven: Boolean(isInsurer),
-          },
-        };
-      }
-      throw error;
-    }
+    const { data } = await apiClient.post<BackendAuthPayload>('/auth/login', {
+      identifier,
+      password: payload.password,
+    });
+    return mapAuthResponse(data);
   },
 
   async register(payload: RegisterRequest): Promise<{ message: string; phone: string }> {
@@ -70,39 +78,20 @@ export const authApi = {
       phone: normalizeCitizenPhone(payload.phone),
       email: payload.email?.trim() || undefined,
     };
-    try {
-      await apiClient.post('/auth/register', body);
-      return { message: 'Registration successful', phone: body.phone };
-    } catch (error) {
-      if (isNetworkError(error)) {
-        return { message: 'OTP sent', phone: payload.phone };
-      }
-      throw error;
-    }
+    await apiClient.post('/auth/register', body);
+    return { message: 'Registration successful', phone: body.phone };
   },
 
   async verifyOtp(payload: OtpVerifyRequest): Promise<AuthTokens & { user: User }> {
     const phone = normalizeCitizenPhone(payload.phone);
     const code = payload.code.replace(/\D/g, '').slice(0, 6);
-    try {
-      const { data } = await apiClient.post<BackendAuthPayload>('/auth/verify-otp', {
-        phone,
-        phoneNumber: phone,
-        code,
-        otp: code,
-      });
-      return mapAuthResponse(data);
-    } catch (error) {
-      if (isNetworkError(error)) {
-        return {
-          accessToken: 'mock-access-token',
-          refreshToken: 'mock-refresh-token',
-          expiresIn: 900,
-          user: { ...mockData.user, verified: true, consentGiven: false },
-        };
-      }
-      throw error;
-    }
+    const { data } = await apiClient.post<BackendAuthPayload>('/auth/verify-otp', {
+      phone,
+      phoneNumber: phone,
+      code,
+      otp: code,
+    });
+    return mapAuthResponse(data);
   },
 
   async resendOtp(phone: string): Promise<void> {
@@ -133,27 +122,15 @@ export const authApi = {
 
 export const customerApi = {
   async getMe(): Promise<User> {
-    try {
-      await apiClient.get('/customers/me');
-      // Profile endpoint returns citizen profile; user fields come from auth store after login.
-      return mapAuthUser(null);
-    } catch (error) {
-      if (isNetworkError(error)) {
-        return mockData.user;
-      }
-      throw error;
-    }
+    await apiClient.get('/customers/me');
+    return mapAuthUser(null);
   },
 
   async submitConsent(payload: ConsentRequest): Promise<Partial<User>> {
-    try {
-      await apiClient.post('/customers/consent', payload);
-      return { consentGiven: true };
-    } catch (error) {
-      if (isNetworkError(error)) {
-        return { consentGiven: true };
-      }
-      throw error;
+    const body = await filterConsentPayload(payload);
+    if (hasConsentToSubmit(body)) {
+      await apiClient.post('/customers/consent', body);
     }
+    return { consentGiven: true };
   },
 };

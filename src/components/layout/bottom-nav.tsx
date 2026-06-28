@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { href: '/dashboard', icon: Home, labelKey: 'home' as const },
   { href: '/products', icon: Package, labelKey: 'products' as const },
-  { href: '/claims/new', icon: FileText, labelKey: 'claims' as const },
+  { href: '/claims', icon: FileText, labelKey: 'claims.nav' as const },
   { href: '/dependants', icon: Users, labelKey: 'dependants' as const },
 ];
 
@@ -17,8 +17,8 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-brand-border/80 bg-brand-surface/95 pb-safe backdrop-blur-md">
-      <div className="mx-auto flex max-w-lg items-stretch justify-around px-2 py-1.5">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-brand-border/80 bg-brand-surface/95 pb-safe backdrop-blur-md lg:hidden">
+      <div className="mx-auto flex max-w-2xl items-stretch justify-around px-2 py-1.5">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active =

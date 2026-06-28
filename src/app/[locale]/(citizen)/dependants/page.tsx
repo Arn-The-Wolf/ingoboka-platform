@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Baby, Heart, User, UserPlus, Users } from 'lucide-react';
 import { customerApiExt } from '@/lib/api';
 import { CitizenHeader } from '@/components/layout/citizen-header';
+import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,14 +52,15 @@ export default function DependantsPage() {
   return (
     <>
       <CitizenHeader title={t('dependants')} />
-      <div className="mx-auto max-w-lg px-4 pb-6 pt-4">
+      <PageContainer>
         <PageHeader
           title={t('dependants')}
           subtitle="Manage family members on your profile."
           backHref="/dashboard"
         />
 
-        <Card className="mb-6 border-brand-primary/20 shadow-card">
+        <div className="grid gap-8 lg:grid-cols-2">
+        <Card className="border-brand-primary/20 shadow-card h-fit">
           <CardContent className="p-5">
             <div className="mb-4 flex items-center gap-2">
               <UserPlus className="h-5 w-5 text-brand-primary" />
@@ -120,6 +122,7 @@ export default function DependantsPage() {
           </CardContent>
         </Card>
 
+        <div>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-brand-primary-dark">Your family</h2>
           <span className="text-xs text-brand-muted">{dependants.length} members</span>
@@ -159,7 +162,9 @@ export default function DependantsPage() {
             })}
           </div>
         )}
-      </div>
+        </div>
+        </div>
+      </PageContainer>
     </>
   );
 }

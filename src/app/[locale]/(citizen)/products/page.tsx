@@ -4,17 +4,28 @@ import { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
-import { Link } from '@/i18n/routing';
+import { LoadingLink } from '@/components/navigation/loading-link';
 import { productApi } from '@/lib/api';
 import { getRecommendedProductIds, clearRecommendedProductIds } from '@/lib/recommended-products';
 import { CitizenHeader } from '@/components/layout/citizen-header';
+import { PageContainer } from '@/components/layout/page-container';
 import { ProductCard } from '@/components/citizen/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 const FILTERS = ['All', 'Accident', 'Health', 'Funeral', 'Business'] as const;
+
+function ProductsSkeleton() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton key={i} className="h-52 rounded-xl" />
+      ))}
+    </div>
+  );
+}
 
 export default function ProductsPage() {
   const t = useTranslations('citizen');
@@ -64,17 +75,32 @@ export default function ProductsPage() {
   return (
     <>
       <CitizenHeader title={t('products')} />
-      <div className="mx-auto max-w-lg px-4 pb-6 pt-4">
-        <section className="mb-6">
-          <div className="relative mb-4 h-36 overflow-hidden rounded-xl bg-brand-primary shadow-sm">
-            <div className="absolute inset-0 bg-gradient-to-r from-brand-primary/90 to-brand-primary/40" />
-            <div className="absolute inset-0 flex items-center px-6">
-              <h2 className="max-w-[200px] text-2xl font-bold text-white">
-                Protect what matters most
-              </h2>
+      <PageContainer>
+        <section className="mb-8 grid gap-6 lg:grid-cols-[1fr_320px]">
+          <div className="relative overflow-hidden rounded-2xl bg-brand-primary shadow-sm">
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-primary/95 to-brand-primary/50" />
+            <div className="relative flex min-h-[10rem] items-center px-8 py-10">
+              <div>
+                <h2 className="text-3xl font-bold text-white">Protect what matters most</h2>
+                <p className="mt-2 max-w-lg text-white/85">
+                  Browse microinsurance plans tailored for Rwanda — health, accident, funeral, and more.
+                </p>
+              </div>
             </div>
           </div>
-          <div className="relative">
+          <LoadingLink
+            href="/products/needs-assessment"
+            className="flex flex-col justify-center rounded-2xl border border-brand-secondary/30 bg-brand-accent/15 p-6 text-sm transition-colors hover:bg-brand-accent/25"
+          >
+            <span className="text-lg font-semibold text-brand-primary-dark">Not sure which plan fits?</span>
+            <span className="mt-2 text-brand-muted">
+              Take our 2-minute needs assessment for personalized recommendations.
+            </span>
+          </LoadingLink>
+        </section>
+
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand-outline" />
             <input
               type="search"
@@ -84,41 +110,26 @@ export default function ProductsPage() {
               className="w-full rounded-xl border border-brand-border bg-white py-3.5 pl-12 pr-4 text-base focus:border-brand-primary focus:outline-none focus:ring-1 focus:ring-brand-primary"
             />
           </div>
-        </section>
+          <nav className="flex flex-wrap gap-2">
+            {FILTERS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFilter(f)}
+                className={cn(
+                  'whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition-all',
+                  filter === f
+                    ? 'bg-brand-primary text-white shadow-sm'
+                    : 'bg-brand-surface-container text-brand-muted hover:bg-brand-primary-light'
+                )}
+              >
+                {f}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-        <nav className="sticky top-16 z-30 -mx-4 mb-4 flex gap-2 overflow-x-auto bg-brand-background px-4 py-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f}
-              type="button"
-              onClick={() => setFilter(f)}
-              className={cn(
-                'whitespace-nowrap rounded-full px-5 py-2 text-sm font-semibold transition-all',
-                filter === f
-                  ? 'bg-brand-primary text-white shadow-sm'
-                  : 'bg-brand-surface-container text-brand-muted hover:bg-brand-primary-light'
-              )}
-            >
-              {f}
-            </button>
-          ))}
-        </nav>
-
-        <Link
-          href="/products/needs-assessment"
-          className="mb-6 block rounded-xl border border-brand-secondary/30 bg-brand-accent/15 p-4 text-sm transition-colors hover:bg-brand-accent/25"
-        >
-          <span className="font-semibold text-brand-primary-dark">Not sure which plan fits?</span>
-          <span className="mt-1 block text-brand-muted">
-            Take our 2-minute needs assessment for personalized recommendations.
-          </span>
-        </Link>
-
-        {isLoading && (
-          <div className="flex justify-center py-12">
-            <Spinner />
-          </div>
-        )}
+        {isLoading && <ProductsSkeleton />}
 
         {error && (
           <Card className="border-brand-error/30 bg-red-50">
@@ -131,15 +142,17 @@ export default function ProductsPage() {
           </Card>
         )}
 
-        <div className="grid gap-4">
-          {filtered.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              recommended={recommendedIds.has(product.id)}
-            />
-          ))}
-        </div>
+        {!isLoading && (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {filtered.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                recommended={recommendedIds.has(product.id)}
+              />
+            ))}
+          </div>
+        )}
 
         {!isLoading && filtered.length === 0 && (
           <Card className="border-dashed">
@@ -148,7 +161,7 @@ export default function ProductsPage() {
             </CardContent>
           </Card>
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }
