@@ -1,7 +1,7 @@
 import { apiClient } from './client';
-import { unwrapPage } from './mappers';
+import { mapAuthUser, unwrapPage } from './mappers';
 import type { ApplicationResponse } from './products';
-import type { PolicyReportSummary } from '@/types';
+import type { PolicyReportSummary, UserRole } from '@/types';
 
 export interface Organization {
   id: string;
@@ -18,6 +18,43 @@ export interface PlatformOverview {
   activePolicies: number;
   openClaims: number;
   totalApplications: number;
+}
+
+export interface AdminUser {
+  id: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  role: UserRole;
+  status: string;
+  verified: boolean;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  action: string;
+  actor: string;
+  resource: string;
+  occurredAt: string;
+  details?: string;
+}
+
+export interface PlatformSettings {
+  platformName: string;
+  defaultLocale: string;
+  maintenanceMode: boolean;
+  apiBaseUrl: string;
+  supportEmail: string;
+}
+
+function mapApplication(raw: Record<string, unknown>): ApplicationResponse {
+  return {
+    id: String(raw.id ?? ''),
+    applicationNumber: String(raw.applicationReference ?? raw.applicationNumber ?? ''),
+    status: String(raw.status ?? ''),
+    premiumAmount: Number(raw.premiumAmount ?? 0),
+    currency: String(raw.currency ?? 'RWF'),
+  };
 }
 
 export const adminApi = {
@@ -44,6 +81,53 @@ export const adminApi = {
       status: String(p.status ?? 'ACTIVE'),
       contactEmail: p.contactEmail ? String(p.contactEmail) : undefined,
     }));
+  },
+
+  async listUsers(page = 0, size = 50): Promise<{ content: AdminUser[]; totalElements: number }> {
+    const { data } = await apiClient.get<{
+      content?: Record<string, unknown>[];
+      totalElements?: number;
+    }>('/admin/users', { params: { page, size } });
+    const content = unwrapPage(data).map((raw) => {
+      const user = mapAuthUser(raw);
+      return {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        status: String(raw.status ?? (user.verified ? 'ACTIVE' : 'PENDING')),
+        verified: user.verified,
+      };
+    });
+    return { content, totalElements: data.totalElements ?? content.length };
+  },
+
+  async listAuditLog(page = 0, size = 50): Promise<{ content: AuditLogEntry[]; totalElements: number }> {
+    const { data } = await apiClient.get<{
+      content?: Record<string, unknown>[];
+      totalElements?: number;
+    }>('/admin/audit-logs', { params: { page, size } });
+    const content = unwrapPage(data).map((raw) => ({
+      id: String(raw.id ?? ''),
+      action: String(raw.action ?? raw.eventType ?? 'ACTION'),
+      actor: String(raw.actorName ?? raw.actor ?? raw.userEmail ?? 'System'),
+      resource: String(raw.resourceType ?? raw.resource ?? raw.entityType ?? '—'),
+      occurredAt: String(raw.occurredAt ?? raw.createdAt ?? new Date().toISOString()),
+      details: raw.details ? String(raw.details) : raw.description ? String(raw.description) : undefined,
+    }));
+    return { content, totalElements: data.totalElements ?? content.length };
+  },
+
+  async getPlatformSettings(): Promise<PlatformSettings> {
+    const { data } = await apiClient.get<Record<string, unknown>>('/admin/platform/settings');
+    return {
+      platformName: String(data.platformName ?? 'Ingoboka'),
+      defaultLocale: String(data.defaultLocale ?? 'rw'),
+      maintenanceMode: Boolean(data.maintenanceMode),
+      apiBaseUrl: String(data.apiBaseUrl ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? ''),
+      supportEmail: String(data.supportEmail ?? 'support@ingoboka.rw'),
+    };
   },
 };
 
@@ -160,5 +244,22 @@ export const insurerApi = {
       params: { page: 0, size: 20 },
     });
     return unwrapPage(data);
+  },
+
+  async listApplications(page = 0, size = 20, status = 'PENDING') {
+    const { data } = await apiClient.get<{
+      content?: Record<string, unknown>[];
+      totalElements?: number;
+    }>('/insurer/applications', { params: { page, size, status } });
+    const content = unwrapPage(data).map(mapApplication);
+    return { content, totalElements: data.totalElements ?? content.length };
+  },
+
+  async reviewApplication(id: string, decision: 'APPROVE' | 'REJECT', reason?: string) {
+    const { data } = await apiClient.post<Record<string, unknown>>(`/insurer/applications/${id}/decision`, {
+      decision: decision === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+      reason,
+    });
+    return mapApplication(data);
   },
 };

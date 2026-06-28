@@ -2,29 +2,21 @@
 
 import { useTranslations } from 'next-intl';
 import { ShieldCheck, TrendingUp, Clock, FileText } from 'lucide-react';
-import { useClaims, useInsurerStats } from '@/hooks/use-claims';
-import { ClaimListItem } from '@/components/insurer/claim-list-item';
+import { useInsurerStats } from '@/hooks/use-claims';
 import { InsurerStatCard } from '@/components/insurer/insurer-stat-card';
 import { InsurerStatsChart } from '@/components/insurer/stats-chart';
+import { PageContainer } from '@/components/layout/page-container';
+import { PageHeader } from '@/components/layout/page-header';
+import { LoadingLink } from '@/components/navigation/loading-link';
 import { Spinner } from '@/components/ui/spinner';
-import { Alert } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import type { ApiError } from '@/types';
 
 export default function InsurerDashboardPage() {
   const t = useTranslations('insurer');
-  const tCommon = useTranslations('common');
   const { data: stats, isLoading: statsLoading } = useInsurerStats();
-  const { data, isLoading, error, refetch } = useClaims();
-
-  const claims = data?.content ?? [];
 
   return (
-    <div className="p-6 lg:p-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-primary-dark">{t('greeting')}</h1>
-        <p className="text-brand-muted">{t('portfolioSummary')}</p>
-      </header>
+    <PageContainer>
+      <PageHeader title={t('greeting')} subtitle={t('portfolioSummary')} />
 
       {statsLoading ? (
         <div className="mb-8 flex justify-center">
@@ -60,43 +52,20 @@ export default function InsurerDashboardPage() {
               trend={t('avgProcessing')}
             />
           </div>
-          <div className="mb-8">
+          <div className="mb-6">
             <InsurerStatsChart stats={stats} title={t('claimsQueue')} />
+          </div>
+          <div className="flex justify-center">
+            <LoadingLink
+              href="/insurer/claims"
+              className="inline-flex items-center gap-2 rounded-full bg-brand-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-primary-dark"
+            >
+              <FileText className="h-4 w-4" />
+              {t('viewClaimsQueue')}
+            </LoadingLink>
           </div>
         </>
       ) : null}
-
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-brand-primary-dark">{t('claimsQueue')}</h2>
-        <span className="text-sm font-semibold text-brand-primary">
-          {t('pendingCount', { count: claims.length })}
-        </span>
-      </div>
-
-      {isLoading && (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
-      )}
-
-      {error && (
-        <Alert variant="error" className="mb-4">
-          {(error as ApiError).message ?? tCommon('error')}
-          <Button variant="outline" size="sm" className="mt-2" onClick={() => refetch()}>
-            {tCommon('retry')}
-          </Button>
-        </Alert>
-      )}
-
-      <div className="grid gap-3 lg:grid-cols-2">
-        {claims.map((claim) => (
-          <ClaimListItem key={claim.id} claim={claim} />
-        ))}
-      </div>
-
-      {!isLoading && claims.length === 0 && (
-        <p className="py-8 text-center text-sm text-brand-muted">{t('noClaimsInQueue')}</p>
-      )}
-    </div>
+    </PageContainer>
   );
 }

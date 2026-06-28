@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Building2, Mail, Phone, Save } from 'lucide-react';
 import { insurerApi } from '@/lib/api';
+import { PageContainer } from '@/components/layout/page-container';
+import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -39,30 +41,31 @@ export default function InsurerSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center p-12">
-        <Spinner />
-      </div>
+      <PageContainer narrow>
+        <div className="flex justify-center py-12">
+          <Spinner />
+        </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-primary-dark">{t('settings')}</h1>
-        <p className="text-sm text-brand-muted">Manage your organization contact details.</p>
-      </header>
+    <PageContainer narrow>
+      <PageHeader title={t('settings')} subtitle={t('settingsSubtitle')} />
 
       {error && <Alert variant="error" className="mb-4">{tCommon('error')}</Alert>}
 
-      <Card className="max-w-lg border-brand-border/60 shadow-card">
+      <Card className="border-brand-border/60 shadow-card">
         <CardContent className="p-6">
           <div className="mb-6 flex items-center gap-3 rounded-xl bg-brand-surface-container-low p-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-brand-primary-light">
               <Building2 className="h-6 w-6 text-brand-primary" />
             </div>
             <div>
-              <p className="font-semibold text-brand-primary-dark">{settings?.name ?? 'Your Organization'}</p>
-              <p className="text-sm text-brand-muted">Insurer partner account</p>
+              <p className="font-semibold text-brand-primary-dark">
+                {settings?.name ?? t('yourOrganization')}
+              </p>
+              <p className="text-sm text-brand-muted">{t('orgAccount')}</p>
             </div>
           </div>
 
@@ -70,7 +73,7 @@ export default function InsurerSettingsPage() {
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-brand-muted" />
-                Contact email
+                {t('contactEmail')}
               </Label>
               <Input
                 type="email"
@@ -82,7 +85,7 @@ export default function InsurerSettingsPage() {
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-brand-muted" />
-                Contact phone
+                {t('contactPhone')}
               </Label>
               <Input
                 type="tel"
@@ -95,7 +98,7 @@ export default function InsurerSettingsPage() {
 
           {saveMutation.isSuccess && (
             <Alert variant="default" className="mt-4">
-              Settings saved successfully.
+              {t('settingsSaved')}
             </Alert>
           )}
 
@@ -110,6 +113,6 @@ export default function InsurerSettingsPage() {
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }

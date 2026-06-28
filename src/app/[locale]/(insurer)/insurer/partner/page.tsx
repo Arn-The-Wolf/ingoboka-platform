@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { FileText, Handshake, Receipt, Wallet } from 'lucide-react';
 import { insurerApi } from '@/lib/api';
+import { PageContainer } from '@/components/layout/page-container';
+import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { Badge } from '@/components/ui/badge';
@@ -34,11 +36,8 @@ export default function InsurerPartnerPage() {
     (ledger as Array<{ description: string; amount: number; currency: string }>) ?? [];
 
   return (
-    <div className="p-6 lg:p-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-primary-dark">{t('partner')}</h1>
-        <p className="text-sm text-brand-muted">Contracts, invoices, and revenue ledger.</p>
-      </header>
+    <PageContainer>
+      <PageHeader title={t('partner')} subtitle={t('partnerSubtitle')} />
 
       <section className="mb-8">
         <div className="mb-4 flex items-center gap-2">
@@ -49,7 +48,9 @@ export default function InsurerPartnerPage() {
           <Spinner />
         ) : contractList.length === 0 ? (
           <Card className="border-dashed">
-            <CardContent className="py-8 text-center text-sm text-brand-muted">No contracts found.</CardContent>
+            <CardContent className="py-8 text-center text-sm text-brand-muted">
+              {t('noContracts')}
+            </CardContent>
           </Card>
         ) : (
           <div className="grid gap-3 lg:grid-cols-2">
@@ -77,7 +78,9 @@ export default function InsurerPartnerPage() {
           <Spinner />
         ) : invoiceList.length === 0 ? (
           <Card className="border-dashed">
-            <CardContent className="py-8 text-center text-sm text-brand-muted">No invoices yet.</CardContent>
+            <CardContent className="py-8 text-center text-sm text-brand-muted">
+              {t('noInvoices')}
+            </CardContent>
           </Card>
         ) : (
           <div className="grid gap-3 lg:grid-cols-2">
@@ -107,7 +110,9 @@ export default function InsurerPartnerPage() {
           <Spinner />
         ) : ledgerList.length === 0 ? (
           <Card className="border-dashed">
-            <CardContent className="py-8 text-center text-sm text-brand-muted">No ledger entries.</CardContent>
+            <CardContent className="py-8 text-center text-sm text-brand-muted">
+              {t('noLedger')}
+            </CardContent>
           </Card>
         ) : (
           <div className="grid gap-3">
@@ -124,6 +129,6 @@ export default function InsurerPartnerPage() {
           </div>
         )}
       </section>
-    </div>
+    </PageContainer>
   );
 }

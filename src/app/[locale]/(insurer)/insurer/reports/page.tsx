@@ -6,6 +6,8 @@ import { BarChart3, FileText, Users } from 'lucide-react';
 import { claimApi, insurerApi } from '@/lib/api';
 import { InsurerStatCard } from '@/components/insurer/insurer-stat-card';
 import { InsurerStatsChart } from '@/components/insurer/stats-chart';
+import { PageContainer } from '@/components/layout/page-container';
+import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
@@ -27,11 +29,8 @@ export default function InsurerReportsPage() {
   const policyData = policies;
 
   return (
-    <div className="p-6 lg:p-8">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold text-brand-primary-dark">{t('reports')}</h1>
-        <p className="text-sm text-brand-muted">Portfolio performance and claims analytics.</p>
-      </header>
+    <PageContainer>
+      <PageHeader title={t('reports')} subtitle={t('reportsSubtitle')} />
 
       {statsLoading ? (
         <div className="mb-8 flex justify-center">
@@ -65,7 +64,9 @@ export default function InsurerReportsPage() {
       ) : null}
 
       {policiesLoading ? (
-        <Spinner />
+        <div className="flex justify-center py-8">
+          <Spinner />
+        </div>
       ) : policyData ? (
         <div className="grid gap-4 sm:grid-cols-2">
           <Card className="border-brand-border/60 shadow-card">
@@ -82,6 +83,6 @@ export default function InsurerReportsPage() {
           </Card>
         </div>
       ) : null}
-    </div>
+    </PageContainer>
   );
 }
