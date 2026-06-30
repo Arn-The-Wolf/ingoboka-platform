@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <rect width="400" height="240" rx="16" fill="#FFF8EB"/>
+  <circle cx="160" cy="108" r="28" fill="#F4A228" opacity="0.35"/>
+  <circle cx="240" cy="108" r="28" fill="#1B6B3A" opacity="0.25"/>
+  <circle cx="200" cy="88" r="22" fill="#1B6B3A"/>
+  <path d="M148 148c8-18 28-28 52-28s44 10 52 28" stroke="#1B6B3A" stroke-width="8" stroke-linecap="round"/>
+  <path d="M120 132h24M256 132h24" stroke="#F4A228" stroke-width="6" stroke-linecap="round"/>
+  <text x="200" y="200" text-anchor="middle" fill="#005127" font-family="Inter,system-ui,sans-serif" font-size="18" font-weight="700">Family Health</text>
+</svg>

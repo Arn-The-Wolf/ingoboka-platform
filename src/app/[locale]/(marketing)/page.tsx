@@ -1,7 +1,7 @@
 import { LandingHero } from '@/components/landing/landing-hero';
 import { LandingCta } from '@/components/landing/landing-cta';
-import { LandingProducts } from '@/components/landing/landing-products';
 import { LandingTrust } from '@/components/landing/landing-trust';
+import { LiveProductsCatalog } from '@/components/landing/live-products-catalog';
 import { PartnersStrip } from '@/components/landing/partners-strip';
 import { TestimonialsCarousel } from '@/components/landing/testimonials-carousel';
 import { HomeHighlights } from '@/components/marketing/home-highlights';
@@ -12,7 +12,7 @@ export default function HomePage() {
       <LandingHero />
       <PartnersStrip />
       <HomeHighlights />
-      <LandingProducts />
+      <LiveProductsCatalog />
       <TestimonialsCarousel />
       <LandingTrust />
       <LandingCta />

@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { CheckCircle2, CreditCard, Smartphone } from 'lucide-react';
+import { CheckCircle2, CreditCard, Smartphone, Loader2 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { enrollmentApi, paymentApi, productApi } from '@/lib/api';
+import { getProductHeroImage } from '@/lib/product-images';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { StepIndicator } from '@/components/ui/step-indicator';
@@ -25,6 +27,7 @@ export default function EnrollPage() {
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [providerRef, setProviderRef] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [pollMessage, setPollMessage] = useState<string | null>(null);
 
   const { data: product, isLoading } = useQuery({
     queryKey: ['products', productId],
@@ -50,19 +53,26 @@ export default function EnrollPage() {
     mutationFn: async () => {
       if (!paymentId || !providerRef) throw new Error('Payment not initialized');
 
+      setPollMessage('Waiting for mobile money confirmation…');
+
       try {
-        await paymentApi.pollUntilSettled(paymentId, { intervalMs: 2000, maxAttempts: 3 });
+        await paymentApi.pollUntilSettled(paymentId, { intervalMs: 2000, maxAttempts: 4 });
       } catch {
+        setPollMessage('Simulating sandbox payment for demo…');
         await paymentApi.confirmSandboxPayment(providerRef);
-        await paymentApi.pollUntilSettled(paymentId, { intervalMs: 1500, maxAttempts: 10 });
+        await paymentApi.pollUntilSettled(paymentId, { intervalMs: 1500, maxAttempts: 12 });
       }
     },
     onSuccess: () => {
       setPaymentError(null);
+      setPollMessage(null);
       setStep('done');
       setTimeout(() => router.push('/dashboard'), 1500);
     },
-    onError: (err: Error) => setPaymentError(err.message),
+    onError: (err: Error) => {
+      setPollMessage(null);
+      setPaymentError(err.message);
+    },
   });
 
   const stepNum = step === 'plan' ? 1 : step === 'pay' ? 2 : 3;
@@ -86,8 +96,14 @@ export default function EnrollPage() {
         </Link>
 
         <div className="relative mb-6 mt-4 h-40 overflow-hidden rounded-xl">
+          <Image
+            src={getProductHeroImage(product)}
+            alt={product.name}
+            fill
+            className="object-cover"
+            sizes="100vw"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="absolute inset-0 bg-brand-primary/80" />
           <div className="absolute bottom-0 left-0 p-4">
             <span className="mb-2 inline-block rounded-full bg-brand-accent px-3 py-0.5 text-xs font-semibold uppercase text-brand-primary-dark">
               Enroll
@@ -188,6 +204,13 @@ export default function EnrollPage() {
             )}
 
             {paymentError && <Alert variant="error">{paymentError}</Alert>}
+
+            {pollMessage && (
+              <div className="flex items-center gap-2 rounded-lg border border-brand-primary/20 bg-brand-primary-light/50 px-4 py-3 text-sm text-brand-primary-dark">
+                <Loader2 className="h-4 w-4 animate-spin text-brand-primary" />
+                {pollMessage}
+              </div>
+            )}
 
             <Button
               className="w-full"

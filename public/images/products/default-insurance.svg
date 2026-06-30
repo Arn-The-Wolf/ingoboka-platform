@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <rect width="400" height="240" rx="16" fill="#E8F5EF"/>
+  <rect x="120" y="60" width="160" height="100" rx="12" fill="#1B6B3A" opacity="0.9"/>
+  <path d="M200 78l40 22v44c0 26-40 46-40 46s-40-20-40-46V100l40-22z" fill="#F4A228"/>
+  <text x="200" y="200" text-anchor="middle" fill="#005127" font-family="Inter,system-ui,sans-serif" font-size="18" font-weight="700">Microinsurance</text>
+</svg>

@@ -12,8 +12,10 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { productApi } from '@/lib/api';
+import { getProductHeroImage } from '@/lib/product-images';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
@@ -110,16 +112,14 @@ export default function ProductDetailPage() {
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
       <div>
         <section className="relative mb-8 h-64 overflow-hidden rounded-2xl lg:h-80">
-          {product.heroImageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={product.heroImageUrl}
-              alt={product.name}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 bg-brand-primary/70" />
-          )}
+          <Image
+            src={getProductHeroImage(product)}
+            alt={product.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 66vw"
+            priority
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
           <div className="absolute bottom-0 left-0 z-20 w-full p-4">
             <span className="mb-2 inline-block rounded-full bg-brand-accent px-3 py-0.5 text-xs font-semibold uppercase tracking-wider text-brand-primary-dark">

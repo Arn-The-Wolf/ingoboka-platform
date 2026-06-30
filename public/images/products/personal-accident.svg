@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 240" fill="none">
+  <rect width="400" height="240" rx="16" fill="#E8F5EF"/>
+  <circle cx="200" cy="100" r="48" fill="#1B6B3A" opacity="0.15"/>
+  <path d="M200 58l28 16v36c0 22-28 40-28 40s-28-18-28-40V74l28-16z" fill="#1B6B3A"/>
+  <path d="M188 96l8 8 16-16" stroke="#F4A228" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="200" y="200" text-anchor="middle" fill="#005127" font-family="Inter,system-ui,sans-serif" font-size="18" font-weight="700">Personal Accident</text>
+</svg>

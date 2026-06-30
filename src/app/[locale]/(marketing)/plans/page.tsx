@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { MarketingPageHero } from '@/components/marketing/marketing-page-hero';
-import { LandingProducts } from '@/components/landing/landing-products';
+import { LiveProductsCatalog } from '@/components/landing/live-products-catalog';
 import { LandingCta } from '@/components/landing/landing-cta';
 
 export default async function PlansPage() {
@@ -9,7 +9,7 @@ export default async function PlansPage() {
   return (
     <>
       <MarketingPageHero title={t('pages.plans.heroTitle')} subtitle={t('pages.plans.heroSubtitle')} />
-      <LandingProducts />
+      <LiveProductsCatalog />
       <LandingCta />
     </>
   );

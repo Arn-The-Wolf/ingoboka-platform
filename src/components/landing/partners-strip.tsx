@@ -1,19 +1,18 @@
 'use client';
 
-import { Building2, CreditCard, Shield, Smartphone } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { AnimatedSection } from '@/components/ui/animated-section';
 
 const PARTNERS = [
-  { icon: Smartphone, labelKey: 'partners.momo' as const },
-  { icon: CreditCard, labelKey: 'partners.airtel' as const },
-  { icon: Shield, labelKey: 'partners.risa' as const },
-  { icon: Building2, labelKey: 'partners.insurers' as const },
+  { src: '/images/partners/mtn.svg', alt: 'MTN MoMo', labelKey: 'partners.momo' as const },
+  { src: '/images/partners/airtel.svg', alt: 'Airtel Money', labelKey: 'partners.airtel' as const },
+  { src: '/images/partners/risa.svg', alt: 'RISA', labelKey: 'partners.risa' as const },
+  { src: '/images/partners/insurers.svg', alt: 'Licensed insurers', labelKey: 'partners.insurers' as const },
 ];
 
 export function PartnersStrip() {
   const t = useTranslations('landing');
-
   const items = [...PARTNERS, ...PARTNERS];
 
   return (
@@ -23,14 +22,14 @@ export function PartnersStrip() {
           {t('partners.title')}
         </p>
         <div className="relative overflow-hidden">
-          <div className="flex w-max animate-marquee gap-8 px-4">
-            {items.map(({ icon: Icon, labelKey }, index) => (
+          <div className="flex w-max animate-marquee items-center gap-10 px-6">
+            {items.map(({ src, alt, labelKey }, index) => (
               <div
                 key={`${labelKey}-${index}`}
-                className="flex shrink-0 items-center gap-2 rounded-full border border-brand-border/50 bg-brand-background px-5 py-2.5 text-sm font-medium text-brand-muted transition-colors hover:border-brand-primary/30 hover:text-brand-primary"
+                className="flex shrink-0 flex-col items-center gap-2 transition-transform duration-300 hover:scale-105"
               >
-                <Icon className="h-4 w-4 text-brand-primary" />
-                {t(labelKey)}
+                <Image src={src} alt={alt} width={120} height={40} className="h-10 w-auto" />
+                <span className="text-xs font-medium text-brand-muted">{t(labelKey)}</span>
               </div>
             ))}
           </div>

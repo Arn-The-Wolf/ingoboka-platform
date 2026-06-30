@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 40" fill="none">
+  <rect width="140" height="40" rx="8" fill="#1B6B3A"/>
+  <rect x="14" y="10" width="20" height="20" rx="2" fill="#F4A228"/>
+  <rect x="18" y="14" width="4" height="12" fill="#1B6B3A"/>
+  <rect x="26" y="18" width="4" height="8" fill="#1B6B3A"/>
+  <text x="88" y="26" text-anchor="middle" fill="#fff" font-family="Inter,system-ui,sans-serif" font-size="11" font-weight="700">Licensed Insurers</text>
+</svg>
