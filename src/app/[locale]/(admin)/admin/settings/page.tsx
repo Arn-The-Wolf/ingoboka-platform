@@ -7,7 +7,7 @@ import { adminApi } from '@/lib/api';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Badge } from '@/components/ui/badge';
 
 export default function AdminSettingsPage() {
@@ -24,11 +24,7 @@ export default function AdminSettingsPage() {
     <PageContainer narrow>
       <PageHeader title={t('settings')} subtitle={t('platformConfigDesc')} />
 
-      {isLoading && (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
-      )}
+      {isLoading && <ListSkeleton rows={4} />}
 
       {config && (
         <Card className="border-brand-border/60 shadow-card">

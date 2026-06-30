@@ -159,6 +159,137 @@
       "relChild": "Umwana",
       "relSpouse": "Uwashakanye",
       "relParent": "Umubyeyi"
+    },
+    "notifications": {
+      "nav": "Amakuru",
+      "title": "Amakuru",
+      "subtitle": "Amakuru ku bwishingizi, ibyifuzo n'ubwishyu bwawe",
+      "empty": "Nta makuru aracyariho. Tuzakumenyesha igihe hari ikintu cy'ingenzi.",
+      "markRead": "Garagaza ko wasomye",
+      "unread": "Ntirasomwa",
+      "read": "Byasomwe",
+      "unreadCount": "{count, plural, one {ikimenyetso # kitarasomwa} other {ibimenyetso # bitarasomwa}}",
+      "loadError": "Ntibyashobotse gufata amakuru"
+    },
+    "enroll": {
+      "badge": "Iyandikishe",
+      "backToProducts": "← Subira ku bicuruzwa",
+      "choosePlan": "Hitamo gahunda yawe",
+      "continuePayment": "Komeza ku kwishyura",
+      "paymentSummary": "Incamake y'ubwishyu",
+      "productLabel": "Igicuruzwa",
+      "planLabel": "Gahunda",
+      "total": "Igiteranyo",
+      "mobileMoney": "Mobile Money",
+      "cardSoon": "Ikarita (vuba)",
+      "paymentRef": "Uzuza ubwishyu kuri telefone yawe. Indango: {ref}",
+      "waitingConfirm": "Tegereza kwemeza Mobile Money…",
+      "sandboxSimulate": "Dusimula ubwishyu bwo kugerageza…",
+      "confirming": "Kwemeza ubwishyu…",
+      "confirmPaid": "Naramaze kwishyura — emeza",
+      "completeTitle": "Kwiyandikisha byarangiye!",
+      "completeSubtitle": "Tugutwara ku wallet y'ubwishingizi…",
+      "perPerson": "/ ku muntu"
+    },
+    "productDetail": {
+      "defaultCategory": "Ubwishingizi",
+      "perPerson": "/ ku muntu",
+      "waitingPeriodTitle": "Igihe cyo gutegereza iminsi {days}",
+      "waitingPeriodBody": "Ubwishingizi butangira nyuma y'iminsi {days} yo kuba umunyamuryango ukora. Ibyifuzo mbere y'iki gihe ntibyemewe.",
+      "tabs": {
+        "cover": "Ubwishingizi",
+        "exclusions": "Ibyatandukanyijwe",
+        "howToClaim": "Uko wohereza icyifuzo",
+        "documents": "Inyandiko"
+      },
+      "coverEmpty": "Ibisobanuro by'ubwishingizi bizagaragara hano igihe byasohotse.",
+      "coverageUpTo": "Kugeza kuri {amount}.",
+      "exclusionsDefault": "Amategeko asanzwe atandukanya ibintu bimwe. Reba amabwiriza.",
+      "documentsEmpty": "Nta nyandiko zihari ubu.",
+      "faq": "Ibibazo bikunze kubazwa",
+      "quickCheck": "Isuzuma rikora vuba",
+      "applyPlan": "Saba iyi gahunda",
+      "quizPass": "Witeguye! Suzuma ukomeze.",
+      "quizFail": "Subiza neza ibibazo byombi kugira ngo ukomeze",
+      "needsAssessmentLink": "Ntuzi neza? Tangira isuzuma ry'ibyo ukeneye",
+      "loadError": "Ntibyashobotse gufata iki gicuruzwa. Gishobora kuba cyakuwe cyangwa API idakora.",
+      "backToProducts": "Subira ku bicuruzwa",
+      "retry": "Ongera ugerageze",
+      "loadingTitle": "Igicuruzwa",
+      "frequencies": {
+        "daily": "Ku munsi",
+        "weekly": "Ku cyumweru",
+        "monthly": "Ku kwezi"
+      },
+      "quiz": {
+        "q1": {
+          "question": "Ubwishingizi buhagije butangira ryari?",
+          "optA": "Ako akoherereje kwishyura",
+          "optB": "Nyuma y'igihe cyo gutegereza"
+        },
+        "q2": {
+          "question": "Wohereza icyifuzo gute?",
+          "optA": "Binyuze mu gice cy'Ibyifuzo muri porogaramu",
+          "optB": "Gusa ugenda ku biro by'uwatanga ubwishingizi"
+        }
+      }
+    },
+    "needsAssessment": {
+      "title": "Isuzuma ry'ibyo ukeneye",
+      "backToProducts": "← Subira ku bicuruzwa",
+      "questionOf": "Ikibazo {current} kuri {total}",
+      "skip": "Simbuka ubu",
+      "seeResults": "Reba ibisubizo",
+      "continue": "Komeza",
+      "findingCover": "Turimo gushaka ubwishingizi bukwiriye…",
+      "analyzing": "Turimo gusesengura ibyago byawe kugira ngo tubone uburinzi buhagije ku muryango wawe.",
+      "matchScore": "Amanota yo guhuza: {score}%",
+      "questions": {
+        "occupation": {
+          "title": "Akazi kawe gakomeye ni iki?",
+          "subtitle": "Tubwire icyo ukora kugira ngo dushyireho ubwishingizi bukwiriye ibyago byawe bya buri munsi.",
+          "MOTO_RIDER": "Umumotari",
+          "FARMER": "Umuhinzi",
+          "VENDOR": "Umucuruzi w'isoko",
+          "OFFICE": "Umukozi wa biro",
+          "OTHER": "Ikindi"
+        },
+        "dependents": {
+          "title": "Bangaye bangahe biyungiyeho?",
+          "subtitle": "Ibi bidufasha gushyiraho gahunda y'umuryango cyangwa y'umuntu.",
+          "0": "Njye njenyine",
+          "1-2": "Abantu 1–2",
+          "3-4": "Abantu 3–4",
+          "5+": "Abantu 5 cyangwa benshi"
+        },
+        "smartphone": {
+          "title": "Ufite telefone igendanwa?",
+          "subtitle": "Ingoboka ikora neza kuri telefone ku byifuzo no kwishyura.",
+          "YES": "Yego, nkoresha buri munsi",
+          "SOMETIMES": "Bimwe na bimwe",
+          "NO": "Nta telefone igendanwa mfite"
+        },
+        "payment": {
+          "title": "Ukunda kwishyura gute?",
+          "subtitle": "Hitamo igihe cyo kwishyura cyujuje ubushobozi bwawe bwo kwishyura.",
+          "DAILY": "Ku munsi (amafaranga make)",
+          "WEEKLY": "Ku cyumweru",
+          "MONTHLY": "Ku kwezi"
+        },
+        "income": {
+          "title": "Amafaranga winjiza ku munsi ni angahe?",
+          "subtitle": "Dukoresha ibi gusa kugenzura ubushobozi bwo kwishyura — ntibisangizwa.",
+          "UNDER_2K": "Munsi ya 2,000 RWF",
+          "2K_5K": "2,000 – 5,000 RWF",
+          "5K_10K": "5,000 – 10,000 RWF",
+          "OVER_10K": "Hejuru ya 10,000 RWF"
+        },
+        "ready": {
+          "title": "Hafi byarangiye! Witeguye kubona ibisubizo?",
+          "subtitle": "Tuzaguha uburinzi buhagije ku muryango wawe.",
+          "YES": "Erekana ibyo nshobora gufata"
+        }
+      }
     }
   },
   "insurer": {
@@ -272,8 +403,20 @@
     "assistedEnrollment": "Kwiyandikisha ufashijwe",
     "applications": "Ubusabe",
     "citizenPhone": "Telefone y'umuturage",
-    "productPlan": "ID y'igishushanyo",
-    "createApplication": "Tangira ubusabe"
+    "productPlan": "Gahunda y'igicuruzwa",
+    "selectPlan": "Hitamo gahunda y'igicuruzwa",
+    "selectPlanPlaceholder": "Hitamo gahunda…",
+    "phonePlaceholder": "urugero 0780000001",
+    "createApplication": "Tangira ubusabe",
+    "pendingReview": "Birategereje isuzuma",
+    "approved": "Byemewe",
+    "assistedTrend": "Kwiyandikisha bifashijwe",
+    "approvedTrend": "Biteguye kwishyura",
+    "createSuccess": "Ubusabe bwakozwe neza.",
+    "emptyApplications": "Nta busabe bwifashijwe buhari. Kora ubusabe ku muturage haruguru.",
+    "totalApplications": "{count} byose",
+    "loadingPlans": "Gufata gahunda…",
+    "noPlans": "Nta gahunda zasohotse. Saba umuyobozi w'uwatanga ubwishingizi gusohora ibicuruzwa."
   },
   "error": {
     "title": "Habaye ikosa",

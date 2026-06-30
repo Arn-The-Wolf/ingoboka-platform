@@ -19,7 +19,7 @@ import { productApi } from '@/lib/api';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -418,11 +418,7 @@ export default function InsurerProductsPage() {
         </Card>
       )}
 
-      {isLoading && (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
-      )}
+      {isLoading && <ListSkeleton rows={6} />}
 
       {error && <Alert variant="error">{tCommon('error')}</Alert>}
 

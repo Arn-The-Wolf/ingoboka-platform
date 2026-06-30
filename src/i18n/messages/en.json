@@ -159,6 +159,137 @@
       "relChild": "Child",
       "relSpouse": "Spouse",
       "relParent": "Parent"
+    },
+    "notifications": {
+      "nav": "Notifications",
+      "title": "Notifications",
+      "subtitle": "Updates about your policies, claims, and payments",
+      "empty": "No notifications yet. We'll let you know when something important happens.",
+      "markRead": "Mark as read",
+      "unread": "Unread",
+      "read": "Read",
+      "unreadCount": "{count, plural, one {# unread notification} other {# unread notifications}}",
+      "loadError": "Could not load notifications"
+    },
+    "enroll": {
+      "badge": "Enroll",
+      "backToProducts": "← Back to products",
+      "choosePlan": "Choose your plan",
+      "continuePayment": "Continue to payment",
+      "paymentSummary": "Payment summary",
+      "productLabel": "Product",
+      "planLabel": "Plan",
+      "total": "Total",
+      "mobileMoney": "Mobile Money",
+      "cardSoon": "Card (soon)",
+      "paymentRef": "Complete the payment on your phone. Reference: {ref}",
+      "waitingConfirm": "Waiting for mobile money confirmation…",
+      "sandboxSimulate": "Simulating sandbox payment for demo…",
+      "confirming": "Confirming payment…",
+      "confirmPaid": "I have paid — confirm",
+      "completeTitle": "Enrollment complete!",
+      "completeSubtitle": "Redirecting to your policy wallet…",
+      "perPerson": "/ per person"
+    },
+    "productDetail": {
+      "defaultCategory": "Insurance",
+      "perPerson": "/ per person",
+      "waitingPeriodTitle": "{days}-Day Waiting Period",
+      "waitingPeriodBody": "Cover starts after {days} days of active membership. Claims made before this period are not valid.",
+      "tabs": {
+        "cover": "Cover",
+        "exclusions": "Exclusions",
+        "howToClaim": "How to Claim",
+        "documents": "Documents"
+      },
+      "coverEmpty": "Coverage details will appear here once published.",
+      "coverageUpTo": "Up to {amount}.",
+      "exclusionsDefault": "Standard policy exclusions apply. See terms for details.",
+      "documentsEmpty": "No documents available yet.",
+      "faq": "FAQ",
+      "quickCheck": "Quick Check",
+      "applyPlan": "Apply for this plan",
+      "quizPass": "You're all set! Review and continue.",
+      "quizFail": "Answer both questions correctly to proceed",
+      "needsAssessmentLink": "Not sure? Take the needs assessment first",
+      "loadError": "Could not load this product. It may have been removed or the API is unavailable.",
+      "backToProducts": "Back to products",
+      "retry": "Retry",
+      "loadingTitle": "Product",
+      "frequencies": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly"
+      },
+      "quiz": {
+        "q1": {
+          "question": "When does your full cover begin?",
+          "optA": "Immediately after payment",
+          "optB": "After the waiting period"
+        },
+        "q2": {
+          "question": "How do you file a claim?",
+          "optA": "Through the Claims section in the app",
+          "optB": "Only by visiting the insurer office"
+        }
+      }
+    },
+    "needsAssessment": {
+      "title": "Needs Assessment",
+      "backToProducts": "← Back to products",
+      "questionOf": "Question {current} of {total}",
+      "skip": "Skip for now",
+      "seeResults": "See results",
+      "continue": "Continue",
+      "findingCover": "Finding your perfect cover…",
+      "analyzing": "We're analyzing your risk profile to find the most affordable protection for your family.",
+      "matchScore": "Match score: {score}%",
+      "questions": {
+        "occupation": {
+          "title": "What is your main work?",
+          "subtitle": "Tell us what you do so we can suggest the right cover for your daily risks.",
+          "MOTO_RIDER": "Moto Rider",
+          "FARMER": "Farmer",
+          "VENDOR": "Market Vendor",
+          "OFFICE": "Office Worker",
+          "OTHER": "Other"
+        },
+        "dependents": {
+          "title": "How many people depend on you?",
+          "subtitle": "This helps us recommend family or individual plans.",
+          "0": "Just me",
+          "1-2": "1–2 people",
+          "3-4": "3–4 people",
+          "5+": "5 or more"
+        },
+        "smartphone": {
+          "title": "Do you own a smartphone?",
+          "subtitle": "Ingoboka works best on mobile for claims and payments.",
+          "YES": "Yes, I use it daily",
+          "SOMETIMES": "Sometimes",
+          "NO": "No smartphone"
+        },
+        "payment": {
+          "title": "How do you prefer to pay?",
+          "subtitle": "Choose the premium frequency that fits your cash flow.",
+          "DAILY": "Daily (small amounts)",
+          "WEEKLY": "Weekly",
+          "MONTHLY": "Monthly"
+        },
+        "income": {
+          "title": "What is your daily income?",
+          "subtitle": "We use this only to check affordability — never shared.",
+          "UNDER_2K": "Under 2,000 RWF",
+          "2K_5K": "2,000 – 5,000 RWF",
+          "5K_10K": "5,000 – 10,000 RWF",
+          "OVER_10K": "Over 10,000 RWF"
+        },
+        "ready": {
+          "title": "Almost there! Ready for results?",
+          "subtitle": "We will match you with affordable protection for your family.",
+          "YES": "Show my recommendations"
+        }
+      }
     }
   },
   "insurer": {
@@ -272,8 +403,20 @@
     "assistedEnrollment": "Assisted enrollment",
     "applications": "Applications",
     "citizenPhone": "Citizen phone",
-    "productPlan": "Product plan ID",
-    "createApplication": "Start application"
+    "productPlan": "Product plan",
+    "selectPlan": "Select product plan",
+    "selectPlanPlaceholder": "Choose a plan…",
+    "phonePlaceholder": "e.g. 0780000001",
+    "createApplication": "Start application",
+    "pendingReview": "Pending review",
+    "approved": "Approved",
+    "assistedTrend": "Assisted enrollments",
+    "approvedTrend": "Ready for payment",
+    "createSuccess": "Application created successfully.",
+    "emptyApplications": "No assisted applications yet. Create one for a citizen above.",
+    "totalApplications": "{count} total",
+    "loadingPlans": "Loading plans…",
+    "noPlans": "No published plans available. Ask your insurer admin to publish products."
   },
   "error": {
     "title": "Something went wrong",

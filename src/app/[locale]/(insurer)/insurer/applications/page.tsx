@@ -9,7 +9,7 @@ import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Badge, policyStatusVariant } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
@@ -42,11 +42,7 @@ export default function InsurerApplicationsPage() {
     <PageContainer>
       <PageHeader title={t('applicationsQueue')} subtitle={t('applicationsSubtitle')} />
 
-      {isLoading && (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
-      )}
+      {isLoading && <ListSkeleton rows={6} />}
 
       {error && !isLoading && (
         <Alert variant="error" className="mb-4">

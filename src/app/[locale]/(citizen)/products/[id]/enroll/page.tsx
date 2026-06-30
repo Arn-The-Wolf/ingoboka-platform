@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { CheckCircle2, CreditCard, Smartphone, Loader2 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
@@ -13,12 +14,13 @@ import { PageContainer } from '@/components/layout/page-container';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
 export default function EnrollPage() {
+  const t = useTranslations('citizen.enroll');
   const params = useParams<{ id: string; locale: string }>();
   const router = useRouter();
   const productId = params.id;
@@ -53,12 +55,12 @@ export default function EnrollPage() {
     mutationFn: async () => {
       if (!paymentId || !providerRef) throw new Error('Payment not initialized');
 
-      setPollMessage('Waiting for mobile money confirmation…');
+      setPollMessage(t('waitingConfirm'));
 
       try {
         await paymentApi.pollUntilSettled(paymentId, { intervalMs: 2000, maxAttempts: 4 });
       } catch {
-        setPollMessage('Simulating sandbox payment for demo…');
+        setPollMessage(t('sandboxSimulate'));
         await paymentApi.confirmSandboxPayment(providerRef);
         await paymentApi.pollUntilSettled(paymentId, { intervalMs: 1500, maxAttempts: 12 });
       }
@@ -79,9 +81,14 @@ export default function EnrollPage() {
 
   if (isLoading || !product) {
     return (
-      <div className="flex justify-center py-12">
-        <Spinner />
-      </div>
+      <PageContainer narrow>
+        <Skeleton className="mb-4 h-40 w-full rounded-xl" shimmer />
+        <Skeleton className="mb-6 h-8 w-48" shimmer />
+        <div className="space-y-3">
+          <Skeleton className="h-20 w-full rounded-xl" shimmer />
+          <Skeleton className="h-20 w-full rounded-xl" shimmer />
+        </div>
+      </PageContainer>
     );
   }
 
@@ -92,7 +99,7 @@ export default function EnrollPage() {
       <CitizenHeader title={product.name} />
       <PageContainer narrow>
         <Link href="/products" className="text-sm font-medium text-brand-primary hover:underline">
-          ← Back to products
+          {t('backToProducts')}
         </Link>
 
         <div className="relative mb-6 mt-4 h-40 overflow-hidden rounded-xl">
@@ -106,7 +113,7 @@ export default function EnrollPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <div className="absolute bottom-0 left-0 p-4">
             <span className="mb-2 inline-block rounded-full bg-brand-accent px-3 py-0.5 text-xs font-semibold uppercase text-brand-primary-dark">
-              Enroll
+              {t('badge')}
             </span>
             <h1 className="text-2xl font-bold text-white">{product.name}</h1>
           </div>
@@ -117,7 +124,7 @@ export default function EnrollPage() {
         {step === 'plan' && (
           <div className="space-y-4">
             <div>
-              <h2 className="text-lg font-semibold text-brand-primary-dark">Choose your plan</h2>
+              <h2 className="text-lg font-semibold text-brand-primary-dark">{t('choosePlan')}</h2>
               <p className="text-sm text-brand-muted">{product.termsSummary ?? product.description}</p>
             </div>
             {product.plans?.map((plan) => (
@@ -150,7 +157,7 @@ export default function EnrollPage() {
               loading={enrollMutation.isPending}
               onClick={() => selectedPlanId && enrollMutation.mutate(selectedPlanId)}
             >
-              Continue to payment
+              {t('continuePayment')}
             </Button>
           </div>
         )}
@@ -158,20 +165,20 @@ export default function EnrollPage() {
         {step === 'pay' && (
           <div className="space-y-4">
             <div className="rounded-xl border border-brand-border bg-white p-5 shadow-card">
-              <h2 className="mb-4 text-lg font-semibold text-brand-primary-dark">Payment summary</h2>
+              <h2 className="mb-4 text-lg font-semibold text-brand-primary-dark">{t('paymentSummary')}</h2>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-brand-muted">Product</span>
+                  <span className="text-brand-muted">{t('productLabel')}</span>
                   <span className="font-medium">{product.name}</span>
                 </div>
                 {selectedPlan && (
                   <div className="flex justify-between">
-                    <span className="text-brand-muted">Plan</span>
+                    <span className="text-brand-muted">{t('planLabel')}</span>
                     <span className="font-medium">{formatCurrency(selectedPlan.premiumAmount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between border-t border-brand-border pt-2 font-semibold">
-                  <span>Total</span>
+                  <span>{t('total')}</span>
                   <span className="text-brand-primary">
                     {selectedPlan ? formatCurrency(selectedPlan.premiumAmount) : '—'}
                   </span>
@@ -185,7 +192,7 @@ export default function EnrollPage() {
                 className="flex flex-col items-center gap-2 rounded-xl border-2 border-brand-primary bg-brand-primary-light p-4"
               >
                 <Smartphone className="h-6 w-6 text-brand-primary" />
-                <span className="text-sm font-semibold">Mobile Money</span>
+                <span className="text-sm font-semibold">{t('mobileMoney')}</span>
               </button>
               <button
                 type="button"
@@ -193,13 +200,13 @@ export default function EnrollPage() {
                 className="flex flex-col items-center gap-2 rounded-xl border border-brand-border p-4 opacity-60"
               >
                 <CreditCard className="h-6 w-6 text-brand-muted" />
-                <span className="text-sm font-semibold text-brand-muted">Card (soon)</span>
+                <span className="text-sm font-semibold text-brand-muted">{t('cardSoon')}</span>
               </button>
             </div>
 
             {providerRef && (
               <Alert variant="default">
-                Complete the payment on your phone. Reference: <strong>{providerRef}</strong>
+                {t('paymentRef', { ref: providerRef })}
               </Alert>
             )}
 
@@ -219,7 +226,7 @@ export default function EnrollPage() {
               disabled={completePaymentMutation.isPending}
               loading={completePaymentMutation.isPending}
             >
-              {completePaymentMutation.isPending ? 'Confirming payment…' : 'I have paid — confirm'}
+              {completePaymentMutation.isPending ? t('confirming') : t('confirmPaid')}
             </Button>
           </div>
         )}
@@ -227,8 +234,8 @@ export default function EnrollPage() {
         {step === 'done' && (
           <div className="flex flex-col items-center py-12 text-center">
             <CheckCircle2 className="mb-4 h-16 w-16 text-brand-success" />
-            <h2 className="text-xl font-bold text-brand-primary-dark">Enrollment complete!</h2>
-            <p className="mt-2 text-sm text-brand-muted">Redirecting to your policy wallet…</p>
+            <h2 className="text-xl font-bold text-brand-primary-dark">{t('completeTitle')}</h2>
+            <p className="mt-2 text-sm text-brand-muted">{t('completeSubtitle')}</p>
           </div>
         )}
       </PageContainer>

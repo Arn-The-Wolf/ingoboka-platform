@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   AlertTriangle,
   Download,
@@ -26,33 +27,14 @@ import type { ProductPlan } from '@/lib/api/products';
 const TABS = ['cover', 'exclusions', 'how-to-claim', 'documents'] as const;
 type TabId = (typeof TABS)[number];
 
-const TAB_LABELS: Record<TabId, string> = {
-  cover: 'Cover',
-  exclusions: 'Exclusions',
-  'how-to-claim': 'How to Claim',
-  documents: 'Documents',
+const TAB_I18N_KEYS: Record<TabId, 'cover' | 'exclusions' | 'howToClaim' | 'documents'> = {
+  cover: 'cover',
+  exclusions: 'exclusions',
+  'how-to-claim': 'howToClaim',
+  documents: 'documents',
 };
 
 const BENEFIT_ICONS = [HeartPulse, Shield, HeartPulse];
-
-const QUIZ = [
-  {
-    id: 'q1',
-    question: 'When does your full cover begin?',
-    options: [
-      { id: 'q1a', label: 'Immediately after payment', correct: false },
-      { id: 'q1b', label: 'After the waiting period', correct: true },
-    ],
-  },
-  {
-    id: 'q2',
-    question: 'How do you file a claim?',
-    options: [
-      { id: 'q2a', label: 'Through the Claims section in the app', correct: true },
-      { id: 'q2b', label: 'Only by visiting the insurer office', correct: false },
-    ],
-  },
-];
 
 function planForFrequency(plans: ProductPlan[], freq: 'daily' | 'weekly' | 'monthly') {
   const key = freq.toUpperCase();
@@ -64,6 +46,7 @@ function planForFrequency(plans: ProductPlan[], freq: 'daily' | 'weekly' | 'mont
 }
 
 export default function ProductDetailPage() {
+  const t = useTranslations('citizen.productDetail');
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const productId = params.id;
@@ -71,6 +54,28 @@ export default function ProductDetailPage() {
   const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  const quiz = useMemo(
+    () => [
+      {
+        id: 'q1',
+        question: t('quiz.q1.question'),
+        options: [
+          { id: 'q1a', label: t('quiz.q1.optA'), correct: false },
+          { id: 'q1b', label: t('quiz.q1.optB'), correct: true },
+        ],
+      },
+      {
+        id: 'q2',
+        question: t('quiz.q2.question'),
+        options: [
+          { id: 'q2a', label: t('quiz.q2.optA'), correct: true },
+          { id: 'q2b', label: t('quiz.q2.optB'), correct: false },
+        ],
+      },
+    ],
+    [t]
+  );
 
   const { data: product, isLoading, isError, refetch } = useQuery({
     queryKey: ['products', productId, 'detail'],
@@ -89,7 +94,7 @@ export default function ProductDetailPage() {
   const documents = product?.documents ?? [];
   const waitingDays = selectedPlan?.waitingPeriodDays ?? product?.waitingPeriodDays ?? 30;
 
-  const quizPassed = QUIZ.every((q) => {
+  const quizPassed = quiz.every((q) => {
     const selected = answers[q.id];
     return q.options.find((o) => o.id === selected)?.correct;
   });
@@ -97,7 +102,7 @@ export default function ProductDetailPage() {
   if (isLoading) {
     return (
       <>
-        <CitizenHeader title="Product" />
+        <CitizenHeader title={t('loadingTitle')} />
         <PageContainer>
           <div className="space-y-4">
             <div className="h-64 animate-pulse rounded-2xl bg-brand-surface-container" />
@@ -111,17 +116,17 @@ export default function ProductDetailPage() {
   if (isError || !product) {
     return (
       <>
-        <CitizenHeader title="Product" />
+        <CitizenHeader title={t('loadingTitle')} />
         <PageContainer>
           <Alert variant="error" className="mb-4">
-            Could not load this product. It may have been removed or the API is unavailable.
+            {t('loadError')}
           </Alert>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => refetch()}>
-              Retry
+              {t('retry')}
             </Button>
             <Link href="/products">
-              <Button variant="pill">Back to products</Button>
+              <Button variant="pill">{t('backToProducts')}</Button>
             </Link>
           </div>
         </PageContainer>
@@ -147,7 +152,7 @@ export default function ProductDetailPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
           <div className="absolute bottom-0 left-0 z-20 w-full p-4">
             <span className="mb-2 inline-block rounded-full bg-brand-accent px-3 py-0.5 text-xs font-semibold uppercase tracking-wider text-brand-primary-dark">
-              {product.category || 'Insurance'}
+              {product.category || t('defaultCategory')}
             </span>
             <h1 className="text-2xl font-bold text-white">{product.name}</h1>
           </div>
@@ -167,7 +172,7 @@ export default function ProductDetailPage() {
                     : 'text-brand-muted hover:bg-brand-surface-container'
                 )}
               >
-                {freq}
+                {t(`frequencies.${freq}`)}
               </button>
             ))}
           </div>
@@ -175,7 +180,7 @@ export default function ProductDetailPage() {
             <span className="text-2xl font-bold text-brand-primary">
               {selectedPlan ? formatCurrency(selectedPlan.premiumAmount) : '—'}
             </span>
-            <span className="ml-1 text-sm text-brand-muted">/ per person</span>
+            <span className="ml-1 text-sm text-brand-muted">{t('perPerson')}</span>
           </div>
         </section>
 
@@ -184,11 +189,10 @@ export default function ProductDetailPage() {
             <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-brand-secondary" />
             <div>
               <p className="text-sm font-semibold text-brand-primary-dark">
-                {waitingDays}-Day Waiting Period
+                {t('waitingPeriodTitle', { days: waitingDays })}
               </p>
               <p className="text-sm text-brand-muted">
-                Cover starts after {waitingDays} days of active membership. Claims made before this
-                period are not valid.
+                {t('waitingPeriodBody', { days: waitingDays })}
               </p>
             </div>
           </div>
@@ -208,7 +212,7 @@ export default function ProductDetailPage() {
                     : 'text-brand-muted'
                 )}
               >
-                {TAB_LABELS[tab]}
+                {t(`tabs.${TAB_I18N_KEYS[tab]}`)}
               </button>
             ))}
           </div>
@@ -220,7 +224,7 @@ export default function ProductDetailPage() {
                   <p className="text-sm text-brand-muted">{product.termsSummary}</p>
                 )}
                 {coverItems.length === 0 ? (
-                  <p className="text-sm text-brand-muted">Coverage details will appear here once published.</p>
+                  <p className="text-sm text-brand-muted">{t('coverEmpty')}</p>
                 ) : (
                   coverItems.map((item, index) => {
                     const Icon = BENEFIT_ICONS[index % BENEFIT_ICONS.length];
@@ -234,7 +238,7 @@ export default function ProductDetailPage() {
                           <p className="text-sm text-brand-muted">
                             {item.description}
                             {item.coverageLimit != null &&
-                              ` Up to ${formatCurrency(item.coverageLimit)}.`}
+                              ` ${t('coverageUpTo', { amount: formatCurrency(item.coverageLimit) })}`}
                           </p>
                         </div>
                       </div>
@@ -247,7 +251,7 @@ export default function ProductDetailPage() {
             {activeTab === 'exclusions' && (
               <ul className="list-inside list-disc space-y-2 text-sm text-brand-muted">
                 {exclusionItems.length === 0 ? (
-                  <li>Standard policy exclusions apply. See terms for details.</li>
+                  <li>{t('exclusionsDefault')}</li>
                 ) : (
                   exclusionItems.map((item) => (
                     <li key={item.title}>
@@ -276,7 +280,7 @@ export default function ProductDetailPage() {
             {activeTab === 'documents' && (
               <div className="space-y-2">
                 {documents.length === 0 ? (
-                  <p className="text-sm text-brand-muted">No documents available yet.</p>
+                  <p className="text-sm text-brand-muted">{t('documentsEmpty')}</p>
                 ) : (
                   documents.map((doc) => (
                     <a
@@ -301,7 +305,7 @@ export default function ProductDetailPage() {
 
         {faqItems.length > 0 && (
           <section className="mb-6 px-4">
-            <h3 className="mb-3 text-sm font-semibold text-brand-primary-dark">FAQ</h3>
+            <h3 className="mb-3 text-sm font-semibold text-brand-primary-dark">{t('faq')}</h3>
             <div className="space-y-2">
               {faqItems.map((item, i) => (
                 <div key={item.question} className="rounded-xl border border-brand-border bg-white">
@@ -332,9 +336,9 @@ export default function ProductDetailPage() {
 
       <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
         <section className="mb-6">
-          <h3 className="mb-3 text-sm font-semibold text-brand-primary-dark">Quick Check</h3>
+          <h3 className="mb-3 text-sm font-semibold text-brand-primary-dark">{t('quickCheck')}</h3>
           <div className="space-y-4">
-            {QUIZ.map((q) => (
+            {quiz.map((q) => (
               <div key={q.id}>
                 <p className="mb-2 text-sm text-brand-primary-dark">{q.question}</p>
                 <div className="flex flex-col gap-2">
@@ -371,7 +375,7 @@ export default function ProductDetailPage() {
               disabled={!quizPassed}
               onClick={() => router.push(`/products/${productId}/enroll`)}
             >
-              Apply for this plan
+              {t('applyPlan')}
             </Button>
             <p
               className={cn(
@@ -379,15 +383,13 @@ export default function ProductDetailPage() {
                 quizPassed ? 'text-brand-primary' : 'text-brand-muted'
               )}
             >
-              {quizPassed
-                ? "You're all set! Review and continue."
-                : 'Answer both questions correctly to proceed'}
+              {quizPassed ? t('quizPass') : t('quizFail')}
             </p>
             <Link
               href="/products/needs-assessment"
               className="mt-2 block text-center text-xs font-medium text-brand-primary hover:underline"
             >
-              Not sure? Take the needs assessment first
+              {t('needsAssessmentLink')}
             </Link>
           </div>
       </aside>

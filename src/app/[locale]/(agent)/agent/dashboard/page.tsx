@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ClipboardList, Phone, Plus, Users } from 'lucide-react';
-import { agentApi } from '@/lib/api';
+import { agentApi, productApi } from '@/lib/api';
 import { InsurerStatCard } from '@/components/insurer/insurer-stat-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,25 +15,61 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { formatCurrency } from '@/lib/utils';
 
+interface PlanOption {
+  id: string;
+  label: string;
+}
+
 export default function AgentDashboardPage() {
   const t = useTranslations('agent');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
-  const [citizenPhone, setCitizenPhone] = useState('0780000001');
-  const [productPlanId, setProductPlanId] = useState('40404040-4040-4040-4040-404040404040');
+  const [citizenPhone, setCitizenPhone] = useState('');
+  const [productPlanId, setProductPlanId] = useState('');
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['agent', 'applications'],
     queryFn: () => agentApi.listApplications(),
   });
 
-  const createMutation = useMutation({
-    mutationFn: () => agentApi.createAssistedApplication(citizenPhone, productPlanId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['agent', 'applications'] }),
+  const { data: planOptions = [], isLoading: plansLoading } = useQuery({
+    queryKey: ['agent', 'product-plans'],
+    queryFn: async (): Promise<PlanOption[]> => {
+      const { content } = await productApi.list(0, 50);
+      const details = await Promise.all(content.map((p) => productApi.getById(p.id)));
+      return details.flatMap((product) =>
+        (product.plans ?? []).map((plan) => ({
+          id: plan.id,
+          label: `${product.name} — ${plan.name} (${plan.billingFrequency}) · ${formatCurrency(plan.premiumAmount)}`,
+        }))
+      );
+    },
   });
 
-  const applications = data?.content ?? [];
-  const pending = applications.filter((a) => a.status !== 'ACTIVE' && a.status !== 'COMPLETED').length;
+  const createMutation = useMutation({
+    mutationFn: () => agentApi.createAssistedApplication(citizenPhone.trim(), productPlanId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agent', 'applications'] });
+      setCitizenPhone('');
+      setProductPlanId('');
+    },
+  });
+
+  const applications = useMemo(() => data?.content ?? [], [data?.content]);
+  const pending = useMemo(
+    () =>
+      applications.filter(
+        (a) => !['ACTIVE', 'COMPLETED', 'APPROVED'].includes(a.status.toUpperCase())
+      ).length,
+    [applications]
+  );
+  const approved = useMemo(
+    () => applications.filter((a) => a.status.toUpperCase() === 'APPROVED').length,
+    [applications]
+  );
+
+  const canSubmit =
+    citizenPhone.trim().length >= 9 && productPlanId.length > 0 && !createMutation.isPending;
 
   return (
     <div className="p-6 lg:p-8">
@@ -44,13 +80,18 @@ export default function AgentDashboardPage() {
 
       <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3">
         <InsurerStatCard icon={ClipboardList} label={t('applications')} value={applications.length} />
-        <InsurerStatCard icon={Users} label="Pending review" value={pending} trend="Assisted enrollments" />
+        <InsurerStatCard
+          icon={Users}
+          label={t('pendingReview')}
+          value={pending}
+          trend={t('assistedTrend')}
+        />
         <InsurerStatCard
           icon={Phone}
-          label="Field agents"
-          value={1}
-          trend="Active today"
-          trendUp
+          label={t('approved')}
+          value={approved}
+          trend={t('approvedTrend')}
+          trendUp={approved > 0}
           className="col-span-2 md:col-span-1"
         />
       </div>
@@ -65,23 +106,38 @@ export default function AgentDashboardPage() {
             <div className="space-y-2">
               <Label>{t('citizenPhone')}</Label>
               <Input
-                placeholder="0780000001"
+                placeholder={t('phonePlaceholder')}
                 value={citizenPhone}
                 onChange={(e) => setCitizenPhone(e.target.value)}
+                inputMode="tel"
               />
             </div>
             <div className="space-y-2">
-              <Label>{t('productPlan')}</Label>
-              <Input
-                placeholder="Plan UUID"
+              <Label htmlFor="product-plan">{t('selectPlan')}</Label>
+              <select
+                id="product-plan"
+                className="flex h-10 w-full rounded-md border border-brand-border bg-white px-3 py-2 text-sm text-brand-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
                 value={productPlanId}
                 onChange={(e) => setProductPlanId(e.target.value)}
-              />
+                disabled={plansLoading}
+              >
+                <option value="">
+                  {plansLoading ? t('loadingPlans') : t('selectPlanPlaceholder')}
+                </option>
+                {planOptions.map((plan) => (
+                  <option key={plan.id} value={plan.id}>
+                    {plan.label}
+                  </option>
+                ))}
+              </select>
+              {!plansLoading && planOptions.length === 0 && (
+                <p className="text-xs text-brand-muted">{t('noPlans')}</p>
+              )}
             </div>
           </div>
           {createMutation.isSuccess && (
             <Alert variant="default" className="mt-4">
-              Application created successfully.
+              {t('createSuccess')}
             </Alert>
           )}
           {createMutation.error && (
@@ -94,6 +150,7 @@ export default function AgentDashboardPage() {
             variant="pill-accent"
             onClick={() => createMutation.mutate()}
             loading={createMutation.isPending}
+            disabled={!canSubmit}
           >
             {t('createApplication')}
           </Button>
@@ -102,7 +159,9 @@ export default function AgentDashboardPage() {
 
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-brand-primary-dark">{t('applications')}</h2>
-        <span className="text-sm font-semibold text-brand-primary">{applications.length} total</span>
+        <span className="text-sm font-semibold text-brand-primary">
+          {t('totalApplications', { count: applications.length })}
+        </span>
       </div>
 
       {isLoading && <PageSkeleton cards={4} showHeader={false} />}
@@ -127,7 +186,7 @@ export default function AgentDashboardPage() {
       {!isLoading && applications.length === 0 && (
         <Card className="border-dashed">
           <CardContent className="py-10 text-center text-sm text-brand-muted">
-            No assisted applications yet. Create one for a citizen above.
+            {t('emptyApplications')}
           </CardContent>
         </Card>
       )}

@@ -7,7 +7,7 @@ import { insurerApi } from '@/lib/api';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 
@@ -45,7 +45,7 @@ export default function InsurerPartnerPage() {
           <h2 className="text-lg font-semibold text-brand-primary-dark">{t('contracts')}</h2>
         </div>
         {cLoading ? (
-          <Spinner />
+          <ListSkeleton rows={3} />
         ) : contractList.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center text-sm text-brand-muted">
@@ -75,7 +75,7 @@ export default function InsurerPartnerPage() {
           <h2 className="text-lg font-semibold text-brand-primary-dark">{t('invoices')}</h2>
         </div>
         {iLoading ? (
-          <Spinner />
+          <ListSkeleton rows={3} />
         ) : invoiceList.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center text-sm text-brand-muted">
@@ -107,7 +107,7 @@ export default function InsurerPartnerPage() {
           <h2 className="text-lg font-semibold text-brand-primary-dark">{t('revenueLedger')}</h2>
         </div>
         {lLoading ? (
-          <Spinner />
+          <ListSkeleton rows={4} />
         ) : ledgerList.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="py-8 text-center text-sm text-brand-muted">

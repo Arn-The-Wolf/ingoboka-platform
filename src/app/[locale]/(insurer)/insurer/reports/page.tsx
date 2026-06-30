@@ -9,7 +9,8 @@ import { InsurerStatsChart } from '@/components/insurer/stats-chart';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
+import { ListSkeleton } from '@/components/ui/list-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Alert } from '@/components/ui/alert';
 
 export default function InsurerReportsPage() {
@@ -33,8 +34,10 @@ export default function InsurerReportsPage() {
       <PageHeader title={t('reports')} subtitle={t('reportsSubtitle')} />
 
       {statsLoading ? (
-        <div className="mb-8 flex justify-center">
-          <Spinner />
+        <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-xl" shimmer />
+          ))}
         </div>
       ) : statsError ? (
         <Alert variant="error" className="mb-8">
@@ -64,9 +67,7 @@ export default function InsurerReportsPage() {
       ) : null}
 
       {policiesLoading ? (
-        <div className="flex justify-center py-8">
-          <Spinner />
-        </div>
+        <ListSkeleton rows={2} className="grid gap-4 sm:grid-cols-2" />
       ) : policyData ? (
         <div className="grid gap-4 sm:grid-cols-2">
           <Card className="border-brand-border/60 shadow-card">

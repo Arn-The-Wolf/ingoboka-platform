@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import {
   ArrowRight,
   Bike,
@@ -19,88 +20,92 @@ import { setRecommendedProductIds } from '@/lib/recommended-products';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 
 type QuestionId = 'occupation' | 'dependents' | 'smartphone' | 'payment' | 'income' | 'ready';
 
-interface Question {
+const QUESTION_META: Array<{
   id: QuestionId;
-  title: string;
-  subtitle: string;
-  options: Array<{ value: string; label: string; icon: React.ComponentType<{ className?: string }> }>;
-}
-
-const QUESTIONS: Question[] = [
+  iconMap: Record<string, React.ComponentType<{ className?: string }>>;
+  options: Array<{ value: string; icon: React.ComponentType<{ className?: string }> }>;
+}> = [
   {
     id: 'occupation',
-    title: 'What is your main work?',
-    subtitle: 'Tell us what you do so we can suggest the right cover for your daily risks.',
+    iconMap: {},
     options: [
-      { value: 'MOTO_RIDER', label: 'Moto Rider', icon: Bike },
-      { value: 'FARMER', label: 'Farmer', icon: Sprout },
-      { value: 'VENDOR', label: 'Market Vendor', icon: Store },
-      { value: 'OFFICE', label: 'Office Worker', icon: Building2 },
-      { value: 'OTHER', label: 'Other', icon: MoreHorizontal },
+      { value: 'MOTO_RIDER', icon: Bike },
+      { value: 'FARMER', icon: Sprout },
+      { value: 'VENDOR', icon: Store },
+      { value: 'OFFICE', icon: Building2 },
+      { value: 'OTHER', icon: MoreHorizontal },
     ],
   },
   {
     id: 'dependents',
-    title: 'How many people depend on you?',
-    subtitle: 'This helps us recommend family or individual plans.',
+    iconMap: {},
     options: [
-      { value: '0', label: 'Just me', icon: Users },
-      { value: '1-2', label: '1–2 people', icon: Users },
-      { value: '3-4', label: '3–4 people', icon: Users },
-      { value: '5+', label: '5 or more', icon: Users },
+      { value: '0', icon: Users },
+      { value: '1-2', icon: Users },
+      { value: '3-4', icon: Users },
+      { value: '5+', icon: Users },
     ],
   },
   {
     id: 'smartphone',
-    title: 'Do you own a smartphone?',
-    subtitle: 'Ingoboka works best on mobile for claims and payments.',
+    iconMap: {},
     options: [
-      { value: 'YES', label: 'Yes, I use it daily', icon: Smartphone },
-      { value: 'SOMETIMES', label: 'Sometimes', icon: Smartphone },
-      { value: 'NO', label: 'No smartphone', icon: Smartphone },
+      { value: 'YES', icon: Smartphone },
+      { value: 'SOMETIMES', icon: Smartphone },
+      { value: 'NO', icon: Smartphone },
     ],
   },
   {
     id: 'payment',
-    title: 'How do you prefer to pay?',
-    subtitle: 'Choose the premium frequency that fits your cash flow.',
+    iconMap: {},
     options: [
-      { value: 'DAILY', label: 'Daily (small amounts)', icon: Store },
-      { value: 'WEEKLY', label: 'Weekly', icon: Store },
-      { value: 'MONTHLY', label: 'Monthly', icon: Store },
+      { value: 'DAILY', icon: Store },
+      { value: 'WEEKLY', icon: Store },
+      { value: 'MONTHLY', icon: Store },
     ],
   },
   {
     id: 'income',
-    title: 'What is your daily income?',
-    subtitle: 'We use this only to check affordability — never shared.',
+    iconMap: {},
     options: [
-      { value: 'UNDER_2K', label: 'Under 2,000 RWF', icon: Store },
-      { value: '2K_5K', label: '2,000 – 5,000 RWF', icon: Store },
-      { value: '5K_10K', label: '5,000 – 10,000 RWF', icon: Store },
-      { value: 'OVER_10K', label: 'Over 10,000 RWF', icon: Store },
+      { value: 'UNDER_2K', icon: Store },
+      { value: '2K_5K', icon: Store },
+      { value: '5K_10K', icon: Store },
+      { value: 'OVER_10K', icon: Store },
     ],
   },
   {
     id: 'ready',
-    title: 'Almost there! Ready for results?',
-    subtitle: 'We will match you with affordable protection for your family.',
-    options: [
-      { value: 'YES', label: 'Show my recommendations', icon: ArrowRight },
-    ],
+    iconMap: {},
+    options: [{ value: 'YES', icon: ArrowRight }],
   },
 ];
 
 export default function NeedsAssessmentPage() {
+  const t = useTranslations('citizen.needsAssessment');
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Partial<Record<QuestionId, string>>>({});
   const [showResults, setShowResults] = useState(false);
+
+  const questions = useMemo(
+    () =>
+      QUESTION_META.map((meta) => ({
+        id: meta.id,
+        title: t(`questions.${meta.id}.title`),
+        subtitle: t(`questions.${meta.id}.subtitle`),
+        options: meta.options.map((opt) => ({
+          value: opt.value,
+          label: t(`questions.${meta.id}.${opt.value}`),
+          icon: opt.icon,
+        })),
+      })),
+    [t]
+  );
 
   const assessmentMutation = useMutation({
     mutationFn: () =>
@@ -121,8 +126,8 @@ export default function NeedsAssessmentPage() {
     },
   });
 
-  const question = QUESTIONS[step];
-  const progress = ((step + 1) / QUESTIONS.length) * 100;
+  const question = questions[step];
+  const progress = ((step + 1) / questions.length) * 100;
   const selected = question ? answers[question.id] : undefined;
 
   function handleSelect(value: string) {
@@ -131,7 +136,7 @@ export default function NeedsAssessmentPage() {
   }
 
   function handleNext() {
-    if (step < QUESTIONS.length - 1) {
+    if (step < questions.length - 1) {
       setStep((s) => s + 1);
       return;
     }
@@ -146,24 +151,21 @@ export default function NeedsAssessmentPage() {
   if (showResults) {
     return (
       <>
-        <CitizenHeader title="Needs Assessment" />
+        <CitizenHeader title={t('title')} />
         <PageContainer narrow className="flex flex-col items-center py-16 text-center">
           <div className="relative mb-8 h-32 w-32">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="h-20 w-20 animate-spin rounded-full border-4 border-brand-primary border-t-transparent" />
             </div>
           </div>
-          <h2 className="mb-2 text-xl font-semibold text-brand-primary">
-            Finding your perfect cover…
-          </h2>
+          <h2 className="mb-2 text-xl font-semibold text-brand-primary">{t('findingCover')}</h2>
           <p className="max-w-sm text-sm text-brand-muted">
-            {assessmentMutation.data?.guidance ||
-              "We're analyzing your risk profile to find the most affordable protection for your family."}
+            {assessmentMutation.data?.guidance || t('analyzing')}
           </p>
           {assessmentMutation.data && (
             <>
               <p className="mt-4 text-sm font-semibold text-brand-primary">
-                Match score: {assessmentMutation.data.score}%
+                {t('matchScore', { score: assessmentMutation.data.score })}
               </p>
               {assessmentMutation.data.recommendedProducts &&
                 assessmentMutation.data.recommendedProducts.length > 0 && (
@@ -178,7 +180,6 @@ export default function NeedsAssessmentPage() {
                 )}
             </>
           )}
-          {assessmentMutation.isPending && <Spinner className="mt-6" />}
         </PageContainer>
       </>
     );
@@ -186,17 +187,15 @@ export default function NeedsAssessmentPage() {
 
   return (
     <>
-      <CitizenHeader title="Needs Assessment" />
+      <CitizenHeader title={t('title')} />
       <PageContainer narrow className="flex min-h-[calc(100vh-8rem)] flex-col pb-28">
         <Link href="/products" className="mb-4 text-sm font-medium text-brand-primary hover:underline">
-          ← Back to products
+          {t('backToProducts')}
         </Link>
 
         <div className="mb-6">
           <div className="mb-1 flex justify-between text-xs text-brand-muted">
-            <span>
-              Question {step + 1} of {QUESTIONS.length}
-            </span>
+            <span>{t('questionOf', { current: step + 1, total: questions.length })}</span>
             <span className="font-semibold text-brand-primary">{Math.round(progress)}%</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-brand-surface-container">
@@ -251,7 +250,7 @@ export default function NeedsAssessmentPage() {
       <footer className="fixed bottom-0 left-0 right-0 z-30 border-t border-brand-border bg-brand-surface-container-low px-4 py-4 lg:static lg:border-t-0 lg:bg-transparent lg:px-0 lg:py-0">
         <div className="mx-auto flex max-w-3xl gap-3">
           <Button variant="outline" className="flex-1 rounded-full" onClick={handleSkip}>
-            Skip for now
+            {t('skip')}
           </Button>
           <Button
             variant="pill-accent"
@@ -260,7 +259,7 @@ export default function NeedsAssessmentPage() {
             loading={assessmentMutation.isPending}
             onClick={handleNext}
           >
-            {step === QUESTIONS.length - 1 ? 'See results' : 'Continue'}
+            {step === questions.length - 1 ? t('seeResults') : t('continue')}
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>

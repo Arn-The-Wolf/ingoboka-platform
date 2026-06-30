@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Home, Package, FileText, Users, LogOut, Shield } from 'lucide-react';
+import { Home, Package, FileText, Users, LogOut, Shield, Bell } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 import { cn, getInitials } from '@/lib/utils';
 import { useLogout } from '@/hooks/use-auth';
@@ -13,6 +13,7 @@ const navItems = [
   { href: '/dashboard', icon: Home, labelKey: 'home' as const },
   { href: '/products', icon: Package, labelKey: 'products' as const },
   { href: '/claims', icon: FileText, labelKey: 'claims.nav' as const },
+  { href: '/notifications', icon: Bell, labelKey: 'notifications.nav' as const },
   { href: '/dependants', icon: Users, labelKey: 'dependants' as const },
 ];
 
