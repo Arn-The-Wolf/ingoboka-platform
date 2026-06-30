@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { getApiBaseUrl } from './config';
 import { mapAuthUser, unwrapPage } from './mappers';
 import { getWithFallback, mapApplicationStatusFilter, PENDING_APPLICATION_STATUSES } from './integration-helpers';
 import type { ApplicationResponse } from './products';
@@ -125,7 +126,7 @@ export const adminApi = {
       platformName: 'Ingoboka',
       defaultLocale: 'rw',
       maintenanceMode: false,
-      apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8080/api/v1',
+      apiBaseUrl: getApiBaseUrl(),
       supportEmail: 'support@ingoboka.rw',
     };
     try {

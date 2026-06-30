@@ -28,6 +28,17 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8080/api/v1
 
 Do **not** point at remote hosts (e.g. `185.181.10.165`) for local work.
 
+### Production (Vercel)
+
+The live site is HTTPS; calling the HTTP API directly from the browser is blocked (mixed content). Use the built-in proxy:
+
+| Variable | Value |
+|----------|--------|
+| `NEXT_PUBLIC_API_BASE_URL` | `/api/v1` |
+| `API_PROXY_TARGET` | `http://185.181.10.165:8085` |
+
+Vercel rewrites `/api/v1/*` to the Rodin API server-side.
+
 ### 3. Open the app
 
 http://localhost:3000

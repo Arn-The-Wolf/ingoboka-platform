@@ -19,7 +19,23 @@ const nextConfig = {
         protocol: 'http',
         hostname: 'localhost',
       },
+      {
+        protocol: 'http',
+        hostname: '185.181.10.165',
+      },
     ],
+  },
+  async rewrites() {
+    const proxyTarget = process.env.API_PROXY_TARGET?.replace(/\/$/, '');
+    if (!proxyTarget) {
+      return [];
+    }
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${proxyTarget}/api/v1/:path*`,
+      },
+    ];
   },
 };
 
