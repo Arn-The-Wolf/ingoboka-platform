@@ -68,3 +68,6 @@ Untitled
 .tmp-api/
 .tmp-api/
 .env*
+
+.tmp-*.json
+
