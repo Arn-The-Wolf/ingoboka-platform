@@ -24,11 +24,11 @@ export function InsurerStatCard({
   return (
     <div
       className={cn(
-        'flex flex-col justify-between rounded-xl border border-brand-border/60 bg-white p-4 shadow-card',
+        'group flex flex-col justify-between rounded-xl border border-brand-border/60 bg-white p-4 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-primary/25 hover:shadow-elevated',
         className
       )}
     >
-      <Icon className="mb-2 h-5 w-5 text-brand-primary" />
+      <Icon className="mb-2 h-5 w-5 text-brand-primary transition-transform duration-300 group-hover:scale-110" />
       <div>
         <p className="text-xs text-brand-muted">{label}</p>
         <p className="text-2xl font-bold text-brand-primary-dark">{value}</p>

@@ -8,7 +8,7 @@ import { InsurerStatsChart } from '@/components/insurer/stats-chart';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { LoadingLink } from '@/components/navigation/loading-link';
-import { Spinner } from '@/components/ui/spinner';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
 
 export default function InsurerDashboardPage() {
   const t = useTranslations('insurer');
@@ -19,9 +19,7 @@ export default function InsurerDashboardPage() {
       <PageHeader title={t('greeting')} subtitle={t('portfolioSummary')} />
 
       {statsLoading ? (
-        <div className="mb-8 flex justify-center">
-          <Spinner />
-        </div>
+        <PageSkeleton cards={4} showHeader={false} />
       ) : stats ? (
         <>
           <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">

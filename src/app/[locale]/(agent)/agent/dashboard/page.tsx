@@ -8,7 +8,7 @@ import { agentApi } from '@/lib/api';
 import { InsurerStatCard } from '@/components/insurer/insurer-stat-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -105,11 +105,7 @@ export default function AgentDashboardPage() {
         <span className="text-sm font-semibold text-brand-primary">{applications.length} total</span>
       </div>
 
-      {isLoading && (
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
-      )}
+      {isLoading && <PageSkeleton cards={4} showHeader={false} />}
       {error && <Alert variant="error">{tCommon('error')}</Alert>}
 
       <div className="grid gap-3 lg:grid-cols-2">

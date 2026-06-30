@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { AnimatedSection } from '@/components/ui/animated-section';
 import { cn } from '@/lib/utils';
 
 export const FAQ_ITEMS = [
@@ -21,31 +22,43 @@ export function MarketingFaqAccordion() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <div className="divide-y divide-brand-border/60 rounded-2xl border border-brand-border/60 bg-brand-background">
-      {FAQ_ITEMS.map((item, index) => {
-        const isOpen = openIndex === index;
-        return (
-          <div key={item.qKey}>
-            <button
-              type="button"
-              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-brand-primary-light/30"
-              aria-expanded={isOpen}
-              onClick={() => setOpenIndex(isOpen ? null : index)}
-            >
-              <span className="font-semibold text-brand-primary-dark">{t(item.qKey)}</span>
-              <ChevronDown
+    <AnimatedSection>
+      <div className="divide-y divide-brand-border/60 rounded-2xl border border-brand-border/60 bg-brand-background shadow-card">
+        {FAQ_ITEMS.map((item, index) => {
+          const isOpen = openIndex === index;
+          return (
+            <div key={item.qKey}>
+              <button
+                type="button"
                 className={cn(
-                  'h-5 w-5 shrink-0 text-brand-muted transition-transform',
-                  isOpen && 'rotate-180'
+                  'flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors duration-200',
+                  isOpen ? 'bg-brand-primary-light/40 text-brand-primary' : 'hover:bg-brand-primary-light/30'
                 )}
-              />
-            </button>
-            {isOpen && (
-              <div className="px-5 pb-4 text-sm leading-relaxed text-brand-muted">{t(item.aKey)}</div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+                aria-expanded={isOpen}
+                onClick={() => setOpenIndex(isOpen ? null : index)}
+              >
+                <span className="font-semibold text-brand-primary-dark">{t(item.qKey)}</span>
+                <ChevronDown
+                  className={cn(
+                    'h-5 w-5 shrink-0 text-brand-muted transition-transform duration-300',
+                    isOpen && 'rotate-180 text-brand-primary'
+                  )}
+                />
+              </button>
+              <div
+                className={cn(
+                  'grid transition-all duration-300 ease-in-out',
+                  isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                )}
+              >
+                <div className="overflow-hidden">
+                  <div className="px-5 pb-4 text-sm leading-relaxed text-brand-muted">{t(item.aKey)}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </AnimatedSection>
   );
 }

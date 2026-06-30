@@ -353,7 +353,28 @@
         "description": "Inyungu y'imisanzu yose yo gufasha umuryango wawe mu bihe bigoye.",
         "price": "FRW 1,000"
       },
-      "enrollCta": "Tangira"
+      "enrollCta": "Tangira",
+      "mostPopular": "Ikunzwe cyane"
+    },
+    "partners": {
+      "title": "Twizewe n'abafatanyabikorwa mu Rwanda",
+      "momo": "MTN MoMo",
+      "airtel": "Airtel Money",
+      "risa": "Bihuje na RISA",
+      "insurers": "Abafatanyabikorwa bemewe"
+    },
+    "testimonials": {
+      "title": "Abakoresha bavuga iki",
+      "subtitle": "Inkuru z'ukuri z'abanyarwanda bakoresha Ingoboka buri munsi.",
+      "quote1": "Niyandikishije mu minota icumi kuri telefoni yanjye. Amasezerano ari mu Kinyarwanda gusa — none ndumva neza icyo nishyura.",
+      "author1": "Marie U.",
+      "role1": "Umucuruzi muto, Kigali",
+      "quote2": "Igihe papa yanjye yakeneye ubuvuzi, natanze icyifuzo mu app kandi nakurikiranye buri munsi. Nta murongo muremure ku biro.",
+      "author2": "Jean Paul N.",
+      "role2": "Umunyagihugu ufite ubwishingizi, Musanze",
+      "quote3": "Nk'umukozi wo mu murima, mfasha imiryango kwiyandikisha mu minota. Kwishyura ukoresheje Mobile Money bituma umusanzu uba uciriritse kuri bose.",
+      "author3": "Grace M.",
+      "role3": "Umukozi wo mu murima wa Ingoboka, Huye"
     },
     "trust": {
       "title": "Kwizera n'ubunyangamugayo",

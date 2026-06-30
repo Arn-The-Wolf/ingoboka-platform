@@ -4,21 +4,21 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]',
   {
     variants: {
       variant: {
-        default: 'bg-brand-primary text-white hover:bg-brand-primary-dark',
+        default: 'bg-brand-primary text-white hover:bg-brand-primary-dark hover:shadow-elevated',
         secondary:
           'bg-brand-secondary text-white hover:bg-brand-secondary/90',
         outline:
-          'border border-brand-border bg-white hover:bg-brand-primary-light text-brand-primary-dark',
+          'border border-brand-border bg-white hover:bg-brand-primary-light hover:border-brand-primary/30 text-brand-primary-dark',
         ghost: 'hover:bg-brand-primary-light text-brand-primary-dark',
         destructive: 'bg-brand-error text-white hover:bg-brand-error/90',
         accent: 'bg-brand-accent text-brand-primary-dark hover:bg-brand-accent-dark',
         pill: 'rounded-full bg-brand-primary text-white hover:bg-brand-primary-dark shadow-sm',
         'pill-accent':
-          'rounded-full bg-brand-accent text-brand-primary-dark hover:bg-brand-accent-dark shadow-sm font-semibold',
+          'rounded-full bg-brand-accent text-brand-primary-dark hover:bg-brand-accent-dark hover:shadow-glow shadow-sm font-semibold',
       },
       size: {
         default: 'h-10 px-4 py-2',

@@ -44,6 +44,12 @@ const config: Config = {
         card: '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)',
         elevated: '0 4px 16px 0 rgb(27 107 58 / 0.12)',
         modal: '0 12px 32px 0 rgb(0 0 0 / 0.1)',
+        glow: '0 0 24px 0 rgb(244 162 40 / 0.35)',
+      },
+      animation: {
+        'fade-in-up': 'fade-in-up 0.6s ease-out both',
+        float: 'float 4s ease-in-out infinite',
+        marquee: 'marquee 28s linear infinite',
       },
     },
   },

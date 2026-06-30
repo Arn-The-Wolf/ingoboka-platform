@@ -9,7 +9,8 @@ import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { LoadingLink } from '@/components/navigation/loading-link';
 import { Card, CardContent } from '@/components/ui/card';
-import { Spinner } from '@/components/ui/spinner';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { formatDate } from '@/lib/utils';
@@ -42,9 +43,7 @@ export default function AdminDashboardPage() {
       <PageHeader title={t('dashboard')} subtitle={t('overview')} />
 
       {overviewLoading ? (
-        <div className="mb-8 flex justify-center">
-          <Spinner />
-        </div>
+        <PageSkeleton cards={5} showHeader={false} />
       ) : overviewError ? (
         <Alert variant="error" className="mb-8">
           {tCommon('error')}
@@ -101,8 +100,9 @@ export default function AdminDashboardPage() {
           </div>
 
           {orgsLoading ? (
-            <div className="flex justify-center py-12">
-              <Spinner />
+            <div className="space-y-3">
+              <Skeleton className="h-20 rounded-xl" shimmer />
+              <Skeleton className="h-20 rounded-xl" shimmer />
             </div>
           ) : recentOrgs.length > 0 ? (
             <div className="grid gap-3">
@@ -144,8 +144,9 @@ export default function AdminDashboardPage() {
           </div>
 
           {auditLoading ? (
-            <div className="flex justify-center py-12">
-              <Spinner />
+            <div className="space-y-2">
+              <Skeleton className="h-16 rounded-xl" shimmer />
+              <Skeleton className="h-16 rounded-xl" shimmer />
             </div>
           ) : recentAudit.length > 0 ? (
             <div className="space-y-2">

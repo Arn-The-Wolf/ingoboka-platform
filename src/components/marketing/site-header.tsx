@@ -32,9 +32,9 @@ export function SiteHeader() {
 
   const linkClass = (href: string, exact?: boolean) =>
     cn(
-      'text-sm font-medium transition-colors',
+      'relative text-sm font-medium transition-colors duration-200 after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:w-0 after:bg-brand-primary after:transition-all after:duration-300 hover:after:w-full',
       isActive(pathname, href, exact)
-        ? 'text-brand-primary'
+        ? 'text-brand-primary after:w-full'
         : 'text-brand-muted hover:text-brand-primary'
     );
 
@@ -49,7 +49,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-brand-border/60 bg-brand-background/95 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 lg:h-20 lg:px-8">
-        <LoadingLink href="/" className="text-xl font-bold tracking-tight text-brand-primary lg:text-2xl">
+        <LoadingLink href="/" className="text-xl font-bold tracking-tight text-brand-primary transition-colors hover:text-brand-primary-dark lg:text-2xl">
           {tCommon('appName')}
         </LoadingLink>
 
@@ -79,7 +79,7 @@ export function SiteHeader() {
           <LocaleSwitcher />
           <button
             type="button"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-brand-primary"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md text-brand-primary transition-colors hover:bg-brand-primary-light"
             aria-expanded={mobileOpen}
             aria-label={mobileOpen ? t('closeMenu') : t('openMenu')}
             onClick={() => setMobileOpen((o) => !o)}
@@ -89,8 +89,13 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {mobileOpen && (
-        <div className="border-t border-brand-border/60 bg-brand-background px-4 py-4 lg:hidden">
+      <div
+        className={cn(
+          'overflow-hidden border-t border-brand-border/60 bg-brand-background transition-all duration-300 ease-in-out lg:hidden',
+          mobileOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
+        )}
+      >
+        <div className="px-4 py-4">
           <nav className="flex flex-col gap-1" aria-label="Mobile">
             {NAV_LINKS.map((link) => (
               <LoadingLink
@@ -116,7 +121,7 @@ export function SiteHeader() {
             </div>
           </nav>
         </div>
-      )}
+      </div>
     </header>
   );
 }

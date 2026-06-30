@@ -353,7 +353,28 @@
         "description": "Lump-sum funeral benefit to support your family during difficult times.",
         "price": "RWF 1,000"
       },
-      "enrollCta": "Get started"
+      "enrollCta": "Get started",
+      "mostPopular": "Most popular"
+    },
+    "partners": {
+      "title": "Trusted by partners across Rwanda",
+      "momo": "MTN MoMo",
+      "airtel": "Airtel Money",
+      "risa": "RISA aligned",
+      "insurers": "Licensed insurers"
+    },
+    "testimonials": {
+      "title": "What our users say",
+      "subtitle": "Real stories from Rwandans using Ingoboka every day.",
+      "quote1": "I enrolled in under ten minutes on my phone. The policy is in plain Kinyarwanda — I finally understand what I'm paying for.",
+      "author1": "Marie U.",
+      "role1": "Small business owner, Kigali",
+      "quote2": "When my father needed hospital care, I submitted a claim from the app and tracked it daily. No long queues at an office.",
+      "author2": "Jean Paul N.",
+      "role2": "Citizen policyholder, Musanze",
+      "quote3": "As a field agent, I help families enroll in minutes. Mobile Money payment makes premiums affordable for everyone.",
+      "author3": "Grace M.",
+      "role3": "Ingoboka field agent, Huye"
     },
     "trust": {
       "title": "Trust & compliance",
