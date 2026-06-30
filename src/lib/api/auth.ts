@@ -138,19 +138,32 @@ export const authApi = {
 };
 
 export const customerApi = {
-  async getMe(): Promise<User> {
+  async getMe(): Promise<Partial<User> & { id?: string }> {
     const stored = useAuthStore.getState().user;
+    if (!stored) return mapAuthUser(null);
+
     try {
       const { data } = await apiClient.get<Record<string, unknown>>('/customers/me');
-      if (!stored) return mapAuthUser(null);
       const kycStatus = String(data.kycStatus ?? '');
+      let consentGiven = stored.consentGiven;
+      try {
+        const active = await listActiveConsents();
+        consentGiven = requiredConsentsSatisfied(active);
+      } catch {
+        /* keep stored consent flag */
+      }
+
       return {
         ...stored,
+        fullName: String(data.fullName ?? stored.fullName),
+        email: data.email ? String(data.email) : stored.email,
+        phone: data.phone ? String(data.phone) : stored.phone,
+        nationalId: data.nationalId ? String(data.nationalId) : stored.nationalId,
         verified: stored.verified || kycStatus === 'VERIFIED',
+        consentGiven,
       };
-    } catch (error) {
-      if (stored) return stored;
-      throw error;
+    } catch {
+      return stored;
     }
   },
 

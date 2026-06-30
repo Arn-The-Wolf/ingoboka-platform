@@ -129,8 +129,37 @@
       "incidentHospital": "Gusura ibitaro",
       "incidentOther": "Ikindi"
     },
-    "profile": "Umwirondoro",
-    "dependants": "Abagize"
+    "profile": {
+      "title": "Umwirondoro wanjye",
+      "subtitle": "Amakuru ya konti n'kwemeza umwirondoro",
+      "fallbackName": "Umunyagihugu",
+      "email": "Imeyili",
+      "nationalId": "Indangamuntu",
+      "verification": "Imiterere yo kwemeza",
+      "verified": "Byemejwe",
+      "pending": "Birategereje",
+      "kycTitle": "Kwemeza umwirondoro (KYC)",
+      "kycBody": "Ohereza umwirondoro wawe kugira ngo abatanga ubwishingizi basabe ibyifuzo vuba.",
+      "submitKyc": "Ohereza kwemeza",
+      "kycSubmitted": "Kwemeza byoherejwe — tuzakumenyesha igihe byasuzumwe.",
+      "alreadyVerified": "Byamaze kwemezwa"
+    },
+    "dependants": "Abagize",
+    "dependantsPage": {
+      "subtitle": "Gucunga abagize umuryango wawe ku mwirondoro wawe.",
+      "addTitle": "Ongeraho umuryango",
+      "firstName": "Izina ry'ubanza",
+      "lastName": "Izina ry'umuryango",
+      "dateOfBirth": "Itariki y'amavuko",
+      "relationship": "Isano",
+      "yourFamily": "Umuryango wawe",
+      "members": "Abagize {count}",
+      "empty": "Nta bagize umuryango bongeweho. Ongeraho umwe haruguru.",
+      "remove": "Kuraho",
+      "relChild": "Umwana",
+      "relSpouse": "Uwashakanye",
+      "relParent": "Umubyeyi"
+    }
   },
   "insurer": {
     "dashboard": "Ikibaho cy'uwatanga ubwishingizi",

@@ -69,7 +69,7 @@ export function useVerifyOtp() {
       authApi.verifyOtp({ phone: pendingPhone ?? '', code }),
     onSuccess: (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
-      router.push('/consent');
+      routeAfterAuth(router, data.user);
     },
   });
 }

@@ -13,6 +13,14 @@ export function ContactForm() {
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const name = String(fd.get('name') ?? '');
+    const email = String(fd.get('email') ?? '');
+    const message = String(fd.get('message') ?? '');
+    const subject = encodeURIComponent(`Ingoboka contact — ${name}`);
+    const body = encodeURIComponent(`${message}\n\n— ${name} <${email}>`);
+    window.location.href = `mailto:hello@ingoboka.rw?subject=${subject}&body=${body}`;
     setSubmitted(true);
   }
 

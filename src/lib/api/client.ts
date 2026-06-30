@@ -14,6 +14,7 @@ export const apiClient = axios.create({
 
 let accessToken: string | null = null;
 let onUnauthorized: (() => void) | null = null;
+let refreshAccessToken: (() => Promise<string | null>) | null = null;
 
 export function setAccessToken(token: string | null) {
   accessToken = token;
@@ -26,6 +27,10 @@ export function setAccessToken(token: string | null) {
 
 export function setUnauthorizedHandler(handler: () => void) {
   onUnauthorized = handler;
+}
+
+export function setTokenRefreshHandler(handler: () => Promise<string | null>) {
+  refreshAccessToken = handler;
 }
 
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
@@ -48,8 +53,24 @@ apiClient.interceptors.response.use(
     }
     return response;
   },
-  (error: AxiosError<ApiError>) => {
-    if (error.response?.status === 401) {
+  async (error: AxiosError<ApiError>) => {
+    const config = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
+    const status = error.response?.status;
+
+    if (status === 401 && config && !config._retry && refreshAccessToken) {
+      config._retry = true;
+      try {
+        const newToken = await refreshAccessToken();
+        if (newToken) {
+          config.headers.Authorization = `Bearer ${newToken}`;
+          return apiClient(config);
+        }
+      } catch {
+        /* fall through to logout */
+      }
+    }
+
+    if (status === 401) {
       onUnauthorized?.();
     }
     return Promise.reject(normalizeApiError(error));

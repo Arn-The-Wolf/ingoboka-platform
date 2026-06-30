@@ -61,17 +61,17 @@ export function CitizenSidebar() {
 
       <div className="border-t border-brand-border p-4">
         <div className="mb-3 flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-3">
+          <Link href="/profile" className="flex min-w-0 flex-1 items-center gap-3 rounded-lg p-1 transition-colors hover:bg-brand-primary-light/50">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-accent text-sm font-medium text-brand-primary-dark">
-              {getInitials(user?.fullName ?? 'Citizen')}
+              {getInitials(user?.fullName ?? t('profile.fallbackName'))}
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-brand-primary-dark">
-                {user?.fullName ?? 'Citizen'}
+                {user?.fullName ?? t('profile.fallbackName')}
               </p>
               <p className="truncate text-xs text-brand-muted">{user?.phone ?? user?.email}</p>
             </div>
-          </div>
+          </Link>
           <LocaleSwitcher />
         </div>
         <Button

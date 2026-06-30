@@ -35,6 +35,11 @@ interface DemoCredentialsPanelProps {
 
 export function DemoCredentialsPanel({ onFill, className }: DemoCredentialsPanelProps) {
   const t = useTranslations('auth');
+  const showDemo =
+    process.env.NODE_ENV === 'development' ||
+    process.env.NEXT_PUBLIC_SHOW_DEMO_CREDENTIALS === 'true';
+
+  if (!showDemo) return null;
 
   return (
     <div

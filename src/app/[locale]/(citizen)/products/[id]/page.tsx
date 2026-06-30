@@ -19,7 +19,7 @@ import { getProductHeroImage } from '@/lib/product-images';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { Alert } from '@/components/ui/alert';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { ProductPlan } from '@/lib/api/products';
 
@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading, isError, refetch } = useQuery({
     queryKey: ['products', productId, 'detail'],
     queryFn: () => productApi.getById(productId),
   });
@@ -94,13 +94,37 @@ export default function ProductDetailPage() {
     return q.options.find((o) => o.id === selected)?.correct;
   });
 
-  if (isLoading || !product) {
+  if (isLoading) {
     return (
       <>
         <CitizenHeader title="Product" />
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <PageContainer>
+          <div className="space-y-4">
+            <div className="h-64 animate-pulse rounded-2xl bg-brand-surface-container" />
+            <div className="h-8 w-48 animate-pulse rounded bg-brand-surface-container" />
+          </div>
+        </PageContainer>
+      </>
+    );
+  }
+
+  if (isError || !product) {
+    return (
+      <>
+        <CitizenHeader title="Product" />
+        <PageContainer>
+          <Alert variant="error" className="mb-4">
+            Could not load this product. It may have been removed or the API is unavailable.
+          </Alert>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={() => refetch()}>
+              Retry
+            </Button>
+            <Link href="/products">
+              <Button variant="pill">Back to products</Button>
+            </Link>
+          </div>
+        </PageContainer>
       </>
     );
   }

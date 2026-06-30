@@ -129,8 +129,37 @@
       "incidentHospital": "Hospital visit",
       "incidentOther": "Other"
     },
-    "profile": "Profile",
-    "dependants": "Dependants"
+    "profile": {
+      "title": "My profile",
+      "subtitle": "Account details and identity verification",
+      "fallbackName": "Citizen",
+      "email": "Email",
+      "nationalId": "National ID",
+      "verification": "Verification status",
+      "verified": "Verified",
+      "pending": "Pending",
+      "kycTitle": "Identity verification (KYC)",
+      "kycBody": "Submit your profile for verification so insurers can process claims faster.",
+      "submitKyc": "Submit for verification",
+      "kycSubmitted": "Verification submitted — we'll notify you when reviewed.",
+      "alreadyVerified": "Already verified"
+    },
+    "dependants": "Dependants",
+    "dependantsPage": {
+      "subtitle": "Manage family members on your profile.",
+      "addTitle": "Add dependant",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "dateOfBirth": "Date of birth",
+      "relationship": "Relationship",
+      "yourFamily": "Your family",
+      "members": "{count} members",
+      "empty": "No dependants added yet. Add a family member above.",
+      "remove": "Remove",
+      "relChild": "Child",
+      "relSpouse": "Spouse",
+      "relParent": "Parent"
+    }
   },
   "insurer": {
     "dashboard": "Insurer dashboard",

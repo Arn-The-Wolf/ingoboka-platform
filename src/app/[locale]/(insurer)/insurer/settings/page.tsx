@@ -9,7 +9,7 @@ import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
+import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -42,9 +42,7 @@ export default function InsurerSettingsPage() {
   if (isLoading) {
     return (
       <PageContainer narrow>
-        <div className="flex justify-center py-12">
-          <Spinner />
-        </div>
+        <PageSkeleton cards={1} showHeader={false} />
       </PageContainer>
     );
   }

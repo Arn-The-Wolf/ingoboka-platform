@@ -208,6 +208,14 @@ export const customerApiExt = {
 export const insurerApi = {
   async getSettings() {
     const { data } = await apiClient.get<Record<string, unknown>>('/insurer/settings');
+    if (typeof data.settingsJson === 'string' && data.settingsJson.trim()) {
+      try {
+        const parsed = JSON.parse(data.settingsJson) as Record<string, unknown>;
+        return { ...data, ...parsed };
+      } catch {
+        return data;
+      }
+    }
     return data;
   },
 
