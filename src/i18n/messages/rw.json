@@ -63,7 +63,11 @@
     "consentSubtitle": "Soma wemere kugira ngo ukomeze",
     "consentData": "Nemera ko Ingoboka ikoresha amakuru yanjye ku bw'ubwishingizi",
     "consentMarketing": "Nemera kwakira amakuru ku bicuruzwa binyuze kuri imeyili",
-    "consentTerms": "Nemera Amategeko n'Amabwiriza n'Politiki y'Ubuzima bwite"
+    "consentTerms": "Nemera Amategeko n'Amabwiriza n'Politiki y'Ubuzima bwite",
+    "demoCredentialsTitle": "Konti z'igerageza (kanda kuzuzuzamo)",
+    "demoCitizen": "Umunyagihugu",
+    "demoAdmin": "Umuyobozi",
+    "demoInsurer": "Ubwishingizi"
   },
   "citizen": {
     "dashboard": "Ubwishingizi bwanjye",

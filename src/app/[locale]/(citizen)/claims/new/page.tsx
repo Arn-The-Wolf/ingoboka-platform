@@ -39,6 +39,7 @@ export default function NewClaimPage() {
   const [description, setDescription] = useState('');
   const [claimedAmount, setClaimedAmount] = useState('50000');
   const [files, setFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<string | null>(null);
 
   const { data: policies, isLoading } = useQuery({
     queryKey: ['policies'],
@@ -60,9 +61,14 @@ export default function NewClaimPage() {
       let uploadFailed = false;
       if (files.length > 0) {
         try {
-          await claimApi.uploadDocuments(claimId, files);
+          for (let i = 0; i < files.length; i++) {
+            setUploadProgress(`Uploading ${files[i].name} (${i + 1}/${files.length})…`);
+            await claimApi.uploadDocuments(claimId, [files[i]]);
+          }
         } catch {
           uploadFailed = true;
+        } finally {
+          setUploadProgress(null);
         }
       }
 
@@ -253,6 +259,9 @@ export default function NewClaimPage() {
                     <p className="border-t border-brand-border pt-2 text-brand-muted">{description}</p>
                   </CardContent>
                 </Card>
+                {uploadProgress && (
+                  <p className="text-center text-sm font-medium text-brand-primary">{uploadProgress}</p>
+                )}
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1" onClick={() => setStep(3)}>
                     {tCommon('back')}
@@ -264,7 +273,7 @@ export default function NewClaimPage() {
                     loading={mutation.isPending}
                     onClick={() => mutation.mutate()}
                   >
-                    {t('submitClaim')}
+                    {uploadProgress ?? t('submitClaim')}
                   </Button>
                 </div>
               </section>

@@ -11,6 +11,7 @@ import type {
   RegisterRequest,
   User,
 } from '@/types';
+import type { ApiError } from '@/types';
 
 interface ConsentRecord {
   consentType: string;
@@ -18,27 +19,42 @@ interface ConsentRecord {
   revokedAt?: string | null;
 }
 
-async function filterConsentPayload(payload: ConsentRequest): Promise<ConsentRequest> {
+const TERMS_TYPES = ['TERMS_OF_SERVICE', 'TERMS', 'TERMS_AND_CONDITIONS'] as const;
+const DATA_TYPES = ['DATA_PROCESSING', 'PRIVACY', 'DATA_PROTECTION'] as const;
+const MARKETING_TYPES = ['MARKETING', 'MARKETING_COMMUNICATIONS'] as const;
+
+function hasActiveConsent(records: ConsentRecord[], types: readonly string[]): boolean {
+  return records.some((c) => c.granted && !c.revokedAt && types.includes(c.consentType));
+}
+
+async function listActiveConsents(): Promise<ConsentRecord[]> {
   const { data } = await apiClient.get<PaginatedResponse<ConsentRecord>>(
     '/customers/me/consents',
     { params: { page: 0, size: 20 } }
   );
+  return data.content.filter((c) => c.granted && !c.revokedAt);
+}
 
-  const active = new Set(
-    data.content
-      .filter((c) => c.granted && !c.revokedAt)
-      .map((c) => c.consentType)
-  );
+async function filterConsentPayload(payload: ConsentRequest): Promise<ConsentRequest> {
+  const active = await listActiveConsents();
+  const activeTypes = new Set(active.map((c) => c.consentType));
 
   return {
-    termsAccepted: payload.termsAccepted && !active.has('TERMS_OF_SERVICE'),
-    dataProcessing: payload.dataProcessing && !active.has('DATA_PROCESSING'),
-    marketing: payload.marketing && !active.has('MARKETING'),
+    termsAccepted:
+      payload.termsAccepted && !Array.from(TERMS_TYPES).some((t) => activeTypes.has(t)),
+    dataProcessing:
+      payload.dataProcessing && !Array.from(DATA_TYPES).some((t) => activeTypes.has(t)),
+    marketing:
+      payload.marketing && !Array.from(MARKETING_TYPES).some((t) => activeTypes.has(t)),
   };
 }
 
 function hasConsentToSubmit(body: ConsentRequest): boolean {
   return Boolean(body.termsAccepted || body.dataProcessing || body.marketing);
+}
+
+function requiredConsentsSatisfied(active: ConsentRecord[]): boolean {
+  return hasActiveConsent(active, TERMS_TYPES) && hasActiveConsent(active, DATA_TYPES);
 }
 
 export interface OtpDeliveryConfig {
@@ -140,8 +156,21 @@ export const customerApi = {
 
   async submitConsent(payload: ConsentRequest): Promise<Partial<User>> {
     const body = await filterConsentPayload(payload);
-    if (hasConsentToSubmit(body)) {
+    if (!hasConsentToSubmit(body)) {
+      return { consentGiven: true };
+    }
+
+    try {
       await apiClient.post('/customers/consent', body);
+    } catch (error) {
+      const status = (error as ApiError).status;
+      if (status === 500 || status === 409) {
+        const active = await listActiveConsents();
+        if (requiredConsentsSatisfied(active)) {
+          return { consentGiven: true };
+        }
+      }
+      throw error;
     }
     return { consentGiven: true };
   },

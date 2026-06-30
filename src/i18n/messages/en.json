@@ -63,7 +63,11 @@
     "consentSubtitle": "Please review and accept to continue",
     "consentData": "I consent to Ingoboka processing my personal data for insurance services",
     "consentMarketing": "I agree to receive product updates by email",
-    "consentTerms": "I accept the Terms of Service and Privacy Policy"
+    "consentTerms": "I accept the Terms of Service and Privacy Policy",
+    "demoCredentialsTitle": "Demo accounts (tap to fill)",
+    "demoCitizen": "Citizen",
+    "demoAdmin": "Platform admin",
+    "demoInsurer": "Insurer"
   },
   "citizen": {
     "dashboard": "My policies",

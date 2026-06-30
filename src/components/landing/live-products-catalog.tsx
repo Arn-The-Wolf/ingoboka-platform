@@ -10,7 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Carousel } from '@/components/ui/carousel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SectionHeading } from '@/components/landing/section-heading';
-import { productApi, type ProductSummary } from '@/lib/api/products';
+import { fetchPublicProducts } from '@/lib/api/public-products';
+import type { ProductSummary } from '@/lib/api/products';
 import { getProductHeroImage } from '@/lib/product-images';
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
@@ -162,8 +163,8 @@ export function LiveProductsCatalog({ useRegisterCta = true, className }: LivePr
   const t = useTranslations('landing');
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['marketing', 'products'],
-    queryFn: () => productApi.list(0, 12),
+    queryKey: ['marketing', 'products', 'public'],
+    queryFn: () => fetchPublicProducts(),
     staleTime: 5 * 60 * 1000,
   });
 

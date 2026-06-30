@@ -10,6 +10,7 @@ import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
 import { AuthBackButton } from '@/components/layout/auth-back-button';
+import { DemoCredentialsPanel } from '@/components/auth/demo-credentials-panel';
 import { useLogin } from '@/hooks/use-auth';
 import { normalizeCitizenPhone } from '@/lib/auth/phone';
 import { loginSchema, type LoginFormData } from '@/lib/validators';
@@ -55,6 +56,18 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-brand-primary">{t('login')}</h1>
         <p className="text-sm text-brand-muted">{t('loginSubtitle')}</p>
       </header>
+
+      <DemoCredentialsPanel
+        onFill={(demo) => {
+          setValue('loginMethod', demo.loginMethod);
+          if (demo.loginMethod === 'email') {
+            setValue('email', demo.identifier);
+          } else {
+            setValue('phone', demo.identifier.replace(/^\+?250/, ''));
+          }
+          setValue('password', demo.password);
+        }}
+      />
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {error && <Alert variant="error">{error.message}</Alert>}
