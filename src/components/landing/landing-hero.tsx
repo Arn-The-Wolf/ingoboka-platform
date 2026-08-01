@@ -119,24 +119,21 @@ export function LandingHero() {
               ))}
             </div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              className="flex flex-col gap-2 sm:flex-row sm:justify-center sm:gap-3 lg:justify-start"
-            >
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-center sm:gap-3 lg:justify-start">
               <LoadingLink href="/register" className="sm:flex-1 lg:flex-none">
-                <Button variant="pill-accent" className="w-full gap-2 py-4 text-sm font-bold sm:min-w-[180px] sm:py-5 lg:min-w-[200px] lg:py-6 lg:text-base hover:scale-105 active:scale-95 transition-transform">
-                  {t('getStarted')}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 lg:h-5 lg:w-5" />
+                <Button asChild variant="pill-accent" className="w-full gap-2 py-4 text-sm font-bold sm:min-w-[180px] sm:py-5 lg:min-w-[200px] lg:py-6 lg:text-base">
+                  <span>
+                    {t('getStarted')}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 lg:h-5 lg:w-5" />
+                  </span>
                 </Button>
               </LoadingLink>
               <LoadingLink href="/login" className="sm:flex-1 lg:flex-none">
-                <Button variant="outline" className="w-full rounded-full py-4 text-sm sm:min-w-[180px] sm:py-5 lg:min-w-[200px] lg:py-6 hover:scale-105 active:scale-95 transition-transform">
-                  {t('login')}
+                <Button asChild variant="outline" className="w-full rounded-full py-4 text-sm sm:min-w-[180px] sm:py-5 lg:min-w-[200px] lg:py-6">
+                  <span>{t('login')}</span>
                 </Button>
               </LoadingLink>
-            </motion.div>
+            </div>
           </div>
 
           {/* Right content - 3D animated hero visual */}
