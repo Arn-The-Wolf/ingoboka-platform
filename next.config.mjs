@@ -8,7 +8,7 @@ const nextConfig = {
   
   // Image optimization
   images: {
-    domains: ['localhost', 'minio.example', '185.181.10.165'],
+    domains: ['localhost', 'minio.example', '185.181.10.165', '4.168.192.169'],
     formats: ['image/avif', 'image/webp'],
   },
 
@@ -85,6 +85,18 @@ const nextConfig = {
         destination: '/rw',
         permanent: false,
         locale: false,
+      },
+    ];
+  },
+
+  // API Proxy - Rewrites HTTP backend calls to avoid mixed content errors on HTTPS
+  async rewrites() {
+    const apiProxyTarget = process.env.API_PROXY_TARGET || 'http://4.168.192.169:8085';
+    
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${apiProxyTarget}/api/v1/:path*`,
       },
     ];
   },
