@@ -1,6 +1,7 @@
 'use client';
 
 import { LucideIcon } from 'lucide-react';
+import { LoadingLink } from '@/components/navigation/loading-link';
 import { cn } from '@/lib/utils';
 
 interface InsurerStatCardProps {
@@ -10,6 +11,7 @@ interface InsurerStatCardProps {
   trend?: string;
   trendUp?: boolean;
   className?: string;
+  href?: string;
 }
 
 /** KPI stat card — matches insurer_dashboard_overview design. */
@@ -20,11 +22,13 @@ export function InsurerStatCard({
   trend,
   trendUp,
   className,
+  href,
 }: InsurerStatCardProps) {
-  return (
+  const content = (
     <div
       className={cn(
         'group flex flex-col justify-between rounded-xl border border-brand-border/60 bg-white p-4 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-primary/25 hover:shadow-elevated',
+        href && 'cursor-pointer hover:scale-105',
         className
       )}
     >
@@ -45,4 +49,10 @@ export function InsurerStatCard({
       </div>
     </div>
   );
+
+  if (href) {
+    return <LoadingLink href={href}>{content}</LoadingLink>;
+  }
+
+  return content;
 }

@@ -115,7 +115,7 @@ export default function CitizenDashboardPage() {
                   iconClass="text-brand-secondary"
                   title={t('browseProducts')}
                   subtitle="Explore plans"
-                  className="aspect-auto min-h-[7rem]"
+                  className="aspect-auto min-h-[7rem] transition-all duration-300 hover:scale-105 cursor-pointer"
                 />
                 <QuickActionCard
                   href="/claims/new"
@@ -124,7 +124,7 @@ export default function CitizenDashboardPage() {
                   iconClass="text-brand-primary"
                   title={t('claims.nav')}
                   subtitle="Report incident"
-                  className="aspect-auto min-h-[7rem]"
+                  className="aspect-auto min-h-[7rem] transition-all duration-300 hover:scale-105 cursor-pointer"
                 />
               </section>
 

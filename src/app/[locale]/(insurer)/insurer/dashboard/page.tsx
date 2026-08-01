@@ -29,12 +29,14 @@ export default function InsurerDashboardPage() {
               value={stats.activePolicies ?? stats.openClaims}
               trend={t('trendThisMonth')}
               trendUp
+              href="/insurer/policies"
             />
             <InsurerStatCard
               icon={FileText}
               label={t('openClaims')}
               value={stats.openClaims}
               trend={t('resolvedTodayTrend', { count: stats.resolvedToday })}
+              href="/insurer/claims"
             />
             <InsurerStatCard
               icon={TrendingUp}
@@ -42,12 +44,14 @@ export default function InsurerDashboardPage() {
               value={stats.resolvedToday}
               trend={t('onTrack')}
               trendUp
+              href="/insurer/claims"
             />
             <InsurerStatCard
               icon={Clock}
               label={t('avgResolution')}
               value={`${stats.avgResolutionDays}d`}
               trend={t('avgProcessing')}
+              href="/insurer/claims"
             />
           </div>
           <div className="mb-6">

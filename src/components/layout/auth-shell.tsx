@@ -15,11 +15,11 @@ export function AuthShell({ children }: AuthShellProps) {
   const tLanding = useTranslations('landing');
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-brand-background">
+    <div className="relative h-screen overflow-hidden bg-brand-background">
       <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-brand-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-brand-accent/15 blur-2xl" />
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl">
+      <div className="relative mx-auto flex h-screen w-full max-w-6xl">
         {/* Brand panel — desktop only */}
         <aside className="hidden w-1/2 flex-col justify-between border-r border-brand-border/60 bg-gradient-to-br from-brand-primary to-brand-primary-dark p-10 text-white lg:flex">
           <div className="flex items-center gap-3">
@@ -43,8 +43,8 @@ export function AuthShell({ children }: AuthShellProps) {
           <div className="flex justify-end p-4 lg:p-6">
             <LocaleSwitcher />
           </div>
-          <div className="flex flex-1 items-center justify-center px-4 pb-8 lg:px-10">
-            <div className="w-full max-w-lg rounded-2xl border border-brand-border/60 bg-white p-6 shadow-card lg:p-8">
+          <div className="flex flex-1 items-center justify-center px-4 pb-6 lg:px-10">
+            <div className="w-full max-w-lg overflow-y-auto max-h-[calc(100vh-120px)] rounded-2xl border border-brand-border/60 bg-white p-5 shadow-card lg:p-6">
               {children}
             </div>
           </div>

@@ -53,12 +53,12 @@ function ProductPlanCard({
   return (
     <article
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand-border/60 bg-brand-background shadow-card interactive-card',
+        'group relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand-border/60 bg-brand-background shadow-card transition-all duration-300 hover:-translate-y-2 hover:shadow-elevated',
         popular && 'border-brand-primary/40 ring-1 ring-brand-primary/10'
       )}
     >
       {popular && (
-        <span className="absolute right-4 top-4 z-10 rounded-full bg-brand-accent px-3 py-0.5 text-xs font-bold text-brand-primary-dark shadow-sm">
+        <span className="absolute right-4 top-4 z-10 rounded-full bg-brand-accent px-3 py-0.5 text-xs font-bold text-brand-primary-dark shadow-sm animate-pulse">
           {mostPopularLabel}
         </span>
       )}
@@ -67,12 +67,12 @@ function ProductPlanCard({
           src={heroSrc}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          className="object-cover transition-transform duration-700 group-hover:scale-110"
           sizes="(max-width: 768px) 85vw, 33vw"
         />
       </div>
       <div className="flex flex-1 flex-col p-6">
-        <h3 className="mb-2 text-lg font-semibold text-brand-primary-dark">{product.name}</h3>
+        <h3 className="mb-2 text-lg font-semibold text-brand-primary-dark leading-tight transition-colors group-hover:text-brand-primary line-clamp-2">{product.name}</h3>
         <p className="mb-4 flex-1 text-sm leading-relaxed text-brand-muted line-clamp-3">
           {product.description ?? ''}
         </p>
@@ -84,10 +84,10 @@ function ProductPlanCard({
         <LoadingLink href={href}>
           <Button
             variant="outline"
-            className="w-full gap-2 rounded-full transition-all group-hover:border-brand-primary group-hover:bg-brand-primary group-hover:text-white"
+            className="w-full gap-2 rounded-full transition-all duration-300 group-hover:border-brand-primary group-hover:bg-brand-primary group-hover:text-white group-hover:shadow-lg"
           >
             {enrollLabel}
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </LoadingLink>
       </div>
@@ -117,35 +117,35 @@ function StaticFallbackCard({
   return (
     <article
       className={cn(
-        'group relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand-border/60 bg-brand-background shadow-card interactive-card',
+        'group relative flex h-full flex-col overflow-hidden rounded-2xl border border-brand-border/60 bg-brand-background shadow-card transition-all duration-300 hover:-translate-y-2 hover:shadow-elevated',
         popular && 'border-brand-primary/40 ring-1 ring-brand-primary/10'
       )}
     >
       {popular && (
-        <span className="absolute right-4 top-4 z-10 rounded-full bg-brand-accent px-3 py-0.5 text-xs font-bold text-brand-primary-dark shadow-sm">
+        <span className="absolute right-4 top-4 z-10 rounded-full bg-brand-accent px-3 py-0.5 text-xs font-bold text-brand-primary-dark shadow-sm animate-pulse">
           {t('products.mostPopular')}
         </span>
       )}
       <div className="relative h-36 w-full overflow-hidden">
-        <Image src={imageMap[keyName]} alt="" fill className="object-cover" sizes="33vw" />
+        <Image src={imageMap[keyName]} alt="" fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="33vw" />
       </div>
       <div className="flex flex-1 flex-col p-6">
-        <div className={cn('mb-4 flex h-12 w-12 items-center justify-center rounded-xl', accent)}>
+        <div className={cn('mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6', accent)}>
           <Icon className="h-6 w-6" />
         </div>
-        <h3 className="mb-2 text-lg font-semibold text-brand-primary-dark">
+        <h3 className="mb-2 text-lg font-semibold text-brand-primary-dark leading-tight transition-colors group-hover:text-brand-primary line-clamp-2">
           {t(`products.${keyName}.name`)}
         </h3>
-        <p className="mb-4 flex-1 text-sm leading-relaxed text-brand-muted">
+        <p className="mb-4 flex-1 text-sm leading-relaxed text-brand-muted line-clamp-3">
           {t(`products.${keyName}.description`)}
         </p>
         <p className="mb-4 text-sm font-bold text-brand-primary">
           {t('products.fromPrice', { price: t(`products.${keyName}.price`) })}
         </p>
         <LoadingLink href="/register">
-          <Button variant="outline" className="w-full gap-2 rounded-full">
+          <Button variant="outline" className="w-full gap-2 rounded-full transition-all duration-300 group-hover:border-brand-primary group-hover:bg-brand-primary group-hover:text-white group-hover:shadow-lg">
             {t('products.enrollCta')}
-            <ArrowRight className="h-4 w-4" />
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </LoadingLink>
       </div>

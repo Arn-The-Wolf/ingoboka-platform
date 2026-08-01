@@ -139,7 +139,7 @@ export default function ClaimDetailPage() {
               <textarea
                 className="w-full rounded-lg border border-brand-border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
                 rows={3}
-                placeholder="Notes (optional)"
+                placeholder="Notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
               />

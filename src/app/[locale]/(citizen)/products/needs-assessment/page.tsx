@@ -188,12 +188,12 @@ export default function NeedsAssessmentPage() {
   return (
     <>
       <CitizenHeader title={t('title')} />
-      <PageContainer narrow className="flex min-h-[calc(100vh-8rem)] flex-col pb-28">
-        <Link href="/products" className="mb-4 text-sm font-medium text-brand-primary hover:underline">
+      <PageContainer narrow className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden pb-4">
+        <Link href="/products" className="mb-3 text-sm font-medium text-brand-primary hover:underline">
           {t('backToProducts')}
         </Link>
 
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="mb-1 flex justify-between text-xs text-brand-muted">
             <span>{t('questionOf', { current: step + 1, total: questions.length })}</span>
             <span className="font-semibold text-brand-primary">{Math.round(progress)}%</span>
@@ -206,13 +206,13 @@ export default function NeedsAssessmentPage() {
           </div>
         </div>
 
-        <div className="flex-1">
-          <h1 className="mb-2 text-2xl font-bold text-brand-primary-dark">{question.title}</h1>
-          <p className="mb-8 text-sm text-brand-muted">{question.subtitle}</p>
+        <div className="flex-1 overflow-y-auto">
+          <h1 className="mb-2 text-xl lg:text-2xl font-bold text-brand-primary-dark">{question.title}</h1>
+          <p className="mb-6 text-sm text-brand-muted">{question.subtitle}</p>
 
           <div
             className={cn(
-              'grid gap-3',
+              'grid gap-3 pb-4',
               question.options.length <= 3 ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-2'
             )}
           >
@@ -225,7 +225,7 @@ export default function NeedsAssessmentPage() {
                   type="button"
                   onClick={() => handleSelect(opt.value)}
                   className={cn(
-                    'flex flex-col items-center justify-center rounded-xl border-2 p-5 text-center transition-all active:scale-95',
+                    'flex flex-col items-center justify-center rounded-xl border-2 p-4 lg:p-5 text-center transition-all active:scale-95',
                     isSelected
                       ? 'border-brand-primary bg-brand-primary-light shadow-md'
                       : 'border-brand-border bg-white hover:border-brand-secondary'
@@ -233,11 +233,11 @@ export default function NeedsAssessmentPage() {
                 >
                   <div
                     className={cn(
-                      'mb-3 flex h-14 w-14 items-center justify-center rounded-full transition-colors',
+                      'mb-2 flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-full transition-colors',
                       isSelected ? 'bg-brand-accent' : 'bg-brand-primary-light'
                     )}
                   >
-                    <Icon className="h-7 w-7 text-brand-primary" />
+                    <Icon className="h-6 w-6 lg:h-7 lg:w-7 text-brand-primary" />
                   </div>
                   <span className="text-sm font-semibold text-brand-primary-dark">{opt.label}</span>
                 </button>
@@ -245,10 +245,8 @@ export default function NeedsAssessmentPage() {
             })}
           </div>
         </div>
-      </PageContainer>
 
-      <footer className="fixed bottom-0 left-0 right-0 z-30 border-t border-brand-border bg-brand-surface-container-low px-4 py-4 lg:static lg:border-t-0 lg:bg-transparent lg:px-0 lg:py-0">
-        <div className="mx-auto flex max-w-3xl gap-3">
+        <div className="flex gap-3 pt-4 border-t border-brand-border mt-auto">
           <Button variant="outline" className="flex-1 rounded-full" onClick={handleSkip}>
             {t('skip')}
           </Button>
@@ -263,7 +261,7 @@ export default function NeedsAssessmentPage() {
             <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
-      </footer>
+      </PageContainer>
     </>
   );
 }

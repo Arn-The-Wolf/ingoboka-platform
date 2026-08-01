@@ -12,17 +12,20 @@ function routeAfterAuth(
   router: ReturnType<typeof useRouter>,
   user: { role: string; consentGiven: boolean }
 ) {
+  let targetPath = '/dashboard';
+  
   if (user.role === 'PLATFORM_ADMIN') {
-    router.push('/admin/dashboard');
+    targetPath = '/admin/dashboard';
   } else if (user.role === 'AGENT') {
-    router.push('/agent/dashboard');
+    targetPath = '/agent/dashboard';
   } else if (isInsurerPortalRole(user.role as UserRole)) {
-    router.push('/insurer/dashboard');
+    targetPath = '/insurer/dashboard';
   } else if (!user.consentGiven) {
-    router.push('/consent');
-  } else {
-    router.push('/dashboard');
+    targetPath = '/consent';
   }
+
+  // Use window.location for reliable navigation (avoids Next.js router issues)
+  window.location.href = `/rw${targetPath}`;
 }
 
 export function useLogin() {
@@ -33,6 +36,7 @@ export function useLogin() {
     mutationFn: (payload: LoginRequest) => authApi.login(payload),
     onSuccess: (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
+      // Use window.location for reliable navigation
       routeAfterAuth(router, data.user);
     },
   });
@@ -54,7 +58,8 @@ export function useRegister() {
     onSuccess: (_config, variables) => {
       setPendingPhone(normalizeCitizenPhone(variables.phone));
       setPendingEmail(variables.email ?? null);
-      router.push('/verify');
+      // Use window.location for reliable navigation
+      window.location.href = '/rw/verify';
     },
   });
 }
@@ -69,6 +74,7 @@ export function useVerifyOtp() {
       authApi.verifyOtp({ phone: pendingPhone ?? '', code }),
     onSuccess: (data) => {
       setAuth(data.user, data.accessToken, data.refreshToken);
+      // Use window.location for reliable navigation
       routeAfterAuth(router, data.user);
     },
   });
@@ -89,7 +95,8 @@ export function useConsent() {
     mutationFn: (payload: ConsentRequest) => customerApi.submitConsent(payload),
     onSuccess: (updates) => {
       updateUser(updates);
-      router.push('/dashboard');
+      // Use window.location for reliable navigation
+      window.location.href = '/rw/dashboard';
     },
   });
 }
@@ -103,7 +110,8 @@ export function useLogout() {
     mutationFn: () => authApi.logout(refreshToken),
     onSettled: () => {
       logout();
-      router.push('/login');
+      // Use window.location for reliable navigation
+      window.location.href = '/rw/login';
     },
   });
 }

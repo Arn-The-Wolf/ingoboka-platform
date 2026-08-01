@@ -195,6 +195,16 @@ export const customerApiExt = {
     return data;
   },
 
+  async updateDependant(id: string, payload: {
+    firstName: string;
+    lastName: string;
+    relationship: string;
+    dateOfBirth?: string;
+  }) {
+    const { data } = await apiClient.put(`/customer/dependants/${id}`, payload);
+    return data;
+  },
+
   async removeDependant(id: string) {
     await apiClient.delete(`/customer/dependants/${id}`);
   },

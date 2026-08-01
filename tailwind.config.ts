@@ -49,7 +49,12 @@ const config: Config = {
       animation: {
         'fade-in-up': 'fade-in-up 0.6s ease-out both',
         float: 'float 4s ease-in-out infinite',
+        'float-delayed': 'float 4s ease-in-out 0.5s infinite',
         marquee: 'marquee 28s linear infinite',
+      },
+      perspective: {
+        '1000': '1000px',
+        '2000': '2000px',
       },
     },
   },

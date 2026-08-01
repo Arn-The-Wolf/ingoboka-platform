@@ -2,6 +2,7 @@
 
 import { ArrowRight, Layers, Route, Shield } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
 import { LoadingLink } from '@/components/navigation/loading-link';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { SectionHeading } from '@/components/landing/section-heading';
@@ -47,23 +48,31 @@ export function HomeHighlights() {
         <div className="grid gap-6 md:grid-cols-3 lg:gap-8">
           {HIGHLIGHTS.map(({ href, icon: Icon, titleKey, bodyKey, linkKey, accent }, index) => (
             <AnimatedSection key={href} delay={index * 80}>
-            <LoadingLink
-              href={href}
-              className={cn(
-                'group flex h-full flex-col rounded-2xl border border-brand-border/60 bg-brand-background p-6',
-                'interactive-card'
-              )}
-            >
-              <div className={cn('mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110', accent)}>
-                <Icon className="h-6 w-6 transition-colors group-hover:text-brand-primary" />
-              </div>
-              <h3 className="mb-2 text-lg font-semibold text-brand-primary-dark">{t(titleKey)}</h3>
-              <p className="mb-4 flex-1 text-sm leading-relaxed text-brand-muted">{t(bodyKey)}</p>
-              <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary group-hover:gap-2">
-                {t(linkKey)}
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </LoadingLink>
+              <LoadingLink href={href}>
+                <motion.div
+                  whileHover={{ 
+                    y: -8, 
+                    scale: 1.02,
+                    boxShadow: '0 12px 32px 0 rgba(27, 107, 58, 0.15)',
+                  }}
+                  transition={{ duration: 0.3 }}
+                  className="group flex h-full flex-col rounded-2xl border border-brand-border/60 bg-brand-background p-6 shadow-card"
+                >
+                  <motion.div 
+                    whileHover={{ scale: 1.15, rotate: 10 }}
+                    transition={{ duration: 0.3 }}
+                    className={cn('mb-4 flex h-12 w-12 items-center justify-center rounded-xl', accent)}
+                  >
+                    <Icon className="h-6 w-6 transition-colors group-hover:text-brand-primary" />
+                  </motion.div>
+                  <h3 className="mb-2 text-lg font-semibold text-brand-primary-dark">{t(titleKey)}</h3>
+                  <p className="mb-4 flex-1 text-sm leading-relaxed text-brand-muted">{t(bodyKey)}</p>
+                  <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-primary group-hover:gap-2 transition-all">
+                    {t(linkKey)}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </motion.div>
+              </LoadingLink>
             </AnimatedSection>
           ))}
         </div>

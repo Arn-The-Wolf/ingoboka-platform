@@ -50,35 +50,23 @@ export default function LoginPage() {
   const error = login.error as ApiError | null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <AuthBackButton href="/" />
       <header className="space-y-1">
         <h1 className="text-2xl font-bold text-brand-primary">{t('login')}</h1>
         <p className="text-sm text-brand-muted">{t('loginSubtitle')}</p>
       </header>
 
-      <DemoCredentialsPanel
-        onFill={(demo) => {
-          setValue('loginMethod', demo.loginMethod);
-          if (demo.loginMethod === 'email') {
-            setValue('email', demo.identifier);
-          } else {
-            setValue('phone', demo.identifier.replace(/^\+?250/, ''));
-          }
-          setValue('password', demo.password);
-        }}
-      />
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
         {error && <Alert variant="error">{error.message}</Alert>}
 
-        <div className="space-y-2">
-          <Label>{t('loginMethod')}</Label>
+        <div className="space-y-1.5">
+          <Label className="text-xs">{t('loginMethod')}</Label>
           <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
               variant={loginMethod === 'phone' ? 'pill' : 'outline'}
-              className="w-full rounded-full"
+              className="w-full rounded-full py-2 text-sm"
               onClick={() => setValue('loginMethod', 'phone')}
             >
               {t('loginWithPhone')}
@@ -86,7 +74,7 @@ export default function LoginPage() {
             <Button
               type="button"
               variant={loginMethod === 'email' ? 'pill' : 'outline'}
-              className="w-full rounded-full"
+              className="w-full rounded-full py-2 text-sm"
               onClick={() => setValue('loginMethod', 'email')}
             >
               {t('loginWithEmail')}
@@ -95,10 +83,10 @@ export default function LoginPage() {
         </div>
 
         {loginMethod === 'phone' ? (
-          <div className="space-y-2">
-            <Label htmlFor="phone">{t('phone')}</Label>
-            <div className="flex h-12 items-center gap-2 rounded-lg border border-brand-border bg-white px-3 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary">
-              <span className="border-r border-brand-border pr-2 text-sm font-medium text-brand-muted">
+          <div className="space-y-1.5">
+            <Label htmlFor="phone" className="text-xs">{t('phone')}</Label>
+            <div className="flex h-10 items-center gap-2 rounded-lg border border-brand-border bg-white px-3 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary">
+              <span className="border-r border-brand-border pr-2 text-xs font-medium text-brand-muted">
                 +250
               </span>
               <Input
@@ -107,41 +95,41 @@ export default function LoginPage() {
                 inputMode="tel"
                 autoComplete="tel"
                 placeholder="7XX XXX XXX"
-                className="border-0 px-0 shadow-none focus-visible:ring-0"
+                className="border-0 px-0 shadow-none focus-visible:ring-0 text-sm"
                 error={errors.phone?.message}
                 {...register('phone')}
               />
             </div>
-            <p className="text-xs text-brand-muted">{t('phoneLoginHint')}</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            <Label htmlFor="email">{t('email')}</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="email" className="text-xs">{t('email')}</Label>
             <Input
               id="email"
               type="email"
               inputMode="email"
               autoComplete="email"
               placeholder="you@example.com"
+              className="h-10 text-sm"
               error={errors.email?.message}
               {...register('email')}
             />
-            <p className="text-xs text-brand-muted">{t('emailLoginHint')}</p>
           </div>
         )}
 
         <input type="hidden" {...register('loginMethod')} />
 
-        <div className="space-y-2">
-          <Label htmlFor="password">{t('password')}</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="password" className="text-xs">{t('password')}</Label>
           <PasswordInput
             id="password"
             autoComplete="current-password"
+            className="h-10 text-sm"
             error={errors.password?.message}
             {...register('password')}
           />
         </div>
-        <Button type="submit" className="w-full py-6" variant="pill-accent" loading={login.isPending}>
+        <Button type="submit" className="w-full py-5 mt-2" variant="pill-accent" loading={login.isPending}>
           {t('login')}
         </Button>
       </form>

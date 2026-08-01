@@ -148,17 +148,26 @@
     "dependantsPage": {
       "subtitle": "Manage family members on your profile.",
       "addTitle": "Add dependant",
+      "editTitle": "Edit dependant",
       "firstName": "First name",
       "lastName": "Last name",
       "dateOfBirth": "Date of birth",
       "relationship": "Relationship",
       "yourFamily": "Your family",
       "members": "{count} members",
-      "empty": "No dependants added yet. Add a family member above.",
+      "empty": "No dependants added yet. Click 'Add Dependant' to get started.",
       "remove": "Remove",
+      "edit": "Edit",
+      "addButton": "Add Dependant",
+      "cancel": "Cancel",
+      "deleteConfirm": "Are you sure you want to remove this dependant?",
+      "deleteTitle": "Remove Dependant",
       "relChild": "Child",
       "relSpouse": "Spouse",
-      "relParent": "Parent"
+      "relParent": "Parent",
+      "name": "Name",
+      "dob": "Date of Birth",
+      "actions": "Actions"
     },
     "notifications": {
       "nav": "Notifications",

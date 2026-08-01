@@ -2,6 +2,7 @@
 
 import { Scale, Building2, Lock } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { motion } from 'framer-motion';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { SectionHeading } from './section-heading';
 
@@ -36,13 +37,25 @@ export function LandingTrust() {
         <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
           {TRUST_ITEMS.map(({ icon: Icon, titleKey, bodyKey }, index) => (
             <AnimatedSection key={titleKey} delay={index * 80}>
-              <article className="group interactive-card h-full rounded-2xl border border-brand-border/60 bg-white p-6 shadow-card">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-brand-primary-light transition-all duration-300 group-hover:bg-brand-primary group-hover:shadow-elevated">
+              <motion.article 
+                whileHover={{ 
+                  y: -8,
+                  scale: 1.02,
+                  boxShadow: '0 12px 32px 0 rgba(27, 107, 58, 0.15)',
+                }}
+                transition={{ duration: 0.3 }}
+                className="group h-full rounded-2xl border border-brand-border/60 bg-white p-6 shadow-card"
+              >
+                <motion.div 
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.3 }}
+                  className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-brand-primary-light transition-all duration-300 group-hover:bg-brand-primary group-hover:shadow-elevated"
+                >
                   <Icon className="h-5 w-5 text-brand-primary transition-colors group-hover:text-white" />
-                </div>
+                </motion.div>
                 <h3 className="mb-2 font-semibold text-brand-primary-dark">{t(titleKey)}</h3>
                 <p className="text-sm leading-relaxed text-brand-muted">{t(bodyKey)}</p>
-              </article>
+              </motion.article>
             </AnimatedSection>
           ))}
         </div>
