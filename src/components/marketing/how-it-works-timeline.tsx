@@ -32,7 +32,7 @@ export function HowItWorksTimeline() {
                 <li className="relative flex gap-6 pb-12 last:pb-0">
                   {!isLast && (
                     <div
-                      className="absolute left-6 top-14 h-[calc(100%-5rem)] w-0.5 bg-gradient-to-b from-brand-primary/60 to-brand-border/40"
+                      className="absolute left-6 top-14 h-[calc(100%-3.5rem)] w-0.5 bg-gradient-to-b from-brand-primary/60 to-brand-border/40"
                       aria-hidden
                     />
                   )}
