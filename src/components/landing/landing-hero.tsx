@@ -5,9 +5,7 @@ import { useTranslations } from 'next-intl';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
 import { LoadingLink } from '@/components/navigation/loading-link';
-import { AnimatedSection } from '@/components/ui/animated-section';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 const STATS = [
   { key: 'hero.statAffordable' as const, icon: CheckCircle2 },
