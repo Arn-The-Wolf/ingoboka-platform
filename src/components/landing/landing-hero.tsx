@@ -1,5 +1,6 @@
 'use client';
 
+// Deployment: 2026-08-01 23:54 - Fixed API proxy and button navigation
 import { ArrowRight, Shield, CheckCircle2, Smartphone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion, useScroll, useTransform } from 'framer-motion';
