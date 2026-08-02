@@ -405,7 +405,19 @@
     "trendClaims": "Awaiting resolution",
     "viewAllOrganizations": "View all organizations",
     "viewAllUsers": "View all users",
-    "viewAuditLog": "View audit log"
+    "viewAuditLog": "View audit log",
+    "policies": "Policies",
+    "totalPolicies": "total policies",
+    "searchPolicies": "Search policies…",
+    "policyNumber": "Policy number",
+    "product": "Product",
+    "insurer": "Insurer",
+    "coverage": "Coverage",
+    "validUntil": "Valid until",
+    "noPolicies": "No policies found",
+    "noPoliciesHint": "Policies will appear here once citizens enroll.",
+    "noPoliciesFound": "No policies match your search",
+    "tryDifferentSearch": "Try a different search term"
   },
   "agent": {
     "dashboard": "Agent portal",

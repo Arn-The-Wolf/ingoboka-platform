@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Building2,
   Users,
+  Shield,
   ScrollText,
   Settings,
   LogOut,
@@ -22,6 +23,7 @@ const navItems = [
   { href: '/admin/dashboard', icon: LayoutDashboard, labelKey: 'overview' as const },
   { href: '/admin/users', icon: Users, labelKey: 'users' as const },
   { href: '/admin/organizations', icon: Building2, labelKey: 'organizations' as const },
+  { href: '/admin/policies', icon: Shield, labelKey: 'policies' as const },
   { href: '/admin/audit', icon: ScrollText, labelKey: 'audit' as const },
   { href: '/admin/settings', icon: Settings, labelKey: 'settings' as const },
 ];

@@ -405,7 +405,19 @@
     "trendClaims": "Bitegereje gukorwa",
     "viewAllOrganizations": "Reba imiryango yose",
     "viewAllUsers": "Reba abakoresha bose",
-    "viewAuditLog": "Reba inyandiko z'ibikorwa"
+    "viewAuditLog": "Reba inyandiko z'ibikorwa",
+    "policies": "Ubwishingizi",
+    "totalPolicies": "ubwishingizi bwose",
+    "searchPolicies": "Shakisha ubwishingizi…",
+    "policyNumber": "Nimero y'ubwishingizi",
+    "product": "Igicuruzwa",
+    "insurer": "Uwutanga",
+    "coverage": "Ubwishingizi",
+    "validUntil": "Bukora kugeza",
+    "noPolicies": "Nta bwishingizi bubonetse",
+    "noPoliciesHint": "Ubwishingizi buzagaragara hano nyuma yo kwiyandikisha.",
+    "noPoliciesFound": "Nta bwishingizi buhuje n'igushakisho",
+    "tryDifferentSearch": "Gerageza ijambo ry'ubushakashatsi ritandukanye"
   },
   "agent": {
     "dashboard": "Ikibaho cy'umukozi",
