@@ -13,8 +13,7 @@ import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { formatCurrency, formatDate } from '@/lib/format';
+import { cn, formatCurrency, formatDate } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 10;
 
