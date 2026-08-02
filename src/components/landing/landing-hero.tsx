@@ -5,7 +5,7 @@ import { ArrowRight, Shield, CheckCircle2, Smartphone } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
-import { LoadingLink } from '@/components/navigation/loading-link';
+import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 
 const STATS = [
@@ -119,21 +119,7 @@ export function LandingHero() {
               ))}
             </div>
 
-            <div className="flex flex-col gap-2 sm:flex-row sm:justify-center sm:gap-3 lg:justify-start">
-              <LoadingLink href="/register" className="sm:flex-1 lg:flex-none">
-                <Button asChild variant="pill-accent" className="w-full gap-2 py-4 text-sm font-bold sm:min-w-[180px] sm:py-5 lg:min-w-[200px] lg:py-6 lg:text-base">
-                  <span>
-                    {t('getStarted')}
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 lg:h-5 lg:w-5" />
-                  </span>
-                </Button>
-              </LoadingLink>
-              <LoadingLink href="/login" className="sm:flex-1 lg:flex-none">
-                <Button asChild variant="outline" className="w-full rounded-full py-4 text-sm sm:min-w-[180px] sm:py-5 lg:min-w-[200px] lg:py-6">
-                  <span>{t('login')}</span>
-                </Button>
-              </LoadingLink>
-            </div>
+
           </div>
 
           {/* Right content - 3D animated hero visual */}
