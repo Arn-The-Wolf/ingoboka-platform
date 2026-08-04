@@ -8,7 +8,7 @@ import { HomeHighlights } from '@/components/marketing/home-highlights';
 
 export default function HomePage() {
   return (
-    <>
+    <div className="flex flex-col flex-1">
       <LandingHero />
       <PartnersStrip />
       <HomeHighlights />
@@ -16,6 +16,6 @@ export default function HomePage() {
       <TestimonialsCarousel />
       <LandingTrust />
       <LandingCta />
-    </>
+    </div>
   );
 }

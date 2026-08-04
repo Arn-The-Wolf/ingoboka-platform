@@ -2,7 +2,6 @@
 
 import { Shield } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { LocaleSwitcher } from './locale-switcher';
 
 export function AuthHeader() {
   const t = useTranslations('common');
@@ -15,7 +14,6 @@ export function AuthHeader() {
         </div>
         <span className="text-xl font-bold text-brand-primary-dark">{t('appName')}</span>
       </div>
-      <LocaleSwitcher />
     </header>
   );
 }

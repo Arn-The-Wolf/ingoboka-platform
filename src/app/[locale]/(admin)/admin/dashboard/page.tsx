@@ -149,7 +149,7 @@ export default function AdminDashboardPage() {
             <h2 className="text-lg font-semibold text-gray-800">{t('organizations')}</h2>
             <LoadingLink
               href="/admin/organizations"
-              className="text-sm font-medium text-green-600 hover:text-green-700 hover:underline"
+              className="text-sm font-medium text-brand-primary hover:text-brand-primary-darker hover:underline"
             >
               {t('viewAllOrganizations')}
             </LoadingLink>
@@ -199,7 +199,7 @@ export default function AdminDashboardPage() {
             <h2 className="text-lg font-semibold text-gray-800">{t('recentActivity')}</h2>
             <LoadingLink
               href="/admin/audit"
-              className="text-sm font-medium text-green-600 hover:text-green-700 hover:underline"
+              className="text-sm font-medium text-brand-primary hover:text-brand-primary-darker hover:underline"
             >
               {t('viewAuditLog')}
             </LoadingLink>

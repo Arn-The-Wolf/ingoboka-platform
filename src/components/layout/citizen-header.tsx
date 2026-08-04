@@ -3,7 +3,6 @@
 import { useTranslations } from 'next-intl';
 import { Bell } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { LocaleSwitcher } from './locale-switcher';
 
 interface CitizenHeaderProps {
   title: string;
@@ -35,9 +34,6 @@ export function CitizenHeader({ title, subtitle, showNotifications = true }: Cit
               <Bell className="h-5 w-5" />
             </Link>
           )}
-          <div className="lg:hidden">
-            <LocaleSwitcher />
-          </div>
         </div>
       </div>
     </header>

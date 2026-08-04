@@ -19,10 +19,13 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'Ingoboka',
   },
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#1B6B3A',
+  themeColor: '#1E5AA8',
   width: 'device-width',
   initialScale: 1,
 };
@@ -49,7 +52,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${inter.variable} scroll-smooth`}>
       <body className="min-h-screen font-sans">
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
             <NavigationProgress />
             {children}

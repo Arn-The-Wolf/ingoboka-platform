@@ -53,7 +53,7 @@ export function HomeHighlights() {
                   whileHover={{ 
                     y: -8, 
                     scale: 1.02,
-                    boxShadow: '0 12px 32px 0 rgba(27, 107, 58, 0.15)',
+                    boxShadow: '0 12px 32px 0 rgba(30, 90, 168, 0.15)',
                   }}
                   transition={{ duration: 0.3 }}
                   className="group flex h-full flex-col rounded-2xl border border-brand-border/60 bg-brand-background p-6 shadow-card"

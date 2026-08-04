@@ -3,7 +3,6 @@
 import { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { Shield } from 'lucide-react';
-import { LocaleSwitcher } from './locale-switcher';
 
 interface AuthShellProps {
   children: ReactNode;
@@ -19,9 +18,9 @@ export function AuthShell({ children }: AuthShellProps) {
       <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-brand-primary/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-brand-accent/15 blur-2xl" />
 
-      <div className="relative mx-auto flex h-screen w-full max-w-6xl">
-        {/* Brand panel — desktop only */}
-        <aside className="hidden w-1/2 flex-col justify-between border-r border-brand-border/60 bg-gradient-to-br from-brand-primary to-brand-primary-dark p-10 text-white lg:flex">
+      <div className="relative flex h-screen w-full">
+        {/* Brand panel — desktop only - Full height, spans to left edge */}
+        <aside className="hidden w-full lg:w-1/2 flex-col justify-between bg-gradient-to-br from-brand-primary to-brand-primary-darker p-10 text-white lg:flex">
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
               <Shield className="h-6 w-6" />
@@ -39,11 +38,8 @@ export function AuthShell({ children }: AuthShellProps) {
         </aside>
 
         {/* Form panel */}
-        <main className="flex flex-1 flex-col">
-          <div className="flex justify-end p-4 lg:p-6">
-            <LocaleSwitcher />
-          </div>
-          <div className="flex flex-1 items-center justify-center px-4 pb-6 lg:px-10">
+        <main className="flex flex-1 flex-col bg-brand-background">
+          <div className="flex flex-1 items-center justify-center px-4 py-6 lg:px-10">
             <div className="w-full max-w-lg overflow-y-auto max-h-[calc(100vh-120px)] rounded-2xl border border-brand-border/60 bg-white p-5 shadow-card lg:p-6">
               {children}
             </div>

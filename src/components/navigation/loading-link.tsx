@@ -10,7 +10,14 @@ type LoadingLinkProps = ComponentProps<typeof Link> & {
 };
 
 /** Link that shows a loading indicator while navigating to the target route. */
-export function LoadingLink({ href, children, className, showSpinner = true, ...props }: LoadingLinkProps) {
+export function LoadingLink({
+  href,
+  children,
+  className,
+  showSpinner = true,
+  onClick,
+  ...props
+}: LoadingLinkProps) {
   const pathname = usePathname();
   const [pending, setPending] = useState(false);
   const target = typeof href === 'string' ? href : (href.pathname ?? '');
@@ -22,11 +29,16 @@ export function LoadingLink({ href, children, className, showSpinner = true, ...
   return (
     <Link
       href={href}
-      className={cn(className, pending && 'pointer-events-none opacity-80')}
-      onClick={() => {
-        if (target && !pathname.startsWith(target)) {
+      className={cn(
+        'transition-opacity duration-200',
+        className,
+        pending && 'pointer-events-none opacity-70'
+      )}
+      onClick={(e) => {
+        if (target && pathname !== target && !pathname.startsWith(`${target}/`)) {
           setPending(true);
         }
+        onClick?.(e);
       }}
       {...props}
     >

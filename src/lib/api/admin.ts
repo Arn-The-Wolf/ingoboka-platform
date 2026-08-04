@@ -59,6 +59,17 @@ function mapApplication(raw: Record<string, unknown>): ApplicationResponse {
   };
 }
 
+function mapOrganization(raw: Record<string, unknown>): Organization {
+  return {
+    id: String(raw.id ?? ''),
+    name: String(raw.name ?? 'Partner'),
+    slug: String(raw.code ?? raw.slug ?? ''),
+    organizationType: String(raw.type ?? raw.organizationType ?? 'INSURER'),
+    status: String(raw.status ?? 'ACTIVE'),
+    contactEmail: raw.contactEmail ? String(raw.contactEmail) : undefined,
+  };
+}
+
 export const adminApi = {
   async getOverview(): Promise<PlatformOverview> {
     const { data } = await apiClient.get<Record<string, number>>('/admin/platform/overview');
@@ -75,14 +86,50 @@ export const adminApi = {
     const { data } = await apiClient.get<{ content?: Record<string, unknown>[] }>('/partners', {
       params: { page: 0, size: 50 },
     });
-    return unwrapPage(data).map((p) => ({
-      id: String(p.id ?? ''),
-      name: String(p.name ?? 'Partner'),
-      slug: String(p.code ?? ''),
-      organizationType: String(p.type ?? p.organizationType ?? 'INSURER'),
-      status: String(p.status ?? 'ACTIVE'),
-      contactEmail: p.contactEmail ? String(p.contactEmail) : undefined,
-    }));
+    return unwrapPage(data).map(mapOrganization);
+  },
+
+  async createOrganization(payload: {
+    name: string;
+    slug: string;
+    organizationType: string;
+    status?: string;
+    contactEmail?: string;
+  }): Promise<Organization> {
+    const { data } = await apiClient.post<Record<string, unknown>>('/partners', {
+      name: payload.name,
+      code: payload.slug,
+      type: payload.organizationType,
+      organizationType: payload.organizationType,
+      status: payload.status ?? 'ACTIVE',
+      contactEmail: payload.contactEmail || undefined,
+    });
+    return mapOrganization(data);
+  },
+
+  async updateOrganization(
+    id: string,
+    payload: {
+      name: string;
+      slug: string;
+      organizationType: string;
+      status: string;
+      contactEmail?: string;
+    }
+  ): Promise<Organization> {
+    const { data } = await apiClient.put<Record<string, unknown>>(`/partners/${id}`, {
+      name: payload.name,
+      code: payload.slug,
+      type: payload.organizationType,
+      organizationType: payload.organizationType,
+      status: payload.status,
+      contactEmail: payload.contactEmail || undefined,
+    });
+    return mapOrganization(data);
+  },
+
+  async deleteOrganization(id: string): Promise<void> {
+    await apiClient.delete(`/partners/${id}`);
   },
 
   async listUsers(page = 0, size = 50): Promise<{ content: AdminUser[]; totalElements: number }> {

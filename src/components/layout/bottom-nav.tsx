@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Home, Package, FileText, Users } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
@@ -15,6 +16,11 @@ const navItems = [
 export function BottomNav() {
   const t = useTranslations('citizen');
   const pathname = usePathname();
+  const [pendingHref, setPendingHref] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPendingHref(null);
+  }, [pathname]);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-brand-border/80 bg-brand-surface/95 pb-safe backdrop-blur-md lg:hidden">
@@ -24,18 +30,27 @@ export function BottomNav() {
           const active =
             pathname === item.href ||
             (item.href !== '/dashboard' && pathname.startsWith(item.href));
+          const pending = pendingHref === item.href;
           return (
             <Link
               key={item.labelKey}
               href={item.href}
+              onClick={() => {
+                if (!active) setPendingHref(item.href);
+              }}
               className={cn(
-                'flex min-w-[4.5rem] flex-col items-center gap-0.5 rounded-xl px-3 py-2 text-[11px] font-medium transition-colors',
+                'relative flex min-w-[4.5rem] flex-col items-center gap-0.5 rounded-xl px-3 py-2 text-[11px] font-medium transition-all duration-200',
                 active
                   ? 'bg-brand-primary-light text-brand-primary'
-                  : 'text-brand-muted hover:text-brand-primary-dark'
+                  : 'text-brand-muted hover:text-brand-primary-dark',
+                pending && 'pointer-events-none opacity-80'
               )}
             >
-              <Icon className={cn('h-5 w-5', active && 'stroke-[2.5]')} />
+              {pending ? (
+                <span className="h-5 w-5 animate-spin rounded-full border-2 border-brand-primary/30 border-t-brand-primary" />
+              ) : (
+                <Icon className={cn('h-5 w-5', active && 'stroke-[2.5]')} />
+              )}
               <span className="truncate">{t(item.labelKey)}</span>
             </Link>
           );

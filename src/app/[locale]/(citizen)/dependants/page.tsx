@@ -170,7 +170,7 @@ export default function DependantsPage() {
             <h1 className="text-2xl font-bold text-brand-primary-dark">{tNav('dependants')}</h1>
             <p className="mt-1 text-sm text-brand-muted">{t('subtitle')}</p>
           </div>
-          <Button onClick={handleAddClick} className="bg-green-600 hover:bg-green-700">
+          <Button onClick={handleAddClick} variant="default">
             <Plus className="h-4 w-4" />
             {t('addButton')}
           </Button>
@@ -188,7 +188,7 @@ export default function DependantsPage() {
               <p className="mb-6 max-w-sm text-sm text-brand-muted">
                 Add family members to manage their insurance coverage together.
               </p>
-              <Button onClick={handleAddClick} className="bg-green-600 hover:bg-green-700">
+              <Button onClick={handleAddClick} variant="default">
                 <Plus className="h-4 w-4" />
                 {t('addButton')}
               </Button>
@@ -401,7 +401,7 @@ export default function DependantsPage() {
                 onClick={() => addMutation.mutate()}
                 loading={addMutation.isPending}
                 disabled={!form.firstName || !form.lastName}
-                className="bg-green-600 hover:bg-green-700"
+                variant="default"
               >
                 {tCommon('save')}
               </Button>
@@ -485,7 +485,7 @@ export default function DependantsPage() {
                 onClick={() => editMutation.mutate()}
                 loading={editMutation.isPending}
                 disabled={!form.firstName || !form.lastName}
-                className="bg-green-600 hover:bg-green-700"
+                variant="default"
               >
                 {tCommon('save')}
               </Button>

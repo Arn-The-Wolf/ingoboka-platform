@@ -10,14 +10,13 @@ import {
   ScrollText,
   Settings,
   LogOut,
-  Menu,
-  X,
 } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { useLogout } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
-import { LocaleSwitcher } from './locale-switcher';
+import { SidebarToggle } from '@/components/layout/sidebar-toggle';
+import { SidebarNavLink } from '@/components/layout/sidebar-nav-link';
 
 const navItems = [
   { href: '/admin/dashboard', icon: LayoutDashboard, labelKey: 'overview' as const },
@@ -37,31 +36,47 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Toggle Button */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-green-600 text-white shadow-lg transition-all hover:bg-green-500 lg:left-auto lg:right-4"
-        aria-label={isCollapsed ? 'Open sidebar' : 'Close sidebar'}
-      >
-        {isCollapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
-      </button>
+      {isCollapsed && (
+        <SidebarToggle
+          collapsed
+          floating
+          onToggle={() => setIsCollapsed(false)}
+          className="lg:hidden"
+        />
+      )}
 
-      {/* Sidebar */}
-      <aside className={cn(
-        "fixed left-0 top-0 flex h-screen flex-col border-r border-green-700 bg-gradient-to-b from-green-600 to-green-700 transition-all duration-300 z-40",
-        isCollapsed ? "w-0 -translate-x-full lg:w-16 lg:translate-x-0" : "w-64"
-      )}>
-        <Link href="/" className={cn(
-          "border-b border-green-700 bg-green-600 px-6 py-5 transition-all hover:bg-green-500",
-          isCollapsed && "lg:px-2"
-        )}>
-          {!isCollapsed ? (
-            <p className="font-bold text-white text-lg">Ingoboka</p>
-          ) : (
-            <p className="font-bold text-white text-lg text-center hidden lg:block">I</p>
+      <aside
+        className={cn(
+          'fixed left-0 top-0 z-40 flex h-screen flex-col border-r border-brand-primary-darker bg-gradient-to-b from-brand-primary to-brand-primary-darker text-white transition-all duration-300',
+          isCollapsed ? 'w-0 -translate-x-full lg:w-16 lg:translate-x-0' : 'w-64'
+        )}
+      >
+        <div
+          className={cn(
+            'flex items-center border-b border-brand-primary-darker px-3 py-4',
+            isCollapsed ? 'lg:justify-center lg:px-2' : 'justify-between gap-2 px-4'
           )}
-        </Link>
-        <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+        >
+          {isCollapsed ? (
+            <SidebarToggle
+              collapsed
+              onToggle={() => setIsCollapsed(false)}
+              className="hidden lg:flex"
+            />
+          ) : (
+            <>
+              <Link href="/" className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-90">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
+                  <Shield className="h-5 w-5" />
+                </div>
+                <p className="truncate text-lg font-bold">Ingoboka</p>
+              </Link>
+              <SidebarToggle collapsed={false} onToggle={() => setIsCollapsed(true)} />
+            </>
+          )}
+        </div>
+
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active =
@@ -69,36 +84,27 @@ export function AdminSidebar() {
                 ? pathname === '/admin/dashboard'
                 : pathname.startsWith(item.href);
             return (
-              <Link
+              <SidebarNavLink
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all',
-                  active
-                    ? 'bg-green-800 text-white shadow-sm'
-                    : 'text-green-50 hover:bg-green-700/60 hover:text-white',
-                  isCollapsed && 'lg:justify-center lg:px-2'
-                )}
+                active={active}
+                collapsed={isCollapsed}
                 title={isCollapsed ? t(item.labelKey) : undefined}
               >
-                <Icon className="h-4 w-4 shrink-0" />
-                {!isCollapsed && t(item.labelKey)}
-              </Link>
+                <Icon className={cn('h-4 w-4 shrink-0', active && 'text-brand-accent')} />
+                {!isCollapsed && <span className="truncate">{t(item.labelKey)}</span>}
+              </SidebarNavLink>
             );
           })}
         </nav>
-        <div className="border-t border-green-700 p-4 bg-green-800/50">
-          {!isCollapsed && (
-            <div className="mb-3">
-              <LocaleSwitcher />
-            </div>
-          )}
+
+        <div className="border-t border-brand-primary-darker bg-brand-primary-darker/50 p-3">
           <Button
             variant="ghost"
             size="sm"
             className={cn(
-              "w-full text-green-50 hover:bg-green-700/60 hover:text-white",
-              isCollapsed ? "lg:justify-center lg:px-2" : "justify-start"
+              'w-full text-blue-50 hover:bg-brand-primary-darker/60 hover:text-white',
+              isCollapsed ? 'lg:justify-center lg:px-2' : 'justify-start'
             )}
             onClick={() => logout.mutate()}
             loading={logout.isPending}
