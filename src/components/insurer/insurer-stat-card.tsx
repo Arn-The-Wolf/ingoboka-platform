@@ -27,20 +27,22 @@ export function InsurerStatCard({
   const content = (
     <div
       className={cn(
-        'group flex flex-col justify-between rounded-xl border border-brand-border/60 bg-white p-4 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-primary/25 hover:shadow-elevated',
-        href && 'cursor-pointer hover:scale-105',
+        'group flex h-full flex-col justify-between rounded-xl border border-brand-border/60 bg-white p-4 shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-primary/25 hover:shadow-elevated',
+        href && 'cursor-pointer',
         className
       )}
     >
-      <Icon className="mb-2 h-5 w-5 text-brand-primary transition-transform duration-300 group-hover:scale-110" />
-      <div>
-        <p className="text-xs text-brand-muted">{label}</p>
-        <p className="text-2xl font-bold text-brand-primary-dark">{value}</p>
+      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-brand-primary-light text-brand-primary transition-colors group-hover:bg-brand-primary group-hover:text-white">
+        <Icon className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <p className="truncate text-xs font-medium text-brand-muted">{label}</p>
+        <p className="mt-1 text-2xl font-bold tabular-nums text-brand-primary-dark">{value}</p>
         {trend && (
           <p
             className={cn(
-              'mt-1 text-xs font-medium',
-              trendUp ? 'text-brand-success' : 'text-brand-muted'
+              'mt-1 line-clamp-2 text-xs font-medium',
+              trendUp ? 'text-brand-secondary' : 'text-brand-muted'
             )}
           >
             {trend}

@@ -13,7 +13,7 @@ import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { formatDate, cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 
 export default function AdminDashboardPage() {
   const t = useTranslations('admin');
@@ -38,8 +38,48 @@ export default function AdminDashboardPage() {
   const recentOrgs = organizations?.slice(0, 4) ?? [];
   const recentAudit = auditData?.content ?? [];
 
+  const stats = overview
+    ? [
+        {
+          href: '/admin/organizations',
+          icon: Building2,
+          value: overview.organizations,
+          label: t('organizations'),
+          trend: t('trendPartners'),
+        },
+        {
+          href: '/admin/users',
+          icon: Users,
+          value: overview.activeUsers,
+          label: t('activeUsers'),
+          trend: t('trendCitizens'),
+        },
+        {
+          href: '/admin/policies',
+          icon: Shield,
+          value: overview.activePolicies,
+          label: t('activePolicies'),
+          trend: t('trendCoverage'),
+        },
+        {
+          href: '/admin/claims',
+          icon: FileText,
+          value: overview.openClaims,
+          label: t('openClaims'),
+          trend: t('trendClaims'),
+        },
+        {
+          href: '/admin/applications',
+          icon: ScrollText,
+          value: overview.totalApplications,
+          label: t('totalApplications'),
+          trend: t('applications'),
+        },
+      ]
+    : [];
+
   return (
-    <PageContainer>
+    <PageContainer className="px-0 py-0 sm:px-0">
       <PageHeader title={t('dashboard')} subtitle={t('overview')} />
 
       {overviewLoading ? (
@@ -49,104 +89,26 @@ export default function AdminDashboardPage() {
           {tCommon('error')}
         </Alert>
       ) : overview ? (
-        <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-5">
-          <LoadingLink href="/admin/organizations">
-            <Card className="border-purple-200 bg-gradient-to-br from-purple-50 to-purple-100/50 hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 hover:border-purple-300">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500 text-white">
-                    <Building2 className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-2xl font-bold text-purple-900">{overview.organizations}</p>
-                    <p className="text-xs text-purple-700">{t('organizations')}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-purple-600 flex items-center gap-1">
-                  <span className="text-purple-500">↗</span> {t('trendPartners')}
-                </p>
-              </CardContent>
-            </Card>
-          </LoadingLink>
-
-          <LoadingLink href="/admin/users">
-            <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/50 hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 hover:border-blue-300">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500 text-white">
-                    <Users className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-2xl font-bold text-blue-900">{overview.activeUsers}</p>
-                    <p className="text-xs text-blue-700">{t('activeUsers')}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-blue-600 flex items-center gap-1">
-                  <span className="text-blue-500">↗</span> {t('trendCitizens')}
-                </p>
-              </CardContent>
-            </Card>
-          </LoadingLink>
-
-          <LoadingLink href="/admin/policies">
-            <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100/50 hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 hover:border-green-300">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500 text-white">
-                    <Shield className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-2xl font-bold text-green-900">{overview.activePolicies}</p>
-                    <p className="text-xs text-green-700">{t('activePolicies')}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-green-600 flex items-center gap-1">
-                  <span className="text-green-500">↗</span> {t('trendCoverage')}
-                </p>
-              </CardContent>
-            </Card>
-          </LoadingLink>
-
-          <LoadingLink href="/admin/claims">
-            <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-amber-100/50 hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 hover:border-amber-300">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500 text-white">
-                    <FileText className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-2xl font-bold text-amber-900">{overview.openClaims}</p>
-                    <p className="text-xs text-amber-700">{t('openClaims')}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-amber-600">{t('trendClaims')}</p>
-              </CardContent>
-            </Card>
-          </LoadingLink>
-
-          <LoadingLink href="/admin/applications">
-            <Card className="col-span-2 lg:col-span-1 border-indigo-200 bg-gradient-to-br from-indigo-50 to-indigo-100/50 hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-105 hover:border-indigo-300">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500 text-white">
-                    <ScrollText className="h-5 w-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-2xl font-bold text-indigo-900">{overview.totalApplications}</p>
-                    <p className="text-xs text-indigo-700">{t('totalApplications')}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-indigo-600">{t('applications')}</p>
-              </CardContent>
-            </Card>
-          </LoadingLink>
+        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {stats.map((stat) => (
+            <InsurerStatCard
+              key={stat.href}
+              href={stat.href}
+              icon={stat.icon}
+              value={stat.value}
+              label={stat.label}
+              trend={stat.trend}
+              trendUp
+              className="h-full hover:scale-100"
+            />
+          ))}
         </div>
       ) : null}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-2">
         <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">{t('organizations')}</h2>
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-brand-primary-dark">{t('organizations')}</h2>
             <LoadingLink
               href="/admin/organizations"
               className="text-sm font-medium text-brand-primary hover:text-brand-primary-darker hover:underline"
@@ -162,22 +124,19 @@ export default function AdminDashboardPage() {
             </div>
           ) : recentOrgs.length > 0 ? (
             <div className="grid gap-3">
-              {recentOrgs.map((org, index) => (
-                <Card key={org.id} className="border-green-200 bg-white hover:shadow-md transition-all hover:border-green-300">
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-start gap-3">
-                      <div className={cn(
-                        "flex h-10 w-10 items-center justify-center rounded-lg",
-                        index === 0 ? "bg-gradient-to-br from-purple-400 to-purple-600" :
-                        index === 1 ? "bg-gradient-to-br from-blue-400 to-blue-600" :
-                        index === 2 ? "bg-gradient-to-br from-green-400 to-green-600" :
-                        "bg-gradient-to-br from-amber-400 to-amber-600"
-                      )}>
-                        <Building2 className="h-5 w-5 text-white" />
+              {recentOrgs.map((org) => (
+                <Card
+                  key={org.id}
+                  className="border-brand-border/70 bg-white transition-all hover:border-brand-primary/25 hover:shadow-elevated"
+                >
+                  <CardContent className="flex items-center justify-between gap-3 p-4">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-primary-light text-brand-primary">
+                        <Building2 className="h-5 w-5" />
                       </div>
-                      <div>
-                        <p className="font-semibold text-gray-800">{org.name}</p>
-                        <p className="text-sm text-gray-600">{org.organizationType}</p>
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-brand-primary-dark">{org.name}</p>
+                        <p className="text-sm text-brand-muted">{org.organizationType}</p>
                       </div>
                     </div>
                     <Badge variant={org.status === 'ACTIVE' ? 'active' : 'pending'}>{org.status}</Badge>
@@ -186,8 +145,8 @@ export default function AdminDashboardPage() {
               ))}
             </div>
           ) : (
-            <Card className="border-dashed border-green-200">
-              <CardContent className="py-10 text-center text-sm text-gray-500">
+            <Card className="border-dashed border-brand-border">
+              <CardContent className="py-10 text-center text-sm text-brand-muted">
                 {t('noOrganizations')}
               </CardContent>
             </Card>
@@ -195,8 +154,8 @@ export default function AdminDashboardPage() {
         </section>
 
         <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800">{t('recentActivity')}</h2>
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-semibold text-brand-primary-dark">{t('recentActivity')}</h2>
             <LoadingLink
               href="/admin/audit"
               className="text-sm font-medium text-brand-primary hover:text-brand-primary-darker hover:underline"
@@ -213,15 +172,18 @@ export default function AdminDashboardPage() {
           ) : recentAudit.length > 0 ? (
             <div className="space-y-2">
               {recentAudit.map((entry) => (
-                <Card key={entry.id} className="border-blue-200 bg-white hover:shadow-md transition-all hover:border-blue-300">
+                <Card
+                  key={entry.id}
+                  className="border-brand-border/70 bg-white transition-all hover:border-brand-primary/25 hover:shadow-elevated"
+                >
                   <CardContent className="flex items-start justify-between gap-3 p-4">
                     <div className="min-w-0">
-                      <p className="font-medium text-gray-800">{entry.action}</p>
-                      <p className="text-sm text-gray-600">
+                      <p className="font-medium text-brand-primary-dark">{entry.action}</p>
+                      <p className="truncate text-sm text-brand-muted">
                         {entry.actor} · {entry.resource}
                       </p>
                     </div>
-                    <span className="shrink-0 text-xs text-gray-500">
+                    <span className="shrink-0 text-xs text-brand-muted">
                       {formatDate(entry.occurredAt)}
                     </span>
                   </CardContent>
@@ -229,8 +191,8 @@ export default function AdminDashboardPage() {
               ))}
             </div>
           ) : (
-            <Card className="border-dashed border-blue-200">
-              <CardContent className="py-10 text-center text-sm text-gray-500">
+            <Card className="border-dashed border-brand-border">
+              <CardContent className="py-10 text-center text-sm text-brand-muted">
                 {t('noActivity')}
               </CardContent>
             </Card>

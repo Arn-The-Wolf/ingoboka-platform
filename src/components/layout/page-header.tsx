@@ -24,7 +24,9 @@ export function PageHeader({ title, subtitle, backHref, action }: PageHeaderProp
             Back
           </LoadingLink>
         )}
-        <h1 className="text-2xl font-bold tracking-tight text-brand-primary-dark lg:text-3xl">{title}</h1>
+        <h1 className="text-xl font-bold tracking-tight text-brand-primary-dark sm:text-2xl lg:text-3xl">
+          {title}
+        </h1>
         {subtitle && <p className="mt-1 text-sm text-brand-muted lg:text-base">{subtitle}</p>}
       </div>
       {action}

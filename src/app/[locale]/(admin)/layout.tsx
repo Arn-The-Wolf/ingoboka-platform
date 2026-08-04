@@ -9,7 +9,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <AdminSidebar />
         <DashboardContent
           className="lg:ml-64"
-          innerClassName="mx-auto w-full max-w-7xl p-6 pt-16 lg:pt-6"
+          innerClassName="mx-auto w-full max-w-7xl px-4 pb-8 pt-20 pl-16 sm:px-6 lg:px-8 lg:pl-8 lg:pt-6"
         >
           {children}
         </DashboardContent>
