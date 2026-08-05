@@ -11,24 +11,41 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          primary: '#1B6B3A',
-          'primary-dark': '#005127',
-          'primary-light': '#E8F5EF',
-          'primary-container': '#1B6B3A',
-          secondary: '#855300',
-          'secondary-container': '#F4A228',
-          accent: '#F4A228',
-          'accent-dark': '#C99A0F',
-          background: '#F7FAF3',
+          // Primary - Insurance Blue
+          primary: '#1E5AA8',
+          'primary-dark': '#1F2937', // Navy Gray (main text color)
+          'primary-darker': '#14447F', // Darker blue for hovers
+          'primary-light': '#E6F0FA',
+          'primary-container': '#1E5AA8',
+          
+          // Secondary - Emerald Green
+          secondary: '#2E8B57',
+          'secondary-container': '#2E8B57',
+          
+          // Accent - Gold
+          accent: '#D4A017',
+          'accent-dark': '#B58914',
+          
+          // Background & Surfaces
+          background: '#F8FAFC',
           surface: '#FFFFFF',
-          'surface-container': '#EBEFE8',
-          'surface-container-low': '#F1F5ED',
-          muted: '#404940',
-          border: '#BFC9BD',
-          outline: '#707A6F',
-          error: '#BA1A1A',
+          'surface-container': '#F1F5F9',
+          'surface-container-low': '#F8FAFC',
+          
+          // Text Colors
+          muted: '#6B7280',
+          border: '#E5E7EB',
+          outline: '#9CA3AF',
+          
+          // Semantic Colors
+          error: '#DC2626',
           success: '#16A34A',
           warning: '#F59E0B',
+          info: '#2563EB',
+          
+          // Special
+          'asset-protection': '#0F766E',  // Teal
+          sidebar: '#0F172A',  // Dark Navy
         },
       },
       fontFamily: {
@@ -42,9 +59,9 @@ const config: Config = {
       },
       boxShadow: {
         card: '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)',
-        elevated: '0 4px 16px 0 rgb(27 107 58 / 0.12)',
+        elevated: '0 4px 16px 0 rgb(30 90 168 / 0.12)',
         modal: '0 12px 32px 0 rgb(0 0 0 / 0.1)',
-        glow: '0 0 24px 0 rgb(244 162 40 / 0.35)',
+        glow: '0 0 24px 0 rgb(212 160 23 / 0.35)',
       },
       animation: {
         'fade-in-up': 'fade-in-up 0.6s ease-out both',

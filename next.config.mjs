@@ -8,7 +8,28 @@ const nextConfig = {
   
   // Image optimization
   images: {
-    domains: ['localhost', 'minio.example', '185.181.10.165', '4.168.192.169'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'http',
+        hostname: 'minio.example',
+      },
+      {
+        protocol: 'http',
+        hostname: '185.181.10.165',
+      },
+      {
+        protocol: 'http',
+        hostname: '4.168.192.169',
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
   },
 

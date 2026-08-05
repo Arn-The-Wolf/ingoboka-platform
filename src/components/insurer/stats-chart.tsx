@@ -27,11 +27,11 @@ export function InsurerStatsChart({ stats, title }: InsurerStatsChartProps) {
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={stats.claimsByStatus}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E2E8E6" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
               <XAxis dataKey="status" tick={{ fontSize: 11 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Bar dataKey="count" fill="#0A7B4E" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#1E5AA8" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

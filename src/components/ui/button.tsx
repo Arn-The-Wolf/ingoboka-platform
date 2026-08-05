@@ -8,7 +8,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-brand-primary text-white hover:bg-brand-primary-dark hover:shadow-elevated',
+        default: 'bg-brand-primary text-white hover:bg-brand-primary-darker hover:shadow-elevated',
         secondary:
           'bg-brand-secondary text-white hover:bg-brand-secondary/90',
         outline:
@@ -16,7 +16,7 @@ const buttonVariants = cva(
         ghost: 'hover:bg-brand-primary-light text-brand-primary-dark',
         destructive: 'bg-brand-error text-white hover:bg-brand-error/90',
         accent: 'bg-brand-accent text-brand-primary-dark hover:bg-brand-accent-dark',
-        pill: 'rounded-full bg-brand-primary text-white hover:bg-brand-primary-dark shadow-sm',
+        pill: 'rounded-full bg-brand-primary text-white hover:bg-brand-primary-darker shadow-sm',
         'pill-accent':
           'rounded-full bg-brand-accent text-brand-primary-dark hover:bg-brand-accent-dark hover:shadow-glow shadow-sm font-semibold',
       },

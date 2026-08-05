@@ -130,7 +130,7 @@ export function LandingHero() {
               transition={{ duration: 0.8, delay: 0.5 }}
               className="flex aspect-square w-full max-w-sm items-center justify-center perspective-1000 xl:max-w-md"
             >
-              <div className="absolute inset-4 rounded-3xl bg-[radial-gradient(#1B6B3A_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
+              <div className="absolute inset-4 rounded-3xl bg-[radial-gradient(#1E5AA8_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
               <motion.div 
                 whileHover={{ scale: 1.02, rotateY: 5 }}
                 transition={{ duration: 0.4 }}

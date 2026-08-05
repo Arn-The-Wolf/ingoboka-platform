@@ -4,8 +4,8 @@
   "description": "Digital microinsurance policy wallet for Rwanda",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F4F7F6",
-  "theme_color": "#0A7B4E",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E5AA8",
   "orientation": "portrait-primary",
   "icons": [
     {

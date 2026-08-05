@@ -4,6 +4,6 @@ export { policyApi } from './policies';
 export { claimApi } from './claims';
 export { productApi, enrollmentApi } from './products';
 export { paymentApi } from './payments';
-export { adminApi, agentApi, customerApiExt, insurerApi } from './admin';
+export { adminApi, agentApi, customerApiExt, insurerApi, type Organization } from './admin';
 export { notificationApi } from './notifications';
 export { mapBackendRole, isInsurerPortalRole } from './mappers';

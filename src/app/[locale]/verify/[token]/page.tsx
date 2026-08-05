@@ -9,7 +9,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
 import { formatDate } from '@/lib/utils';
 import { Shield, CheckCircle2, XCircle } from 'lucide-react';
-import { LocaleSwitcher } from '@/components/layout/locale-switcher';
 
 export default function PublicVerifyPage() {
   const t = useTranslations('verify');
@@ -27,7 +26,6 @@ export default function PublicVerifyPage() {
           </div>
           <span className="font-semibold">Ingoboka</span>
         </div>
-        <LocaleSwitcher />
       </header>
 
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8 lg:px-8">

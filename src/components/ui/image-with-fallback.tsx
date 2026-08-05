@@ -13,7 +13,7 @@ type ImageWithFallbackProps = Omit<ImageProps, 'src' | 'onError'> & {
  * next/image wrapper that gracefully swaps to a local fallback asset when a
  * remote image (Unsplash product art, Clearbit partner logos, MinIO media) fails.
  */
-export function ImageWithFallback({ src, fallbackSrc, ...props }: ImageWithFallbackProps) {
+export function ImageWithFallback({ src, fallbackSrc, alt = '', ...props }: ImageWithFallbackProps) {
   const [currentSrc, setCurrentSrc] = useState(src);
 
   useEffect(() => {
@@ -23,6 +23,7 @@ export function ImageWithFallback({ src, fallbackSrc, ...props }: ImageWithFallb
   return (
     <Image
       {...props}
+      alt={alt}
       src={currentSrc}
       onError={() => {
         if (currentSrc !== fallbackSrc) {
