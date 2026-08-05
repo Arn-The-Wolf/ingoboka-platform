@@ -1,140 +1,250 @@
 'use client';
 
-import { UserPlus } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import { ArrowLeft, ArrowRight, UserPlus } from 'lucide-react';
 import { LoadingLink } from '@/components/navigation/loading-link';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { PasswordInput } from '@/components/ui/password-input';
-import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
 import { AuthBackButton } from '@/components/layout/auth-back-button';
 import { StepIndicator } from '@/components/ui/step-indicator';
+import {
+  PasswordField,
+  PasswordStrength,
+  PhoneField,
+  TextField,
+} from '@/components/auth/fields';
+import { WelcomeOverlay, useWelcomeSequence } from '@/components/auth/welcome-overlay';
 import { useRegister } from '@/hooks/use-auth';
 import { useOtpDeliveryConfig } from '@/hooks/use-otp-config';
 import { createRegisterSchema, type RegisterFormData } from '@/lib/validators';
 import type { ApiError } from '@/types';
 
+const TOTAL_STEPS = 3;
+
+type StepField = keyof RegisterFormData;
+const STEP_FIELDS: Record<number, StepField[]> = {
+  1: ['firstName', 'lastName'],
+  2: ['phone', 'nationalId'],
+  3: ['email', 'password', 'confirmPassword'],
+};
+
 export default function RegisterPage() {
   const t = useTranslations('auth');
+  const locale = useLocale();
   const registerMutation = useRegister();
+  const welcome = useWelcomeSequence();
   const { data: otpConfig } = useOtpDeliveryConfig();
   const requiresEmail = otpConfig?.requiresEmail ?? true;
   const isEmailMode = otpConfig?.deliveryChannel === 'EMAIL' || requiresEmail;
 
   const schema = useMemo(() => createRegisterSchema(requiresEmail), [requiresEmail]);
 
+  const [step, setStep] = useState(1);
+
   const {
     register,
     handleSubmit,
+    trigger,
+    watch,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(schema),
+    mode: 'onTouched',
   });
 
+  const passwordValue = watch('password') ?? '';
+
+  const goNext = async () => {
+    const valid = await trigger(STEP_FIELDS[step]);
+    if (valid) setStep((s) => Math.min(TOTAL_STEPS, s + 1));
+  };
+
+  const goBack = () => setStep((s) => Math.max(1, s - 1));
+
   const onSubmit = (data: RegisterFormData) => {
-    const { confirmPassword: _, email, ...rest } = data;
-    registerMutation.mutate({
-      ...rest,
-      ...(email?.trim() ? { email: email.trim().toLowerCase() } : {}),
-    });
+    const fullName = `${data.firstName} ${data.lastName}`.trim();
+    registerMutation.mutate(
+      {
+        fullName,
+        phone: data.phone,
+        nationalId: data.nationalId,
+        password: data.password,
+        ...(data.email?.trim() ? { email: data.email.trim().toLowerCase() } : {}),
+      },
+      {
+        onSuccess: () => {
+          welcome.start(() => {
+            window.location.href = `/${locale}/verify`;
+          });
+        },
+      }
+    );
   };
 
   const error = registerMutation.error as ApiError | null;
+  const stepTitles = [t('step1Title'), t('step2Title'), t('step3Title')];
 
   return (
     <div className="space-y-6">
-      <AuthBackButton href="/login" />
-      <header className="space-y-2">
+      <WelcomeOverlay
+        state={welcome.state}
+        title={t('welcomeTitle')}
+        subtitle={t('welcomeRegisterSubtitle')}
+        loadingText={t('creatingAccount')}
+      />
+
+      {step === 1 ? <AuthBackButton href="/login" /> : null}
+
+      <header className="space-y-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-primary text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-primary text-white">
             <UserPlus className="h-5 w-5" />
           </div>
-          <h1 className="text-2xl font-bold text-brand-primary">{t('register')}</h1>
+          <div>
+            <h1 className="text-2xl font-bold text-brand-primary">{t('register')}</h1>
+            <p className="text-sm text-brand-muted">{t('registerSubtitle')}</p>
+          </div>
         </div>
-        <p className="text-sm text-brand-muted">{t('registerSubtitle')}</p>
+        <div className="space-y-1.5">
+          <StepIndicator totalSteps={TOTAL_STEPS} currentStep={step} />
+          <p className="text-xs font-medium text-brand-muted">
+            {t('stepOf', { current: step, total: TOTAL_STEPS })} · {stepTitles[step - 1]}
+          </p>
+        </div>
       </header>
 
-      <StepIndicator totalSteps={3} currentStep={1} />
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {error && <Alert variant="error">{error.message}</Alert>}
-        {isEmailMode && <Alert variant="default">{t('registerEmailHint')}</Alert>}
+        {step === 3 && isEmailMode && <Alert variant="default">{t('registerEmailHint')}</Alert>}
 
-        <div className="space-y-2">
-          <Label htmlFor="fullName">{t('fullName')}</Label>
-          <Input id="fullName" error={errors.fullName?.message} {...register('fullName')} />
-        </div>
+        {/* key forces the entrance animation to replay on each step change */}
+        <div key={step} className="space-y-4 animate-fade-in">
+          {step === 1 && (
+            <>
+              <TextField
+                id="firstName"
+                label={t('firstName')}
+                autoComplete="given-name"
+                placeholder={t('firstNamePlaceholder')}
+                error={errors.firstName?.message}
+                {...register('firstName')}
+              />
+              <TextField
+                id="lastName"
+                label={t('lastName')}
+                autoComplete="family-name"
+                placeholder={t('lastNamePlaceholder')}
+                error={errors.lastName?.message}
+                {...register('lastName')}
+              />
+            </>
+          )}
 
-        <fieldset className="space-y-4 rounded-xl border border-brand-border/60 bg-white p-4">
-          <legend className="px-1 text-sm font-semibold text-brand-primary-dark">
-            {t('contactDetails')}
-          </legend>
-          <div className="space-y-2">
-            <Label htmlFor="phone">{t('phone')}</Label>
-            <div className="flex h-12 items-center gap-2 rounded-lg border border-brand-border bg-white px-3 focus-within:border-brand-primary focus-within:ring-1 focus-within:ring-brand-primary">
-              <span className="border-r border-brand-border pr-2 text-sm font-medium text-brand-muted">
-                +250
-              </span>
-              <Input
+          {step === 2 && (
+            <>
+              <PhoneField
                 id="phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
+                label={t('phone')}
                 placeholder="7XX XXX XXX"
-                className="border-0 px-0 shadow-none focus-visible:ring-0"
+                hint={t('phoneLoginHint')}
                 error={errors.phone?.message}
                 {...register('phone')}
               />
-            </div>
-            <p className="text-xs text-brand-muted">{t('phoneLoginHint')}</p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">
-              {t('email')}
-              {requiresEmail ? ' *' : ` (${t('optional')})`}
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              placeholder="name@example.com"
-              error={errors.email?.message}
-              {...register('email')}
-            />
-          </div>
-        </fieldset>
+              <TextField
+                id="nationalId"
+                label={t('nationalId')}
+                inputMode="numeric"
+                maxLength={16}
+                placeholder="1199780012345678"
+                hint={t('nationalIdHint')}
+                error={errors.nationalId?.message}
+                {...register('nationalId')}
+              />
+            </>
+          )}
 
-        <div className="space-y-2">
-          <Label htmlFor="nationalId">{t('nationalId')}</Label>
-          <Input id="nationalId" error={errors.nationalId?.message} {...register('nationalId')} />
+          {step === 3 && (
+            <>
+              <TextField
+                id="email"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                label={`${t('email')}${requiresEmail ? ' *' : ` (${t('optional')})`}`}
+                placeholder="name@example.com"
+                hint={requiresEmail ? t('emailForVerification') : t('emailOptionalHint')}
+                error={errors.email?.message}
+                {...register('email')}
+              />
+              <div className="space-y-2">
+                <PasswordField
+                  id="password"
+                  label={t('password')}
+                  autoComplete="new-password"
+                  error={errors.password?.message}
+                  {...register('password')}
+                />
+                <PasswordStrength
+                  value={passwordValue}
+                  label={t('passwordStrengthLabel')}
+                  levels={[
+                    t('strengthWeak'),
+                    t('strengthFair'),
+                    t('strengthGood'),
+                    t('strengthStrong'),
+                  ]}
+                />
+              </div>
+              <PasswordField
+                id="confirmPassword"
+                label={t('confirmPassword')}
+                autoComplete="new-password"
+                error={errors.confirmPassword?.message}
+                {...register('confirmPassword')}
+              />
+            </>
+          )}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">{t('password')}</Label>
-          <PasswordInput
-            id="password"
-            autoComplete="new-password"
-            error={errors.password?.message}
-            {...register('password')}
-          />
+
+        <div className="flex gap-3 pt-1">
+          {step > 1 && (
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 gap-2 rounded-full py-6"
+              onClick={goBack}
+              disabled={registerMutation.isPending || welcome.active}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {t('previous')}
+            </Button>
+          )}
+          {step < TOTAL_STEPS ? (
+            <Button
+              type="button"
+              className="flex-[2] gap-2 rounded-full py-6"
+              variant="pill"
+              onClick={goNext}
+            >
+              {t('next')}
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              className="flex-[2] rounded-full py-6"
+              variant="pill-accent"
+              loading={registerMutation.isPending || welcome.active}
+            >
+              {t('register')}
+            </Button>
+          )}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="confirmPassword">{t('confirmPassword')}</Label>
-          <PasswordInput
-            id="confirmPassword"
-            autoComplete="new-password"
-            error={errors.confirmPassword?.message}
-            {...register('confirmPassword')}
-          />
-        </div>
-        <Button type="submit" className="w-full py-6" variant="pill" loading={registerMutation.isPending}>
-          {t('register')}
-        </Button>
       </form>
+
       <p className="text-center text-sm text-brand-muted">
         {t('hasAccount')}{' '}
         <LoadingLink href="/login" className="font-bold text-brand-primary hover:underline">

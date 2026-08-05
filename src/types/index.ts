@@ -163,3 +163,93 @@ export interface PaginatedResponse<T> {
   page: number;
   size: number;
 }
+
+/** Rwandan address (Province → District → Sector → Cell → Village, country fixed to Rwanda). */
+export interface RwandaAddress {
+  province?: string;
+  district?: string;
+  sector?: string;
+  cell?: string;
+  village?: string;
+  country?: string;
+}
+
+/** A platform user as managed by the admin console (maps to backend ManagedUserResponse). */
+export interface ManagedUser {
+  id: string;
+  fullName: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  role: UserRole;
+  /** Raw backend role code (e.g. PLATFORM_ADMIN) — kept for admin editing. */
+  roleCode?: string;
+  status: string;
+  verified: boolean;
+  organizationId?: string;
+  organizationName?: string;
+  province?: string;
+  district?: string;
+  sector?: string;
+  cell?: string;
+  village?: string;
+  country?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** Payload for creating a managed user via the admin console. */
+export interface ManagedUserCreateInput {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  roleCode: string;
+  organizationId?: string;
+  defaultPassword?: string;
+  province?: string;
+  district?: string;
+  sector?: string;
+  cell?: string;
+  village?: string;
+}
+
+/** Payload for updating a managed user's profile via the admin console. */
+export interface ManagedUserUpdateInput {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phoneNumber?: string;
+  province?: string;
+  district?: string;
+  sector?: string;
+  cell?: string;
+  village?: string;
+}
+
+/** Payload for onboarding a new partner organization. */
+export interface PartnerCreateInput {
+  name: string;
+  code: string;
+  type: string;
+  registrationNumber?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  addressLine?: string;
+  district?: string;
+  website?: string;
+  adminFirstName: string;
+  adminLastName: string;
+  adminEmail: string;
+  adminPhone?: string;
+  adminDefaultPassword?: string;
+}
+
+export interface PagedResult<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  page: number;
+  size: number;
+}

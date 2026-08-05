@@ -3,16 +3,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, HeartPulse, Shield, Flower2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import { LoadingLink } from '@/components/navigation/loading-link';
 import { AnimatedSection } from '@/components/ui/animated-section';
 import { Button } from '@/components/ui/button';
 import { Carousel } from '@/components/ui/carousel';
+import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SectionHeading } from '@/components/landing/section-heading';
 import { fetchPublicProducts } from '@/lib/api/public-products';
 import type { ProductSummary } from '@/lib/api/products';
-import { getProductHeroImage } from '@/lib/product-images';
+import { getProductLocalFallback, getProductRemoteHero, getUnsplashByKeyword } from '@/lib/product-images';
 import { formatCurrency } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
@@ -47,7 +47,8 @@ function ProductPlanCard({
   useRegisterCta: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const heroSrc = getProductHeroImage(product);
+  const heroSrc = getProductRemoteHero(product);
+  const heroFallback = getProductLocalFallback(product);
   const href = useRegisterCta ? '/register' : `/products/${product.id}`;
 
   return (
@@ -63,8 +64,9 @@ function ProductPlanCard({
         </span>
       )}
       <div className="relative h-36 w-full overflow-hidden bg-brand-primary-light/40">
-        <Image
+        <ImageWithFallback
           src={heroSrc}
+          fallbackSrc={heroFallback}
           alt={product.name}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -108,10 +110,16 @@ function StaticFallbackCard({
   popular?: boolean;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const imageMap = {
+  const localMap = {
     personalAccident: '/images/products/personal-accident.svg',
     familyHealth: '/images/products/family-health.svg',
     funeralCover: '/images/products/funeral-cover.svg',
+  } as const;
+
+  const remoteKeywordMap = {
+    personalAccident: 'accident',
+    familyHealth: 'health',
+    funeralCover: 'funeral',
   } as const;
 
   return (
@@ -127,7 +135,14 @@ function StaticFallbackCard({
         </span>
       )}
       <div className="relative h-36 w-full overflow-hidden">
-        <Image src={imageMap[keyName]} alt="" fill className="object-cover transition-transform duration-700 group-hover:scale-110" sizes="33vw" />
+        <ImageWithFallback
+          src={getUnsplashByKeyword(remoteKeywordMap[keyName])}
+          fallbackSrc={localMap[keyName]}
+          alt={t(`products.${keyName}.name`)}
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-110"
+          sizes="33vw"
+        />
       </div>
       <div className="flex flex-1 flex-col p-6">
         <div className={cn('mb-4 flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6', accent)}>

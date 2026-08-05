@@ -46,10 +46,13 @@ export function createRegisterSchema(requiresEmail: boolean) {
 
   return z
     .object({
-      fullName: z.string().min(2, 'Full name is required'),
+      firstName: z.string().trim().min(2, 'First name is required'),
+      lastName: z.string().trim().min(2, 'Last name is required'),
       phone: phoneSchema,
       email: requiresEmail ? emailSchema : optionalEmail,
-      nationalId: z.string().min(16, 'National ID must be 16 digits').max(16),
+      nationalId: z
+        .string()
+        .regex(/^\d{16}$/, 'National ID must be 16 digits'),
       password: z.string().min(8, 'Password must be at least 8 characters'),
       confirmPassword: z.string(),
     })
