@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, X } from 'lucide-react';
+import { Menu, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SidebarToggleProps {
@@ -43,7 +43,7 @@ export function SidebarToggle({ collapsed, onToggle, floating = false, className
       )}
       aria-label={collapsed ? 'Open sidebar' : 'Close sidebar'}
     >
-      {collapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}
+      {collapsed ? <Menu className="h-5 w-5" /> : <ArrowLeft className="h-5 w-5" />}
     </button>
   );
 }

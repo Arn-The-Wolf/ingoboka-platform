@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Shield } from 'lucide-react';
 import { AuthBrandPanel } from '@/components/auth/auth-brand-panel';
@@ -14,19 +14,28 @@ interface AuthShellProps {
 export function AuthShell({ children }: AuthShellProps) {
   const tCommon = useTranslations('common');
 
-  return (
-    <div className="relative min-h-screen bg-brand-background lg:h-screen lg:overflow-hidden">
-      <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-brand-primary/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-8 -left-8 h-40 w-40 rounded-full bg-brand-accent/15 blur-2xl" />
+  // Lock document scroll so neither login nor registration can scroll the page.
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+    };
+  }, []);
 
-      <div className="relative mx-auto flex min-h-screen w-full max-w-6xl lg:h-screen">
-        {/* Branded illustration panel — desktop only */}
+  return (
+    <div className="fixed inset-0 z-10 overflow-hidden bg-brand-background">
+      <div className="grid h-full w-full grid-cols-1 lg:grid-cols-2">
+        {/* Full-bleed left brand column (desktop) — no outer margin/padding */}
         <AuthBrandPanel />
 
-        {/* Form panel */}
-        <main className="flex flex-1 flex-col">
-          {/* Compact brand header — mobile only */}
-          <div className="flex items-center justify-between p-4 lg:justify-end lg:p-6">
+        <main className="flex h-full min-h-0 flex-col bg-brand-background">
+          <div className="flex shrink-0 items-center justify-between px-4 py-3 lg:justify-end lg:px-6 lg:py-4">
             <div className="flex items-center gap-2 lg:hidden">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary text-white shadow-elevated">
                 <Shield className="h-5 w-5" />
@@ -36,9 +45,12 @@ export function AuthShell({ children }: AuthShellProps) {
             <LocaleSwitcher />
           </div>
 
-          <div className="flex flex-1 items-center justify-center px-4 pb-8 lg:px-10">
-            <div className="portal-card w-full max-w-md animate-fade-in-up overflow-y-auto p-5 lg:max-h-[calc(100vh-120px)] lg:p-7">
-              {children}
+          {/* Only the form column may scroll on short viewports; the page never does. */}
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div className="flex min-h-full items-center justify-center px-4 py-4 sm:py-6 lg:px-10">
+              <div className="portal-card w-full max-w-md animate-fade-in-up p-5 lg:p-7">
+                {children}
+              </div>
             </div>
           </div>
         </main>

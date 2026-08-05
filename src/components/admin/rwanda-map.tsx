@@ -63,15 +63,15 @@ export function RwandaMap({ className }: { className?: string }) {
   const maxDistrictInsured = Math.max(1, ...districts.map((d) => d.insured));
 
   return (
-    <div className={cn('portal-card animate-fade-in p-5', className)}>
+    <div className={cn('portal-card min-w-0 animate-fade-in overflow-hidden p-4 sm:p-5', className)}>
       <div className="mb-4">
         <h3 className="text-base font-semibold text-brand-primary-dark">{t('mapTitle')}</h3>
         <p className="text-xs text-brand-muted">{t('mapSubtitle', { source: RWANDA_CENSUS_SOURCE })}</p>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <div>
-          <svg viewBox="0 0 100 80" className="w-full" role="img" aria-label={t('mapTitle')}>
+      <div className="grid min-w-0 gap-5 lg:grid-cols-2">
+        <div className="min-w-0">
+          <svg viewBox="0 0 100 80" className="h-auto w-full max-w-full" role="img" aria-label={t('mapTitle')}>
             {provinces.map((p) => {
               const shape = PROVINCE_SHAPES[p.code];
               if (!shape) return null;
@@ -139,20 +139,20 @@ export function RwandaMap({ className }: { className?: string }) {
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <div className="rounded-lg border border-brand-border/60 bg-white p-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="min-w-0 rounded-lg border border-brand-border/60 bg-white p-3">
               <Users className="mb-1 h-4 w-4 text-brand-primary" />
-              <p className="text-sm font-bold text-brand-primary-dark">{numberFmt(scope.population)}</p>
+              <p className="truncate text-sm font-bold text-brand-primary-dark">{numberFmt(scope.population)}</p>
               <p className="text-[11px] text-brand-muted">{t('population')}</p>
             </div>
-            <div className="rounded-lg border border-brand-border/60 bg-white p-3">
+            <div className="min-w-0 rounded-lg border border-brand-border/60 bg-white p-3">
               <ShieldCheck className="mb-1 h-4 w-4 text-brand-secondary" />
-              <p className="text-sm font-bold text-brand-primary-dark">{numberFmt(scope.insured)}</p>
+              <p className="truncate text-sm font-bold text-brand-primary-dark">{numberFmt(scope.insured)}</p>
               <p className="text-[11px] text-brand-muted">{t('insured')}</p>
             </div>
-            <div className="rounded-lg border border-brand-border/60 bg-white p-3">
+            <div className="min-w-0 rounded-lg border border-brand-border/60 bg-white p-3">
               <p className="mb-1 text-xs font-semibold text-brand-accent-dark">%</p>
-              <p className="text-sm font-bold text-brand-primary-dark">{pctFmt(scope.penetration)}</p>
+              <p className="truncate text-sm font-bold text-brand-primary-dark">{pctFmt(scope.penetration)}</p>
               <p className="text-[11px] text-brand-muted">{t('penetration')}</p>
             </div>
           </div>

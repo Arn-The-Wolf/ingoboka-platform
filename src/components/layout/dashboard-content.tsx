@@ -24,7 +24,7 @@ export function DashboardContent({ children, className, innerClassName }: Dashbo
   }, [pathname]);
 
   return (
-    <main className={cn('relative flex-1 overflow-y-auto', className)}>
+    <main className={cn('relative min-w-0 flex-1 overflow-x-hidden overflow-y-auto', className)}>
       {loading && (
         <div
           className="pointer-events-none absolute inset-0 z-20 flex items-start justify-center bg-brand-background/50 pt-24 backdrop-blur-[1px] animate-fade-in"
@@ -36,7 +36,7 @@ export function DashboardContent({ children, className, innerClassName }: Dashbo
           </div>
         </div>
       )}
-      <div className={innerClassName}>
+      <div className={cn('min-w-0', innerClassName)}>
         <PageTransition key={pathname}>{children}</PageTransition>
       </div>
     </main>

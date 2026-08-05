@@ -13,7 +13,7 @@ export function PageContainer({ children, className, narrow }: PageContainerProp
   return (
     <div
       className={cn(
-        'mx-auto w-full px-4 py-6 lg:px-8',
+        'mx-auto w-full min-w-0 px-4 py-6 lg:px-8',
         narrow ? 'max-w-3xl' : 'max-w-7xl',
         className
       )}

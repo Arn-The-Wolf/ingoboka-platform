@@ -96,19 +96,19 @@ export default function AdminDashboardPage() {
           {tCommon('error')}
         </Alert>
       ) : (
-        <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-5">
-          {kpis.map((kpi, index) => {
+        <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+          {kpis.map((kpi) => {
             const Icon = kpi.icon;
             return (
-              <LoadingLink key={kpi.label} href={kpi.href} className={cn(index === 4 && 'col-span-2 lg:col-span-1')}>
+              <LoadingLink key={kpi.label} href={kpi.href} className="min-w-0">
                 <Card className={cn('bg-gradient-to-br transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg', themeClasses[kpi.theme])}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3">
-                      <div className={cn('flex h-10 w-10 items-center justify-center rounded-lg text-white', iconTheme[kpi.theme])}>
+                      <div className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white', iconTheme[kpi.theme])}>
                         <Icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-2xl font-bold text-brand-primary-dark">{kpi.value ?? 0}</p>
+                        <p className="truncate text-2xl font-bold text-brand-primary-dark">{kpi.value ?? 0}</p>
                         <p className="truncate text-xs text-brand-muted">{kpi.label}</p>
                       </div>
                     </div>
@@ -121,12 +121,12 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Rwanda coverage map */}
-      <div className="mb-8">
+      <div className="mb-8 min-w-0 overflow-hidden">
         <RwandaMap />
       </div>
 
       {/* Distribution charts with type toggle + view more */}
-      <div className="mb-8 grid gap-6 lg:grid-cols-2">
+      <div className="mb-8 grid min-w-0 gap-6 lg:grid-cols-2">
         <DistributionChart
           title={t('usersByProvince')}
           data={provinceChart}
