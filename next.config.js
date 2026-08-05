@@ -25,6 +25,16 @@ const nextConfig = {
         port: '9000',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'logo.clearbit.com',
+        pathname: '/**',
+      },
     ],
   },
   async rewrites() {

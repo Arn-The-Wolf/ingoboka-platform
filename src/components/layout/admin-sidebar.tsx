@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   X,
+  Map,
 } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
@@ -22,7 +23,8 @@ import { LocaleSwitcher } from './locale-switcher';
 const navItems = [
   { href: '/admin/dashboard', icon: LayoutDashboard, labelKey: 'overview' as const },
   { href: '/admin/users', icon: Users, labelKey: 'users' as const },
-  { href: '/admin/organizations', icon: Building2, labelKey: 'organizations' as const },
+  { href: '/admin/organizations', icon: Building2, labelKey: 'partners' as const },
+  { href: '/admin/geography', icon: Map, labelKey: 'geography' as const },
   { href: '/admin/policies', icon: Shield, labelKey: 'policies' as const },
   { href: '/admin/audit', icon: ScrollText, labelKey: 'audit' as const },
   { href: '/admin/settings', icon: Settings, labelKey: 'settings' as const },

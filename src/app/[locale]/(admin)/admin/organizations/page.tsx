@@ -1,10 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Building2, Plus, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Building2,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  BarChart3,
+  ArrowUpDown,
+  Mail,
+} from 'lucide-react';
 import { adminApi } from '@/lib/api';
+import type { Organization } from '@/lib/api/admin';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,26 +22,69 @@ import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { AdminSelect } from '@/components/admin/admin-select';
+import { DistributionChart } from '@/components/admin/distribution-chart';
+import { PartnerFormDialog } from '@/components/admin/partner-form-dialog';
+import { orgStatusLabel, orgStatusTone, humanize } from '@/lib/status-label';
+import { cn } from '@/lib/utils';
 
-const ITEMS_PER_PAGE = 12;
+const SIZE_OPTIONS = [12, 24, 48];
 
-export default function AdminOrganizationsPage() {
+export default function AdminPartnersPage() {
   const t = useTranslations('admin');
   const tCommon = useTranslations('common');
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data: organizations, isLoading, error } = useQuery({
-    queryKey: ['admin', 'organizations'],
-    queryFn: () => adminApi.listOrganizations(),
+  const [serverPage, setServerPage] = useState(0);
+  const [size, setSize] = useState(12);
+  const [search, setSearch] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [sortField, setSortField] = useState<'name' | 'status' | 'type'>('name');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [showChart, setShowChart] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['admin', 'partners', serverPage, size],
+    queryFn: () => adminApi.listPartnersPaged(serverPage, size),
   });
 
-  const totalPages = Math.ceil((organizations?.length ?? 0) / ITEMS_PER_PAGE);
-  const paginatedOrgs = organizations?.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
+  const content = useMemo(() => data?.content ?? [], [data?.content]);
 
-  const getOrgGradient = (index: number) => {
+  const typeOptions = useMemo(() => {
+    const set = new Set<string>();
+    content.forEach((o) => set.add(o.organizationType));
+    return Array.from(set).map((v) => ({ value: v, label: humanize(v) }));
+  }, [content]);
+
+  const view = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const dir = sortDir === 'asc' ? 1 : -1;
+    return content
+      .filter((o) => {
+        if (q && !(o.name.toLowerCase().includes(q) || o.slug.toLowerCase().includes(q))) return false;
+        if (typeFilter && o.organizationType !== typeFilter) return false;
+        if (statusFilter && o.status !== statusFilter) return false;
+        return true;
+      })
+      .sort((a, b) => {
+        const val = (o: Organization) =>
+          sortField === 'status' ? o.status : sortField === 'type' ? o.organizationType : o.name;
+        return val(a).localeCompare(val(b)) * dir;
+      });
+  }, [content, search, typeFilter, statusFilter, sortField, sortDir]);
+
+  const byStatus = useMemo(() => {
+    const counts = new Map<string, number>();
+    content.forEach((o) => counts.set(o.status, (counts.get(o.status) ?? 0) + 1));
+    return Array.from(counts.entries()).map(([s, value]) => ({ name: orgStatusLabel(s), value }));
+  }, [content]);
+
+  const totalPages = data?.totalPages ?? 1;
+  const totalElements = data?.totalElements ?? content.length;
+
+  const getGradient = (index: number) => {
     const gradients = [
       'from-purple-400 to-purple-600',
       'from-blue-400 to-blue-600',
@@ -45,116 +98,137 @@ export default function AdminOrganizationsPage() {
 
   return (
     <PageContainer>
-      <div className="flex items-center justify-between mb-6">
-        <PageHeader
-          title={t('organizations')}
-          subtitle={t('partnerCount', { count: organizations?.length ?? 0 })}
-        />
-        <Button className="bg-green-600 hover:bg-green-700 text-white gap-2">
-          <Plus className="h-4 w-4" />
-          Add Organization
-        </Button>
+      <PageHeader
+        title={t('partners')}
+        subtitle={t('partnersSubtitle', { count: totalElements })}
+        action={
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowChart((s) => !s)} className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              <span className="hidden sm:inline">{showChart ? t('hideChart') : t('visualize')}</span>
+            </Button>
+            <Button onClick={() => setAddOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('addPartner')}</span>
+            </Button>
+          </div>
+        }
+      />
+
+      {showChart && (
+        <div className="mb-6">
+          <DistributionChart title={t('partnersByStatus')} data={byStatus} defaultType="pie" height={260} />
+        </div>
+      )}
+
+      <div className="mb-6 space-y-3 rounded-xl border border-brand-border/60 bg-white p-4 shadow-card">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
+            <Input className="pl-9" placeholder={tCommon('search')} value={search} onChange={(e) => setSearch(e.target.value)} />
+          </div>
+          <AdminSelect value={typeFilter} placeholder={t('partnerType')} options={typeOptions} onChange={(e) => setTypeFilter(e.target.value)} />
+          <AdminSelect
+            value={statusFilter}
+            placeholder={t('allStatuses')}
+            options={[
+              { value: 'ACTIVE', label: orgStatusLabel('ACTIVE') },
+              { value: 'SUSPENDED', label: orgStatusLabel('SUSPENDED') },
+              { value: 'INACTIVE', label: orgStatusLabel('INACTIVE') },
+            ]}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          />
+          <div className="flex items-center gap-2">
+            <AdminSelect
+              className="h-10"
+              value={sortField}
+              options={[
+                { value: 'name', label: t('sortName') },
+                { value: 'status', label: t('sortStatus') },
+                { value: 'type', label: t('partnerType') },
+              ]}
+              onChange={(e) => setSortField(e.target.value as 'name' | 'status' | 'type')}
+            />
+            <Button variant="outline" size="icon" className="shrink-0" onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))} title={sortDir === 'asc' ? t('sortAsc') : t('sortDesc')}>
+              <ArrowUpDown className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </div>
 
       {isLoading && <ListSkeleton rows={6} />}
 
-      {error && (
-        <Alert variant="error" className="mb-4">
-          {tCommon('error')}
-        </Alert>
-      )}
+      {error && <Alert variant="error" className="mb-4">{tCommon('error')}</Alert>}
 
-      {!isLoading && (paginatedOrgs?.length ?? 0) > 0 && (
+      {!isLoading && !error && view.length > 0 && (
         <>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {paginatedOrgs?.map((org, index) => (
-              <Card key={org.id} className="border-purple-200 bg-gradient-to-br from-white to-purple-50/30 hover:shadow-lg transition-all hover:border-purple-300 group">
+            {view.map((org, index) => (
+              <Card key={org.id} className="group animate-fade-in border-brand-border/60 bg-white transition-all hover:-translate-y-0.5 hover:border-brand-primary/25 hover:shadow-elevated">
                 <CardContent className="p-5">
-                  <div className="flex items-start gap-3 mb-4">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${getOrgGradient(index)} text-white shadow-md`}>
+                  <div className="mb-3 flex items-start gap-3">
+                    <div className={cn('flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md', getGradient(index))}>
                       <Building2 className="h-6 w-6" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-800 truncate">{org.name}</p>
-                      <p className="text-sm text-gray-600">{org.organizationType}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-semibold text-brand-primary-dark">{org.name}</p>
+                      <p className="text-sm text-brand-muted">{humanize(org.organizationType)}</p>
                     </div>
-                    <Badge variant={org.status === 'ACTIVE' ? 'active' : 'pending'} className="shrink-0">
-                      {org.status}
-                    </Badge>
+                    <Badge variant={orgStatusTone(org.status)} className="shrink-0">{orgStatusLabel(org.status)}</Badge>
                   </div>
-                  {(org.slug || org.contactEmail) && (
-                    <div className="space-y-1 mb-4">
-                      {org.slug && <p className="text-xs text-gray-500 truncate">Slug: {org.slug}</p>}
-                      {org.contactEmail && <p className="text-xs text-gray-500 truncate">📧 {org.contactEmail}</p>}
-                    </div>
-                  )}
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="outline" size="sm" className="flex-1 border-blue-200 hover:bg-blue-50 text-blue-700">
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm" className="border-red-200 hover:bg-red-50 text-red-700">
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                  <div className="space-y-1">
+                    {org.slug && <p className="truncate text-xs text-brand-muted">{org.slug}</p>}
+                    {org.contactEmail && (
+                      <p className="flex items-center gap-1.5 truncate text-xs text-brand-muted">
+                        <Mail className="h-3 w-3" /> {org.contactEmail}
+                      </p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="mt-6 flex items-center justify-between">
-              <p className="text-sm text-gray-600">
-                Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, organizations?.length ?? 0)} of {organizations?.length ?? 0} organizations
-              </p>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="border-purple-200 hover:bg-purple-50"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
-                </Button>
-                <span className="text-sm text-gray-600">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="border-purple-200 hover:bg-purple-50"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+          <div className="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
+            <div className="flex items-center gap-2 text-sm text-brand-muted">
+              <span>{t('perPage')}</span>
+              <AdminSelect
+                className="h-9 w-20"
+                value={String(size)}
+                options={SIZE_OPTIONS.map((s) => ({ value: String(s), label: String(s) }))}
+                onChange={(e) => { setSize(Number(e.target.value)); setServerPage(0); }}
+              />
             </div>
-          )}
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setServerPage((p) => Math.max(0, p - 1))} disabled={serverPage === 0}>
+                <ChevronLeft className="h-4 w-4" /> {t('previous')}
+              </Button>
+              <span className="text-sm text-brand-muted">{t('page', { page: serverPage + 1, total: totalPages })}</span>
+              <Button variant="outline" size="sm" onClick={() => setServerPage((p) => Math.min(totalPages - 1, p + 1))} disabled={serverPage >= totalPages - 1}>
+                {t('next')} <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </>
       )}
 
-      {!isLoading && (organizations?.length ?? 0) === 0 && (
-        <Card className="border-dashed border-purple-200">
+      {!isLoading && !error && view.length === 0 && (
+        <Card className="border-dashed border-brand-border">
           <CardContent className="py-16 text-center">
-            <div className="flex justify-center mb-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-purple-100">
-                <Building2 className="h-10 w-10 text-purple-600" />
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-primary-light">
+                <Building2 className="h-10 w-10 text-brand-primary" />
               </div>
             </div>
-            <p className="font-medium text-gray-700 mb-2">{t('noOrganizations')}</p>
-            <p className="text-sm text-gray-500 mb-6">Start by adding your first organization</p>
-            <Button className="bg-green-600 hover:bg-green-700 text-white gap-2">
-              <Plus className="h-4 w-4" />
-              Add Organization
+            <p className="mb-2 font-medium text-brand-primary-dark">{content.length === 0 ? t('noOrganizations') : t('noResults')}</p>
+            <Button onClick={() => setAddOpen(true)} className="mt-2 gap-2">
+              <Plus className="h-4 w-4" /> {t('addPartner')}
             </Button>
           </CardContent>
         </Card>
       )}
+
+      <PartnerFormDialog open={addOpen} onOpenChange={setAddOpen} />
     </PageContainer>
   );
 }

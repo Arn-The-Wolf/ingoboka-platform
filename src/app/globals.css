@@ -37,6 +37,19 @@
     animation: shimmer 1.8s ease-in-out infinite;
     transform: translateX(-100%);
   }
+
+  /* Standardized auth/form input — consistent 48px height (44px+ touch target) & full width. */
+  .design-input {
+    @apply flex h-12 w-full rounded-xl border border-brand-border bg-white px-4 text-sm text-brand-primary-dark transition-all duration-200 placeholder:text-brand-muted focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .design-input--error {
+    @apply border-brand-error focus:border-brand-error focus:ring-brand-error/20;
+  }
+
+  .portal-card {
+    @apply rounded-2xl border border-brand-border/60 bg-white shadow-card;
+  }
 }
 
 @layer utilities {
@@ -50,6 +63,16 @@
 
   .animate-fade-in {
     animation: fade-in 0.5s ease-out both;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Subtle dotted overlay for branded auth surfaces. */
+  .auth-dot-pattern {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+    background-size: 22px 22px;
   }
 
   .animate-float {
@@ -104,6 +127,17 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 

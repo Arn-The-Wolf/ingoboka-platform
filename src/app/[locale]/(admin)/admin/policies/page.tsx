@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Search, Shield, ChevronLeft, ChevronRight, FileText } from 'lucide-react';
+import { Search, Shield, ChevronLeft, ChevronRight, FileText, BarChart3 } from 'lucide-react';
 import { policyApi } from '@/lib/api';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
@@ -13,6 +13,8 @@ import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { DistributionChart } from '@/components/admin/distribution-chart';
+import { humanize } from '@/lib/status-label';
 import { cn, formatCurrency, formatDate } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 10;
@@ -22,6 +24,7 @@ export default function AdminPoliciesPage() {
   const tCommon = useTranslations('common');
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showChart, setShowChart] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'policies'],
@@ -48,6 +51,12 @@ export default function AdminPoliciesPage() {
     currentPage * ITEMS_PER_PAGE
   );
 
+  const byStatus = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const p of filtered) counts.set(p.status, (counts.get(p.status) ?? 0) + 1);
+    return Array.from(counts.entries()).map(([status, value]) => ({ name: humanize(status), value }));
+  }, [filtered]);
+
   // Reset to page 1 when search changes
   const handleSearchChange = (value: string) => {
     setSearch(value);
@@ -70,10 +79,22 @@ export default function AdminPoliciesPage() {
 
   return (
     <PageContainer>
-      <PageHeader 
-        title={t('policies')} 
-        subtitle={`${filtered.length} ${t('totalPolicies')}`} 
+      <PageHeader
+        title={t('policies')}
+        subtitle={`${filtered.length} ${t('totalPolicies')}`}
+        action={
+          <Button variant="outline" onClick={() => setShowChart((s) => !s)} className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            <span className="hidden sm:inline">{showChart ? t('hideChart') : t('visualize')}</span>
+          </Button>
+        }
       />
+
+      {showChart && (
+        <div className="mb-6">
+          <DistributionChart title={t('distribution')} data={byStatus} defaultType="bar" height={260} />
+        </div>
+      )}
 
       <div className="mb-6 relative max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
@@ -150,7 +171,7 @@ export default function AdminPoliciesPage() {
                     </td>
                     <td className="px-4 py-3">
                       <Badge variant={getStatusVariant(policy.status)}>
-                        {policy.status}
+                        {humanize(policy.status)}
                       </Badge>
                     </td>
                     <td className="hidden px-4 py-3 text-gray-600 md:table-cell">
