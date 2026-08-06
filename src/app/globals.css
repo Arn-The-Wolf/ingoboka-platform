@@ -75,6 +75,94 @@
     background-size: 22px 22px;
   }
 
+  /* Document scroll lock used by AuthShell — belts & braces with JS styles. */
+  html.auth-scroll-lock,
+  html.auth-scroll-lock body {
+    overflow: hidden !important;
+    height: 100% !important;
+    overscroll-behavior: none;
+  }
+
+  /* Brand panel spacing defaults (tall viewports). */
+  .auth-brand-pad {
+    padding: 2rem;
+  }
+  .auth-brand-logo {
+    height: 2.75rem;
+    width: 2.75rem;
+  }
+  .auth-brand-title {
+    font-size: 1.875rem;
+  }
+  .auth-brand-subtitle {
+    font-size: 0.95rem;
+  }
+  .auth-brand-card {
+    padding: 1.1rem;
+  }
+
+  @media (min-width: 1280px) {
+    .auth-brand-pad {
+      padding: 2.5rem;
+    }
+    .auth-brand-title {
+      font-size: 2.25rem;
+    }
+    .auth-brand-subtitle {
+      font-size: 1rem;
+    }
+    .auth-brand-card {
+      padding: 1.25rem;
+    }
+  }
+
+  /* Compact left panel so it fits without page scroll on short desktops. */
+  @media (max-height: 820px) {
+    .auth-brand-pad {
+      padding: 1.25rem 1.5rem;
+    }
+    .auth-brand-title {
+      font-size: 1.5rem;
+    }
+    .auth-brand-subtitle {
+      font-size: 0.85rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .auth-brand-card {
+      padding: 0.85rem;
+      transform: scale(0.92);
+      transform-origin: left top;
+    }
+    .auth-brand-values li:nth-child(n + 3) {
+      display: none;
+    }
+  }
+
+  @media (max-height: 700px) {
+    .auth-brand-pad {
+      padding: 1rem 1.25rem;
+    }
+    .auth-brand-title {
+      font-size: 1.35rem;
+    }
+    .auth-brand-subtitle {
+      display: none;
+    }
+    .auth-brand-card-wrap {
+      transform: scale(0.88);
+      transform-origin: left top;
+    }
+    .auth-brand-values {
+      display: none;
+    }
+    .auth-brand-footer {
+      display: none;
+    }
+  }
+
   .animate-float {
     animation: float 4s ease-in-out infinite;
   }
@@ -85,6 +173,14 @@
 
   .animate-marquee {
     animation: marquee 28s linear infinite;
+  }
+
+  .animate-data-flow {
+    animation: data-flow 1.8s ease-in-out infinite;
+  }
+
+  .animate-data-flow-vertical {
+    animation: data-flow-vertical 1.8s ease-in-out infinite;
   }
 
   .stagger-1 { animation-delay: 0.08s; }
@@ -157,5 +253,39 @@
   }
   100% {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes data-flow {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(320%);
+    opacity: 0;
+  }
+}
+
+@keyframes data-flow-vertical {
+  0% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(320%);
+    opacity: 0;
   }
 }

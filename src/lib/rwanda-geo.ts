@@ -4,6 +4,10 @@
  * Hierarchy (Rwandan order): Province → District → Sector → Cell → Village.
  * Country is fixed to "Rwanda".
  *
+ * Map boundaries (SVG paths) live in `src/data/geo/rwanda-map-paths.ts`, derived from
+ * geoBoundaries RWA ADM1/ADM2 simplified GeoJSON (CC BY 4.0) stored under `public/geo/`.
+ * Province/district `name` + `code` keys here must stay aligned with those map features.
+ *
  * SOURCE & ASSUMPTIONS
  * --------------------
  * Population figures are seeded from Rwanda's 5th Population and Housing Census

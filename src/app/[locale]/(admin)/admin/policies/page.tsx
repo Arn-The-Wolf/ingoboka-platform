@@ -28,7 +28,7 @@ export default function AdminPoliciesPage() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['admin', 'policies'],
-    queryFn: () => policyApi.list(),
+    queryFn: () => policyApi.listTenant(0, 100),
     retry: false,
   });
 

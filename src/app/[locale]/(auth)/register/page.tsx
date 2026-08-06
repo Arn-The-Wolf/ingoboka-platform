@@ -11,6 +11,10 @@ import { Alert } from '@/components/ui/alert';
 import { AuthBackButton } from '@/components/layout/auth-back-button';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import {
+  AddressCascade,
+  emptyAddressCascade,
+} from '@/components/auth/address-cascade';
+import {
   PasswordField,
   PasswordStrength,
   PhoneField,
@@ -22,13 +26,14 @@ import { useOtpDeliveryConfig } from '@/hooks/use-otp-config';
 import { createRegisterSchema, type RegisterFormData } from '@/lib/validators';
 import type { ApiError } from '@/types';
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 type StepField = keyof RegisterFormData;
 const STEP_FIELDS: Record<number, StepField[]> = {
   1: ['firstName', 'lastName'],
   2: ['phone', 'nationalId'],
-  3: ['email', 'password', 'confirmPassword'],
+  3: ['province', 'district', 'sector', 'cell', 'village'],
+  4: ['email', 'password', 'confirmPassword'],
 };
 
 export default function RegisterPage() {
@@ -49,13 +54,31 @@ export default function RegisterPage() {
     handleSubmit,
     trigger,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(schema),
     mode: 'onTouched',
+    defaultValues: {
+      ...emptyAddressCascade,
+      firstName: '',
+      lastName: '',
+      phone: '',
+      nationalId: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
   });
 
   const passwordValue = watch('password') ?? '';
+  const addressValue = {
+    province: watch('province') ?? '',
+    district: watch('district') ?? '',
+    sector: watch('sector') ?? '',
+    cell: watch('cell') ?? '',
+    village: watch('village') ?? '',
+  };
 
   const goNext = async () => {
     const valid = await trigger(STEP_FIELDS[step]);
@@ -72,6 +95,11 @@ export default function RegisterPage() {
         phone: data.phone,
         nationalId: data.nationalId,
         password: data.password,
+        province: data.province,
+        district: data.district,
+        sector: data.sector,
+        cell: data.cell,
+        village: data.village,
         ...(data.email?.trim() ? { email: data.email.trim().toLowerCase() } : {}),
       },
       {
@@ -85,10 +113,10 @@ export default function RegisterPage() {
   };
 
   const error = registerMutation.error as ApiError | null;
-  const stepTitles = [t('step1Title'), t('step2Title'), t('step3Title')];
+  const stepTitles = [t('step1Title'), t('step2Title'), t('step3Title'), t('step4Title')];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       <WelcomeOverlay
         state={welcome.state}
         title={t('welcomeTitle')}
@@ -118,7 +146,7 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {error && <Alert variant="error">{error.message}</Alert>}
-        {step === 3 && isEmailMode && <Alert variant="default">{t('registerEmailHint')}</Alert>}
+        {step === 4 && isEmailMode && <Alert variant="default">{t('registerEmailHint')}</Alert>}
 
         {/* key forces the entrance animation to replay on each step change */}
         <div key={step} className="space-y-4 animate-fade-in">
@@ -167,6 +195,29 @@ export default function RegisterPage() {
           )}
 
           {step === 3 && (
+            <>
+              <p className="text-sm text-brand-muted">{t('addressHint')}</p>
+              <AddressCascade
+                value={addressValue}
+                onChange={(next) => {
+                  setValue('province', next.province, { shouldValidate: true, shouldDirty: true });
+                  setValue('district', next.district, { shouldValidate: true, shouldDirty: true });
+                  setValue('sector', next.sector, { shouldValidate: true, shouldDirty: true });
+                  setValue('cell', next.cell, { shouldValidate: true, shouldDirty: true });
+                  setValue('village', next.village, { shouldValidate: true, shouldDirty: true });
+                }}
+                errors={{
+                  province: errors.province?.message,
+                  district: errors.district?.message,
+                  sector: errors.sector?.message,
+                  cell: errors.cell?.message,
+                  village: errors.village?.message,
+                }}
+              />
+            </>
+          )}
+
+          {step === 4 && (
             <>
               <TextField
                 id="email"

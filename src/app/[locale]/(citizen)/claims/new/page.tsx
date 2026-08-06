@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { claimApi, policyApi } from '@/lib/api';
+import { useAdminToast } from '@/components/admin/admin-toast';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { StepIndicator } from '@/components/ui/step-indicator';
@@ -33,6 +34,7 @@ export default function NewClaimPage() {
   const router = useRouter();
   const t = useTranslations('citizen.claims');
   const tCommon = useTranslations('common');
+  const toast = useAdminToast();
   const [step, setStep] = useState(1);
   const [policyId, setPolicyId] = useState('');
   const [claimType, setClaimType] = useState('ACCIDENT');
@@ -75,8 +77,10 @@ export default function NewClaimPage() {
       return { uploadFailed };
     },
     onSuccess: ({ uploadFailed }) => {
+      toast.success(uploadFailed ? tCommon('submitted') : tCommon('submitted'));
       router.push(uploadFailed ? '/claims?uploadPartial=1' : '/claims');
     },
+    onError: () => toast.error(tCommon('error')),
   });
 
   const activePolicies = (policies?.content ?? []).filter((p) => p.status === 'ACTIVE');

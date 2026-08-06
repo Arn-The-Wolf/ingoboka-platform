@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Baby, Heart, Trash2, User, UserPlus, Users, Edit2, Plus, X } from 'lucide-react';
 import { customerApiExt } from '@/lib/api';
+import { useAdminToast } from '@/components/admin/admin-toast';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
@@ -63,6 +64,7 @@ export default function DependantsPage() {
   const tNav = useTranslations('citizen');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
+  const toast = useAdminToast();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -93,7 +95,9 @@ export default function DependantsPage() {
       queryClient.invalidateQueries({ queryKey: ['dependants'] });
       setForm({ firstName: '', lastName: '', relationship: 'CHILD', dateOfBirth: '' });
       setIsAddDialogOpen(false);
+      toast.success(tCommon('save'));
     },
+    onError: () => toast.error(tCommon('error')),
   });
 
   const editMutation = useMutation({
@@ -111,7 +115,9 @@ export default function DependantsPage() {
       setIsEditDialogOpen(false);
       setSelectedDependant(null);
       setForm({ firstName: '', lastName: '', relationship: 'CHILD', dateOfBirth: '' });
+      toast.success(tCommon('save'));
     },
+    onError: () => toast.error(tCommon('error')),
   });
 
   const removeMutation = useMutation({
@@ -120,7 +126,9 @@ export default function DependantsPage() {
       queryClient.invalidateQueries({ queryKey: ['dependants'] });
       setIsDeleteDialogOpen(false);
       setSelectedDependant(null);
+      toast.success(tCommon('save'));
     },
+    onError: () => toast.error(tCommon('error')),
   });
 
   const handleAddClick = () => {

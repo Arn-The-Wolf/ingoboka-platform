@@ -11,6 +11,7 @@ import { DemoCredentialsPanel } from '@/components/auth/demo-credentials-panel';
 import { PasswordField, PhoneField, TextField } from '@/components/auth/fields';
 import { WelcomeOverlay, useWelcomeSequence } from '@/components/auth/welcome-overlay';
 import { getPostAuthPath, useLogin } from '@/hooks/use-auth';
+import { useAdminToast } from '@/components/admin/admin-toast';
 import { normalizeCitizenPhone } from '@/lib/auth/phone';
 import { loginSchema, type LoginFormData } from '@/lib/validators';
 import type { ApiError } from '@/types';
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const locale = useLocale();
   const login = useLogin();
   const welcome = useWelcomeSequence();
+  const toast = useAdminToast();
 
   const {
     register,
@@ -49,9 +51,14 @@ export default function LoginPage() {
       },
       {
         onSuccess: (result) => {
+          toast.success(t('loginSuccess'));
           welcome.start(() => {
             window.location.href = `/${locale}${getPostAuthPath(result.user)}`;
           });
+        },
+        onError: (err) => {
+          const apiErr = err as ApiError;
+          toast.error(t('loginFailed'), apiErr?.message);
         },
       }
     );

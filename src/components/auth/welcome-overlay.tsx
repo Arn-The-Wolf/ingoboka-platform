@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { CheckCircle2, Loader2 } from 'lucide-react';
 
 export type WelcomeState = 'hidden' | 'loading' | 'welcome';
@@ -13,15 +14,22 @@ interface WelcomeOverlayProps {
 }
 
 /**
- * Full-screen branded overlay shown after a successful login/registration:
- * a brief loading phase, then an animated welcome message, before routing.
+ * Full-viewport branded overlay after login/registration.
+ * Portaled to document.body so ancestor transforms (e.g. portal-card
+ * animate-fade-in-up) cannot trap `position: fixed` inside the form card.
  */
 export function WelcomeOverlay({ state, title, subtitle, loadingText }: WelcomeOverlayProps) {
-  if (state === 'hidden') return null;
+  const [mounted, setMounted] = React.useState(false);
 
-  return (
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (state === 'hidden' || !mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-brand-primary via-brand-primary to-brand-primary-dark animate-fade-in"
+      className="fixed inset-0 z-[200] flex h-[100dvh] w-screen items-center justify-center overflow-hidden bg-gradient-to-br from-brand-primary via-brand-primary to-brand-primary-dark animate-fade-in"
       role="status"
       aria-live="assertive"
     >
@@ -45,7 +53,8 @@ export function WelcomeOverlay({ state, title, subtitle, loadingText }: WelcomeO
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

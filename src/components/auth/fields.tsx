@@ -112,6 +112,58 @@ export const PasswordField = React.forwardRef<HTMLInputElement, TextFieldProps>(
 );
 PasswordField.displayName = 'PasswordField';
 
+export interface SelectFieldOption {
+  value: string;
+  label: string;
+}
+
+export interface SelectFieldProps
+  extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'children'> {
+  label: string;
+  error?: string;
+  hint?: string;
+  options: SelectFieldOption[];
+  placeholder?: string;
+}
+
+/** Native select styled to match design-input height/radius used on auth forms. */
+export const SelectField = React.forwardRef<HTMLSelectElement, SelectFieldProps>(
+  ({ label, error, hint, className, id, options, placeholder, ...props }, ref) => (
+    <FieldShell id={id} label={label} error={error} hint={hint}>
+      <div className="relative">
+        <select
+          id={id}
+          ref={ref}
+          className={cn(
+            'design-input appearance-none pr-10',
+            error && 'design-input--error',
+            className
+          )}
+          {...props}
+        >
+          {placeholder !== undefined && <option value="">{placeholder}</option>}
+          {options.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+        <svg
+          aria-hidden
+          viewBox="0 0 24 24"
+          className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+    </FieldShell>
+  )
+);
+SelectField.displayName = 'SelectField';
+
 /** Heuristic 0–4 password score used by the strength meter. */
 export function passwordScore(value: string): number {
   if (!value) return 0;

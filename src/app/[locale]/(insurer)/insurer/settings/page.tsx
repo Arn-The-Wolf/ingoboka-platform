@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Building2, Mail, Phone, Save } from 'lucide-react';
 import { insurerApi } from '@/lib/api';
+import { useAdminToast } from '@/components/admin/admin-toast';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,6 +19,7 @@ export default function InsurerSettingsPage() {
   const t = useTranslations('insurer');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
+  const toast = useAdminToast();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['insurer', 'settings'],
@@ -36,7 +38,11 @@ export default function InsurerSettingsPage() {
 
   const saveMutation = useMutation({
     mutationFn: () => insurerApi.updateSettings({ contactEmail: email, contactPhone: phone }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['insurer', 'settings'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['insurer', 'settings'] });
+      toast.success(t('settingsSaved'));
+    },
+    onError: () => toast.error(tCommon('error')),
   });
 
   if (isLoading) {
