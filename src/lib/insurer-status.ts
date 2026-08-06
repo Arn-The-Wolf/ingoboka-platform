@@ -7,6 +7,7 @@ const CLAIM_STATUS_LABELS: Record<string, string> = {
   INFO_REQUESTED: 'Information requested',
   APPROVED: 'Approved',
   REJECTED: 'Rejected',
+  CANCELLED: 'Cancelled',
   PAYMENT_PROCESSING: 'Payment processing',
   CLOSED: 'Closed',
 };
@@ -53,6 +54,8 @@ export function claimStatusTone(status?: string | null): StatusTone {
       return 'pending';
     case 'REJECTED':
       return 'error';
+    case 'CANCELLED':
+      return 'expired';
     default:
       return 'default';
   }

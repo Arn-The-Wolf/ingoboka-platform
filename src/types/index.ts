@@ -141,6 +141,14 @@ export interface NeedsAssessmentResult {
   recommendedProducts?: RecommendedProduct[];
 }
 
+export interface NeedsAssessmentPreferences {
+  completed: boolean;
+  completedAt?: string;
+  preferences?: Record<string, unknown>;
+  recommendedCategories?: string[];
+  recommendedProducts?: RecommendedProduct[];
+}
+
 export interface PolicyReportSummary {
   activePolicies: number;
   citizensEnrolled: number;

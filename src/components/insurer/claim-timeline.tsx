@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, Circle, CircleDot } from 'lucide-react';
+import { CheckCircle2, FileSearch } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface TimelineStep {
@@ -14,6 +14,36 @@ export interface TimelineStep {
 interface ClaimTimelineProps {
   steps: TimelineStep[];
   className?: string;
+}
+
+function TimelineStepIndicator({ status }: { status: TimelineStep['status'] }) {
+  if (status === 'done') {
+    return (
+      <CheckCircle2
+        className="h-6 w-6 fill-brand-primary text-brand-surface"
+        strokeWidth={2}
+        aria-hidden
+      />
+    );
+  }
+
+  if (status === 'current') {
+    return (
+      <span
+        className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-primary shadow-sm ring-4 ring-brand-primary/15"
+        aria-hidden
+      >
+        <FileSearch className="h-3.5 w-3.5 text-white" strokeWidth={2.5} />
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-brand-border bg-brand-surface"
+      aria-hidden
+    />
+  );
 }
 
 /** Claim status timeline — matches claim_status_timeline / claim_detail_view design. */
@@ -33,21 +63,15 @@ export function ClaimTimeline({ steps, className }: ClaimTimelineProps) {
               />
             )}
             <div className="relative z-10 mt-0.5 shrink-0">
-              {step.status === 'done' && (
-                <CheckCircle2 className="h-6 w-6 text-brand-primary" />
-              )}
-              {step.status === 'current' && (
-                <CircleDot className="h-6 w-6 text-brand-primary" aria-hidden />
-              )}
-              {step.status === 'pending' && (
-                <Circle className="h-6 w-6 text-brand-border" />
-              )}
+              <TimelineStepIndicator status={step.status} />
             </div>
             <div className="min-w-0 flex-1 pt-0.5">
               <p
                 className={cn(
                   'text-sm font-semibold',
-                  step.status === 'pending' ? 'text-brand-muted' : 'text-brand-primary-dark'
+                  step.status === 'pending' && 'text-brand-muted',
+                  step.status === 'done' && 'text-brand-primary-dark',
+                  step.status === 'current' && 'text-brand-primary'
                 )}
               >
                 {step.label}

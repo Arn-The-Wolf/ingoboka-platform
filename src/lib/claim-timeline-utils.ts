@@ -10,6 +10,7 @@ const TIMELINE_STEP_LABELS: Record<string, string> = {
   INFO_REQUESTED: 'Information requested',
   APPROVED: 'Claim approved',
   REJECTED: 'Claim rejected',
+  CANCELLED: 'Claim cancelled',
   PAYMENT_PROCESSING: 'Payment processing',
   CLOSED: 'Claim closed',
 };

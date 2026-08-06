@@ -48,19 +48,21 @@ export const claimApi = {
   },
 
   async decide(id: string, payload: ClaimDecisionRequest): Promise<Claim> {
-    if (payload.decision === 'REQUEST_INFO') {
-      const { data } = await apiClient.patch<Record<string, unknown>>(`/claims/${id}/status`, {
-        status: 'INFORMATION_REQUIRED',
-        reason: payload.notes ?? 'Additional information requested',
-      });
-      return mapClaim(data);
-    }
-
-    const decision = payload.decision === 'APPROVE' ? 'APPROVED' : 'REJECTED';
+    const decision =
+      payload.decision === 'APPROVE'
+        ? 'APPROVED'
+        : payload.decision === 'REJECT'
+          ? 'REJECTED'
+          : 'REQUEST_INFO';
     const { data } = await apiClient.post<Record<string, unknown>>(`/admin/claims/${id}/decision`, {
       decision,
       reason: payload.notes ?? decision,
     });
+    return mapClaim(data);
+  },
+
+  async cancel(id: string): Promise<Claim> {
+    const { data } = await apiClient.post<Record<string, unknown>>(`/claims/${id}/cancel`);
     return mapClaim(data);
   },
 

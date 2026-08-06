@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { Star } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,7 @@ interface ProductCardProps {
 
 /** Product catalog card — matches product_catalog design. */
 export function ProductCard({ product, recommended, isNew, className }: ProductCardProps) {
+  const t = useTranslations('citizen.productCard');
   const heroSrc = getProductHeroImage(product);
 
   return (
@@ -40,12 +42,12 @@ export function ProductCard({ product, recommended, isNew, className }: ProductC
           {recommended && (
             <Badge className="gap-1 bg-brand-accent text-brand-primary-dark shadow-sm">
               <Star className="h-3 w-3 fill-current" />
-              Recommended
+              {t('recommended')}
             </Badge>
           )}
           {isNew && !recommended && (
             <Badge variant="active" className="bg-brand-primary-light text-brand-primary">
-              New
+              {t('new')}
             </Badge>
           )}
         </div>
@@ -68,7 +70,7 @@ export function ProductCard({ product, recommended, isNew, className }: ProductC
           </div>
           <Link href={`/products/${product.id}`}>
             <Button variant="secondary" size="sm" className="rounded-full">
-              View Details
+              {t('viewDetails')}
             </Button>
           </Link>
         </div>
