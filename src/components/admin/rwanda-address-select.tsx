@@ -4,12 +4,14 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapPin } from 'lucide-react';
 import type { RwandaAddress } from '@/types';
+import { RWANDA_COUNTRY } from '@/lib/rwanda-geo';
 import {
-  RWANDA_COUNTRY,
-  listDistrictNames,
-  listProvinceNames,
-  listSectorNames,
-} from '@/lib/rwanda-geo';
+  listLocationCells,
+  listLocationDistricts,
+  listLocationProvinces,
+  listLocationSectors,
+  listLocationVillages,
+} from '@/lib/rwanda-locations';
 import { AdminSelect } from './admin-select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,30 +24,49 @@ interface RwandaAddressSelectProps {
 
 /**
  * Cascading Rwandan address selector: Province → District → Sector → Cell → Village.
- * Province/District/Sector are backed by `rwanda-geo.ts`; Cell/Village accept free text
- * (with sector-derived suggestions) until exhaustive lower-level data is wired in.
+ * Backed by the full national hierarchy in `rwanda-locations.json`.
  * Country is fixed to "Rwanda".
  */
 export function RwandaAddressSelect({ value, onChange, idPrefix = 'addr' }: RwandaAddressSelectProps) {
   const t = useTranslations('admin');
 
   const provinceOptions = useMemo(
-    () => listProvinceNames().map((name) => ({ value: name, label: name })),
+    () => listLocationProvinces().map((name) => ({ value: name, label: name })),
     []
   );
   const districtOptions = useMemo(
-    () => listDistrictNames(value.province ?? '').map((name) => ({ value: name, label: name })),
+    () => listLocationDistricts(value.province ?? '').map((name) => ({ value: name, label: name })),
     [value.province]
   );
-  const sectorSuggestions = useMemo(
-    () => listSectorNames(value.province ?? '', value.district ?? ''),
+  const sectorOptions = useMemo(
+    () =>
+      listLocationSectors(value.province ?? '', value.district ?? '').map((name) => ({
+        value: name,
+        label: name,
+      })),
     [value.province, value.district]
+  );
+  const cellOptions = useMemo(
+    () =>
+      listLocationCells(value.province ?? '', value.district ?? '', value.sector ?? '').map((name) => ({
+        value: name,
+        label: name,
+      })),
+    [value.province, value.district, value.sector]
+  );
+  const villageOptions = useMemo(
+    () =>
+      listLocationVillages(
+        value.province ?? '',
+        value.district ?? '',
+        value.sector ?? '',
+        value.cell ?? ''
+      ).map((name) => ({ value: name, label: name })),
+    [value.province, value.district, value.sector, value.cell]
   );
 
   const set = (patch: Partial<RwandaAddress>) =>
     onChange({ ...value, country: RWANDA_COUNTRY, ...patch });
-
-  const sectorListId = `${idPrefix}-sector-list`;
 
   return (
     <div className="rounded-xl border border-brand-border/70 bg-brand-surface-container-low/40 p-4">
@@ -62,7 +83,13 @@ export function RwandaAddressSelect({ value, onChange, idPrefix = 'addr' }: Rwan
             placeholder={t('selectProvince')}
             options={provinceOptions}
             onChange={(e) =>
-              set({ province: e.target.value || undefined, district: undefined, sector: undefined, cell: undefined, village: undefined })
+              set({
+                province: e.target.value || undefined,
+                district: undefined,
+                sector: undefined,
+                cell: undefined,
+                village: undefined,
+              })
             }
           />
         </div>
@@ -76,45 +103,58 @@ export function RwandaAddressSelect({ value, onChange, idPrefix = 'addr' }: Rwan
             options={districtOptions}
             disabled={!value.province}
             onChange={(e) =>
-              set({ district: e.target.value || undefined, sector: undefined, cell: undefined, village: undefined })
+              set({
+                district: e.target.value || undefined,
+                sector: undefined,
+                cell: undefined,
+                village: undefined,
+              })
             }
           />
         </div>
 
         <div>
           <Label htmlFor={`${idPrefix}-sector`}>{t('sector')}</Label>
-          <Input
+          <AdminSelect
             id={`${idPrefix}-sector`}
-            list={sectorListId}
             value={value.sector ?? ''}
-            placeholder={value.district ? t('selectPlaceholder') : t('selectFirst')}
+            placeholder={value.district ? t('selectSector') : t('selectFirst')}
+            options={sectorOptions}
             disabled={!value.district}
-            onChange={(e) => set({ sector: e.target.value || undefined })}
+            onChange={(e) =>
+              set({
+                sector: e.target.value || undefined,
+                cell: undefined,
+                village: undefined,
+              })
+            }
           />
-          <datalist id={sectorListId}>
-            {sectorSuggestions.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
         </div>
 
         <div>
           <Label htmlFor={`${idPrefix}-cell`}>{t('cell')}</Label>
-          <Input
+          <AdminSelect
             id={`${idPrefix}-cell`}
             value={value.cell ?? ''}
-            placeholder={value.sector ? t('selectPlaceholder') : t('selectFirst')}
+            placeholder={value.sector ? t('selectCell') : t('selectFirst')}
+            options={cellOptions}
             disabled={!value.sector}
-            onChange={(e) => set({ cell: e.target.value || undefined })}
+            onChange={(e) =>
+              set({
+                cell: e.target.value || undefined,
+                village: undefined,
+              })
+            }
           />
         </div>
 
         <div>
           <Label htmlFor={`${idPrefix}-village`}>{t('village')}</Label>
-          <Input
+          <AdminSelect
             id={`${idPrefix}-village`}
             value={value.village ?? ''}
-            placeholder={value.cell ? t('selectPlaceholder') : t('selectFirst')}
+            placeholder={value.cell ? t('selectVillage') : t('selectFirst')}
+            options={villageOptions}
             disabled={!value.cell}
             onChange={(e) => set({ village: e.target.value || undefined })}
           />

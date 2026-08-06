@@ -34,6 +34,12 @@ export interface RegisterRequest {
   email?: string;
   nationalId: string;
   password: string;
+  /** Rwanda address cascade (required for citizen self-registration). */
+  province: string;
+  district: string;
+  sector: string;
+  cell: string;
+  village: string;
 }
 
 export interface OtpVerifyRequest {

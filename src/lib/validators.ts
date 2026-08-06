@@ -53,6 +53,11 @@ export function createRegisterSchema(requiresEmail: boolean) {
       nationalId: z
         .string()
         .regex(/^\d{16}$/, 'National ID must be 16 digits'),
+      province: z.string().min(1, 'Province is required'),
+      district: z.string().min(1, 'District is required'),
+      sector: z.string().min(1, 'Sector is required'),
+      cell: z.string().min(1, 'Cell is required'),
+      village: z.string().min(1, 'Village is required'),
       password: z.string().min(8, 'Password must be at least 8 characters'),
       confirmPassword: z.string(),
     })

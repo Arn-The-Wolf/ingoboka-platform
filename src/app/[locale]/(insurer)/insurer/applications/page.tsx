@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ClipboardList } from 'lucide-react';
 import { insurerApi } from '@/lib/api';
+import { useAdminToast } from '@/components/admin/admin-toast';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,6 +19,7 @@ export default function InsurerApplicationsPage() {
   const t = useTranslations('insurer');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
+  const toast = useAdminToast();
   const [actionId, setActionId] = useState<string | null>(null);
 
   const { data, isLoading, error } = useQuery({
@@ -29,11 +31,17 @@ export default function InsurerApplicationsPage() {
   const reviewMutation = useMutation({
     mutationFn: ({ id, decision }: { id: string; decision: 'APPROVE' | 'REJECT' }) =>
       insurerApi.reviewApplication(id, decision),
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ['insurer', 'applications'] });
       setActionId(null);
+      toast.success(
+        vars.decision === 'APPROVE' ? t('applicationApproved') : t('applicationRejected')
+      );
     },
-    onError: () => setActionId(null),
+    onError: () => {
+      setActionId(null);
+      toast.error(tCommon('error'));
+    },
   });
 
   const applications = data?.content ?? [];

@@ -78,6 +78,22 @@ export interface AuditLogEntry {
   resource: string;
   occurredAt: string;
   details?: string;
+  outcome?: string;
+  entityId?: string;
+}
+
+export interface AuditLogFilters {
+  page?: number;
+  size?: number;
+  action?: string;
+  actor?: string;
+  resourceType?: string;
+  outcome?: string;
+  search?: string;
+  from?: string;
+  to?: string;
+  sortBy?: string;
+  sortDir?: 'asc' | 'desc';
 }
 
 export interface PlatformSettings {
@@ -86,6 +102,20 @@ export interface PlatformSettings {
   maintenanceMode: boolean;
   apiBaseUrl: string;
   supportEmail: string;
+  supportPhone: string;
+  brandingTagline: string;
+  registrationEnabled: boolean;
+  selfServiceClaimsEnabled: boolean;
+  emailNotificationsEnabled: boolean;
+  smsNotificationsEnabled: boolean;
+  ussdEnabled: boolean;
+  agentAssistedEnabled: boolean;
+  requireKycBeforeEnrollment: boolean;
+  defaultCurrency: string;
+  defaultPolicyGraceDays: number;
+  maxLoginAttempts: number;
+  apiRateLimitPerMinute: number;
+  updatedAt?: string;
 }
 
 function mapApplication(raw: Record<string, unknown>): ApplicationResponse {
@@ -289,18 +319,48 @@ export const adminApi = {
     };
   },
 
-  async listAuditLog(page = 0, size = 50): Promise<{ content: AuditLogEntry[]; totalElements: number }> {
+  async listAuditLog(
+    pageOrFilters: number | AuditLogFilters = 0,
+    size = 50
+  ): Promise<{ content: AuditLogEntry[]; totalElements: number }> {
+    const filters: AuditLogFilters =
+      typeof pageOrFilters === 'number'
+        ? { page: pageOrFilters, size }
+        : { page: 0, size: 50, ...pageOrFilters };
+
+    const params: Record<string, string | number> = {
+      page: filters.page ?? 0,
+      size: filters.size ?? 50,
+      sortBy: filters.sortBy ?? 'createdAt',
+      sortDir: filters.sortDir ?? 'desc',
+    };
+    if (filters.action) params.action = filters.action;
+    if (filters.actor) params.actor = filters.actor;
+    if (filters.resourceType) params.resourceType = filters.resourceType;
+    if (filters.outcome) params.outcome = filters.outcome;
+    if (filters.search) params.search = filters.search;
+    if (filters.from) params.from = filters.from;
+    if (filters.to) params.to = filters.to;
+
     const data = await getWithFallback<{
       content?: Record<string, unknown>[];
       totalElements?: number;
-    }>('/audit/logs', '/admin/audit-logs', { page, size });
+    }>('/audit/logs', '/admin/audit-logs', params);
     const content = unwrapPage(data).map((raw) => ({
       id: String(raw.id ?? ''),
       action: String(raw.action ?? raw.eventType ?? 'ACTION'),
-      actor: String(raw.actorName ?? raw.actor ?? raw.userEmail ?? 'System'),
-      resource: String(raw.resourceType ?? raw.resource ?? raw.entityType ?? '—'),
-      occurredAt: String(raw.occurredAt ?? raw.createdAt ?? new Date().toISOString()),
-      details: raw.details ? String(raw.details) : raw.description ? String(raw.description) : undefined,
+      actor: String(raw.actorEmail ?? raw.actorName ?? raw.actor ?? raw.userEmail ?? 'System'),
+      resource: String(raw.entityType ?? raw.resourceType ?? raw.resource ?? '—'),
+      occurredAt: String(raw.createdAt ?? raw.occurredAt ?? new Date().toISOString()),
+      details: raw.summary
+        ? String(raw.summary)
+        : raw.details
+          ? String(raw.details)
+          : raw.description
+            ? String(raw.description)
+            : undefined,
+      outcome: raw.outcome ? String(raw.outcome) : 'SUCCESS',
+      entityId: raw.entityId ? String(raw.entityId) : undefined,
     }));
     return { content, totalElements: data.totalElements ?? content.length };
   },
@@ -312,21 +372,78 @@ export const adminApi = {
       maintenanceMode: false,
       apiBaseUrl: getApiBaseUrl(),
       supportEmail: 'support@ingoboka.rw',
+      supportPhone: '+250788000000',
+      brandingTagline: 'Digital microinsurance for Rwanda',
+      registrationEnabled: true,
+      selfServiceClaimsEnabled: true,
+      emailNotificationsEnabled: true,
+      smsNotificationsEnabled: true,
+      ussdEnabled: true,
+      agentAssistedEnabled: true,
+      requireKycBeforeEnrollment: false,
+      defaultCurrency: 'RWF',
+      defaultPolicyGraceDays: 7,
+      maxLoginAttempts: 5,
+      apiRateLimitPerMinute: 120,
     };
     try {
       const { data } = await apiClient.get<Record<string, unknown>>('/admin/platform/settings');
-      return {
-        platformName: String(data.platformName ?? fallback.platformName),
-        defaultLocale: String(data.defaultLocale ?? fallback.defaultLocale),
-        maintenanceMode: Boolean(data.maintenanceMode),
-        apiBaseUrl: String(data.apiBaseUrl ?? fallback.apiBaseUrl),
-        supportEmail: String(data.supportEmail ?? fallback.supportEmail),
-      };
+      return mapPlatformSettings(data, fallback);
     } catch {
-      return fallback;
+      try {
+        const { data } = await apiClient.get<Record<string, unknown>>('/platform/config');
+        return mapPlatformSettings(data, fallback);
+      } catch {
+        return fallback;
+      }
     }
   },
+
+  async updatePlatformSettings(payload: Partial<PlatformSettings>): Promise<PlatformSettings> {
+    const { data } = await apiClient.put<Record<string, unknown>>('/admin/platform/settings', payload);
+    return mapPlatformSettings(data, await this.getPlatformSettings());
+  },
+
+  async refreshPlatformSettings(): Promise<PlatformSettings> {
+    const { data } = await apiClient.post<Record<string, unknown>>('/admin/platform/settings/refresh');
+    return mapPlatformSettings(data, await this.getPlatformSettings());
+  },
 };
+
+function mapPlatformSettings(
+  data: Record<string, unknown>,
+  fallback: PlatformSettings
+): PlatformSettings {
+  return {
+    platformName: String(data.platformName ?? fallback.platformName),
+    defaultLocale: String(data.defaultLocale ?? fallback.defaultLocale),
+    maintenanceMode: Boolean(data.maintenanceMode ?? fallback.maintenanceMode),
+    apiBaseUrl: String(data.apiBaseUrl ?? fallback.apiBaseUrl),
+    supportEmail: String(data.supportEmail ?? fallback.supportEmail),
+    supportPhone: String(data.supportPhone ?? fallback.supportPhone),
+    brandingTagline: String(data.brandingTagline ?? fallback.brandingTagline),
+    registrationEnabled: Boolean(data.registrationEnabled ?? fallback.registrationEnabled),
+    selfServiceClaimsEnabled: Boolean(
+      data.selfServiceClaimsEnabled ?? fallback.selfServiceClaimsEnabled
+    ),
+    emailNotificationsEnabled: Boolean(
+      data.emailNotificationsEnabled ?? fallback.emailNotificationsEnabled
+    ),
+    smsNotificationsEnabled: Boolean(
+      data.smsNotificationsEnabled ?? fallback.smsNotificationsEnabled
+    ),
+    ussdEnabled: Boolean(data.ussdEnabled ?? fallback.ussdEnabled),
+    agentAssistedEnabled: Boolean(data.agentAssistedEnabled ?? fallback.agentAssistedEnabled),
+    requireKycBeforeEnrollment: Boolean(
+      data.requireKycBeforeEnrollment ?? fallback.requireKycBeforeEnrollment
+    ),
+    defaultCurrency: String(data.defaultCurrency ?? fallback.defaultCurrency),
+    defaultPolicyGraceDays: Number(data.defaultPolicyGraceDays ?? fallback.defaultPolicyGraceDays),
+    maxLoginAttempts: Number(data.maxLoginAttempts ?? fallback.maxLoginAttempts),
+    apiRateLimitPerMinute: Number(data.apiRateLimitPerMinute ?? fallback.apiRateLimitPerMinute),
+    updatedAt: data.updatedAt ? String(data.updatedAt) : fallback.updatedAt,
+  };
+}
 
 export const agentApi = {
   async listApplications(page = 0, size = 20) {

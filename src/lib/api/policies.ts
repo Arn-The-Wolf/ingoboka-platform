@@ -9,6 +9,16 @@ export const policyApi = {
     return { content: items, totalElements: items.length };
   },
 
+  /** Tenant / platform-admin policy listing (GET /policies/tenant). */
+  async listTenant(page = 0, size = 50) {
+    const { data } = await apiClient.get<{
+      content?: Record<string, unknown>[];
+      totalElements?: number;
+    }>('/policies/tenant', { params: { page, size } });
+    const items = unwrapPage(data).map((raw) => mapPolicy(raw as Record<string, unknown>));
+    return { content: items, totalElements: data.totalElements ?? items.length };
+  },
+
   async getById(id: string): Promise<Policy> {
     const { data } = await apiClient.get<Record<string, unknown>>(`/policies/${id}`);
     return mapPolicy(data);
