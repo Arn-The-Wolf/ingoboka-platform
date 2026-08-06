@@ -52,6 +52,14 @@ export interface CreateStaffInput {
   defaultPassword?: string;
 }
 
+export interface UpdateStaffInput {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phoneNumber?: string;
+  roleCode?: string;
+}
+
 function mapStaff(raw: Record<string, unknown>): StaffMember {
   const roles = Array.isArray(raw.roles) ? (raw.roles as string[]) : [];
   const roleCode = roles[0] ?? '';
@@ -93,12 +101,40 @@ export const staffApi = {
   },
 
   async list(page = 0, size = 20) {
-    const { data } = await apiClient.get<{ content?: Record<string, unknown>[]; totalElements?: number }>(
-      '/partner/staff',
-      { params: { page, size } }
-    );
+    const { data } = await apiClient.get<{
+      content?: Record<string, unknown>[];
+      totalElements?: number;
+      totalPages?: number;
+      page?: number;
+      size?: number;
+    }>('/partner/staff', { params: { page, size } });
     const content = unwrapPage(data).map(mapStaff);
-    return { content, totalElements: data.totalElements ?? content.length };
+    const totalElements = data.totalElements ?? content.length;
+    return {
+      content,
+      totalElements,
+      totalPages: data.totalPages ?? Math.max(1, Math.ceil(totalElements / size)),
+      page: data.page ?? page,
+      size: data.size ?? size,
+    };
+  },
+
+  async get(userId: string): Promise<StaffMember> {
+    const { data } = await apiClient.get<Record<string, unknown>>(`/partner/staff/${userId}`);
+    return mapStaff(data);
+  },
+
+  async update(userId: string, input: UpdateStaffInput): Promise<StaffMember> {
+    const { data } = await apiClient.put<Record<string, unknown>>(`/partner/staff/${userId}`, input);
+    return mapStaff(data);
+  },
+
+  /** Soft-deactivate staff (sets status to DISABLED). */
+  async deactivate(userId: string): Promise<StaffMember> {
+    const { data } = await apiClient.patch<Record<string, unknown>>(`/partner/staff/${userId}/status`, {
+      status: 'DISABLED',
+    });
+    return mapStaff(data);
   },
 
   async create(input: CreateStaffInput) {

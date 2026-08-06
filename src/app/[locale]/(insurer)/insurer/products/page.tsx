@@ -1,11 +1,10 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Package, Plus } from 'lucide-react';
 import { productApi } from '@/lib/api';
-import type { ProductSummary } from '@/lib/api/products';
 import { useAdminToast } from '@/components/admin/admin-toast';
 import {
   DEFAULT_LIST_FILTERS,
@@ -29,20 +28,7 @@ import {
 import { useAuthStore } from '@/store/auth-store';
 import { formatCurrency, cn } from '@/lib/utils';
 
-const PAGE_SIZE = 8;
-
-function productSortValue(product: ProductSummary, sortBy: string): string {
-  switch (sortBy) {
-    case 'code':
-      return product.code ?? '';
-    case 'category':
-      return product.category;
-    case 'status':
-      return product.status ?? '';
-    default:
-      return product.name;
-  }
-}
+const DEFAULT_PAGE_SIZE = 8;
 
 export default function InsurerProductsPage() {
   const t = useTranslations('insurer');
@@ -52,6 +38,7 @@ export default function InsurerProductsPage() {
   const readOnly = user?.role === 'INSURER_CLAIMS_OFFICER';
   const toast = useAdminToast();
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [showForm, setShowForm] = useState(false);
   const [filters, setFilters] = useState<ListToolbarFilters>({
     ...DEFAULT_LIST_FILTERS,
@@ -59,8 +46,8 @@ export default function InsurerProductsPage() {
   });
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['insurer', 'products', page],
-    queryFn: () => productApi.listAdmin(page, PAGE_SIZE),
+    queryKey: ['insurer', 'products', page, pageSize, filters.status],
+    queryFn: () => productApi.listAdmin(page, pageSize, filters.status || undefined),
   });
 
   const publishMutation = useMutation({
@@ -72,36 +59,17 @@ export default function InsurerProductsPage() {
     onError: (err: Error) => toast.error(err.message || tCommon('error')),
   });
 
-  const filtered = useMemo(() => {
-    let items = data?.content ?? [];
-    if (filters.status) {
-      items = items.filter((p) => p.status === filters.status);
-    }
-    if (filters.search.trim()) {
-      const q = filters.search.trim().toLowerCase();
-      items = items.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          (p.code?.toLowerCase().includes(q) ?? false) ||
-          p.category.toLowerCase().includes(q)
-      );
-    }
-    const dir = filters.sortDir === 'asc' ? 1 : -1;
-    items = [...items].sort((a, b) => {
-      const av = productSortValue(a, filters.sortBy);
-      const bv = productSortValue(b, filters.sortBy);
-      return av.localeCompare(bv) * dir;
-    });
-    return items;
-  }, [data?.content, filters]);
+  const products = data?.content ?? [];
 
   const handleFilterChange = (patch: Partial<ListToolbarFilters>) => {
     setFilters((prev) => ({ ...prev, ...patch }));
     setPage(0);
   };
 
-  const totalElements = data?.totalElements ?? filtered.length;
-  const totalPages = Math.max(1, Math.ceil(totalElements / PAGE_SIZE));
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
 
   return (
     <>
@@ -146,7 +114,7 @@ export default function InsurerProductsPage() {
       {error && <Alert variant="error">{tCommon('error')}</Alert>}
 
       <div className="grid gap-4 md:grid-cols-2">
-        {filtered.map((product) => (
+        {products.map((product) => (
           <Card key={product.id} className="border-brand-border/60 transition-shadow hover:shadow-elevated">
             <CardContent className="flex items-center justify-between p-5">
               <div className="flex items-start gap-3">
@@ -189,7 +157,7 @@ export default function InsurerProductsPage() {
         ))}
       </div>
 
-      {!isLoading && filtered.length === 0 && !showForm && (
+      {!isLoading && products.length === 0 && !showForm && (
         <Card className="border-dashed">
           <CardContent className="py-12 text-center text-sm text-brand-muted">
             {t('noProducts')}
@@ -197,12 +165,17 @@ export default function InsurerProductsPage() {
         </Card>
       )}
 
-      <InsurerPagination
-        page={page}
-        totalPages={totalPages}
-        totalElements={totalElements}
-        onPageChange={setPage}
-      />
+      {data && (
+        <InsurerPagination
+          page={page}
+          pageSize={pageSize}
+          totalPages={data.totalPages}
+          totalElements={data.totalElements}
+          onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
+          pageSizeOptions={[8, 10, 20, 50]}
+        />
+      )}
       </div>
 
       {!readOnly && (
