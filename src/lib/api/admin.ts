@@ -9,6 +9,7 @@ import type {
   ManagedUserUpdateInput,
   PagedResult,
   PartnerCreateInput,
+  PartnerUpdateInput,
   PolicyReportSummary,
   UserRole,
 } from '@/types';
@@ -51,6 +52,17 @@ export interface Organization {
   organizationType: string;
   status: string;
   contactEmail?: string;
+}
+
+export interface PartnerDetail extends Organization {
+  registrationNumber?: string;
+  contactPhone?: string;
+  addressLine?: string;
+  district?: string;
+  country?: string;
+  website?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PlatformOverview {
@@ -139,6 +151,20 @@ function mapOrganization(raw: Record<string, unknown>): Organization {
   };
 }
 
+function mapPartnerDetail(raw: Record<string, unknown>): PartnerDetail {
+  return {
+    ...mapOrganization(raw),
+    registrationNumber: raw.registrationNumber ? String(raw.registrationNumber) : undefined,
+    contactPhone: raw.contactPhone ? String(raw.contactPhone) : undefined,
+    addressLine: raw.addressLine ? String(raw.addressLine) : undefined,
+    district: raw.district ? String(raw.district) : undefined,
+    country: raw.country ? String(raw.country) : undefined,
+    website: raw.website ? String(raw.website) : undefined,
+    createdAt: raw.createdAt ? String(raw.createdAt) : undefined,
+    updatedAt: raw.updatedAt ? String(raw.updatedAt) : undefined,
+  };
+}
+
 export const adminApi = {
   async getOverview(): Promise<PlatformOverview> {
     const { data } = await apiClient.get<Record<string, number>>('/admin/platform/overview');
@@ -180,25 +206,25 @@ export const adminApi = {
     id: string,
     payload: {
       name: string;
-      slug: string;
-      organizationType: string;
-      status: string;
+      slug?: string;
+      organizationType?: string;
+      status?: string;
       contactEmail?: string;
     }
   ): Promise<Organization> {
-    const { data } = await apiClient.put<Record<string, unknown>>(`/partners/${id}`, {
+    const partner = await this.updatePartner(id, {
       name: payload.name,
-      code: payload.slug,
-      type: payload.organizationType,
-      organizationType: payload.organizationType,
-      status: payload.status,
-      contactEmail: payload.contactEmail || undefined,
+      contactEmail: payload.contactEmail,
     });
-    return mapOrganization(data);
+    if (payload.status && payload.status !== partner.status) {
+      return this.updatePartnerStatus(id, payload.status);
+    }
+    return partner;
   },
 
-  async deleteOrganization(id: string): Promise<void> {
-    await apiClient.delete(`/partners/${id}`);
+  /** Soft-deactivate a partner (sets status to INACTIVE). */
+  async deleteOrganization(id: string): Promise<Organization> {
+    return this.updatePartnerStatus(id, 'INACTIVE');
   },
 
   async listUsers(page = 0, size = 50): Promise<{ content: AdminUser[]; totalElements: number }> {
@@ -283,14 +309,31 @@ export const adminApi = {
       country: 'Rwanda',
       ...input,
     });
-    return {
-      id: String(data.id ?? data.organizationId ?? ''),
-      name: String(data.name ?? input.name),
-      slug: String(data.code ?? input.code ?? ''),
-      organizationType: String(data.type ?? input.type ?? 'INSURER'),
-      status: String(data.status ?? 'ACTIVE'),
-      contactEmail: data.contactEmail ? String(data.contactEmail) : input.contactEmail,
-    };
+    const partner =
+      data.partner && typeof data.partner === 'object'
+        ? (data.partner as Record<string, unknown>)
+        : data;
+    return mapOrganization(partner);
+  },
+
+  /** Fetch a single partner with full profile details. */
+  async getPartner(id: string): Promise<PartnerDetail> {
+    const { data } = await apiClient.get<Record<string, unknown>>(`/partners/${id}`);
+    return mapPartnerDetail(data);
+  },
+
+  /** Update partner name and profile fields. */
+  async updatePartner(id: string, input: PartnerUpdateInput): Promise<PartnerDetail> {
+    const { data } = await apiClient.patch<Record<string, unknown>>(`/partners/${id}`, input);
+    return mapPartnerDetail(data);
+  },
+
+  /** Update partner organization status (ACTIVE, SUSPENDED, INACTIVE). */
+  async updatePartnerStatus(id: string, status: string): Promise<PartnerDetail> {
+    const { data } = await apiClient.patch<Record<string, unknown>>(`/partners/${id}/status`, {
+      status,
+    });
+    return mapPartnerDetail(data);
   },
 
   /** Partners with backend pagination. */

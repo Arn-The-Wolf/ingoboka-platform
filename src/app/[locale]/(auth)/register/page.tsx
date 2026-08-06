@@ -23,6 +23,7 @@ import {
 import { WelcomeOverlay, useWelcomeSequence } from '@/components/auth/welcome-overlay';
 import { useRegister } from '@/hooks/use-auth';
 import { useOtpDeliveryConfig } from '@/hooks/use-otp-config';
+import { normalizeCitizenPhone } from '@/lib/auth/phone';
 import { createRegisterSchema, type RegisterFormData } from '@/lib/validators';
 import type { ApiError } from '@/types';
 
@@ -104,8 +105,9 @@ export default function RegisterPage() {
       },
       {
         onSuccess: () => {
+          const phone = normalizeCitizenPhone(data.phone);
           welcome.start(() => {
-            window.location.href = `/${locale}/verify`;
+            window.location.href = `/${locale}/verify?phone=${encodeURIComponent(phone)}`;
           });
         },
       }

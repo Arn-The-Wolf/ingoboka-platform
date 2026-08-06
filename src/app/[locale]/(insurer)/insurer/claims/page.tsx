@@ -1,27 +1,128 @@
 'use client';
 
+import { useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useClaims } from '@/hooks/use-claims';
+import { Plus } from 'lucide-react';
+import { insurerPortalApi } from '@/lib/api';
 import { ClaimListItem } from '@/components/insurer/claim-list-item';
+import {
+  DEFAULT_LIST_FILTERS,
+  InsurerListToolbar,
+  type ListToolbarFilters,
+} from '@/components/insurer/insurer-list-toolbar';
+import { InsurerPagination } from '@/components/insurer/insurer-pagination';
+import { useAdminToast } from '@/components/admin/admin-toast';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { insurerStatusLabel } from '@/lib/insurer-status';
 import type { ApiError } from '@/types';
+
+const PAGE_SIZE = 10;
 
 export default function InsurerClaimsPage() {
   const t = useTranslations('insurer');
   const tCommon = useTranslations('common');
-  const { data, isLoading, error, refetch } = useClaims();
+  const queryClient = useQueryClient();
+  const toast = useAdminToast();
+  const [page, setPage] = useState(0);
+  const [filters, setFilters] = useState<ListToolbarFilters>(DEFAULT_LIST_FILTERS);
+  const [showCreate, setShowCreate] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    policyId: '',
+    claimType: 'MEDICAL',
+    description: '',
+    claimedAmount: 0,
+    incidentDate: '',
+  });
+
+  const queryFilters = useMemo(
+    () => ({
+      page,
+      size: PAGE_SIZE,
+      status: filters.status || undefined,
+      search: filters.search || undefined,
+      province: filters.province || undefined,
+      district: filters.district || undefined,
+      sortBy: filters.sortBy,
+      sortDir: filters.sortDir,
+    }),
+    [page, filters]
+  );
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['insurer', 'claims', queryFilters],
+    queryFn: () => insurerPortalApi.listClaims(queryFilters),
+  });
+
+  const createMutation = useMutation({
+    mutationFn: () =>
+      insurerPortalApi.createClaim({
+        policyId: createForm.policyId,
+        claimType: createForm.claimType,
+        description: createForm.description,
+        claimedAmount: createForm.claimedAmount || undefined,
+        incidentDate: createForm.incidentDate || undefined,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['insurer', 'claims'] });
+      queryClient.invalidateQueries({ queryKey: ['insurer', 'dashboard'] });
+      setShowCreate(false);
+      setCreateForm({ policyId: '', claimType: 'MEDICAL', description: '', claimedAmount: 0, incidentDate: '' });
+      toast.success(t('claimCreated'));
+    },
+    onError: () => toast.error(tCommon('error')),
+  });
 
   const claims = data?.content ?? [];
+
+  const handleFilterChange = (patch: Partial<ListToolbarFilters>) => {
+    setFilters((prev) => ({ ...prev, ...patch }));
+    setPage(0);
+  };
 
   return (
     <PageContainer>
       <PageHeader
         title={t('claimsQueue')}
-        subtitle={t('pendingCount', { count: claims.length })}
+        subtitle={t('pendingCount', { count: data?.totalElements ?? 0 })}
+        action={
+          <Button variant="pill" className="gap-2" onClick={() => setShowCreate(true)}>
+            <Plus className="h-4 w-4" />
+            {t('createClaim')}
+          </Button>
+        }
+      />
+
+      <InsurerListToolbar
+        filters={filters}
+        onChange={handleFilterChange}
+        showAddressFilters
+        searchPlaceholder={t('searchClaims')}
+        statusOptions={[
+          { value: '', label: tCommon('allStatuses') },
+          ...['SUBMITTED', 'UNDER_REVIEW', 'INFORMATION_REQUIRED', 'APPROVED', 'REJECTED'].map(
+            (s) => ({ value: s, label: insurerStatusLabel(s) })
+          ),
+        ]}
+        sortOptions={[
+          { value: 'createdAt', label: t('sortSubmitted') },
+          { value: 'claimedAmount', label: t('sortAmount') },
+          { value: 'status', label: tCommon('status') },
+        ]}
       />
 
       {isLoading && <ListSkeleton rows={6} />}
@@ -42,8 +143,88 @@ export default function InsurerClaimsPage() {
       </div>
 
       {!isLoading && claims.length === 0 && (
-        <p className="py-8 text-center text-sm text-brand-muted">{t('noClaimsInQueue')}</p>
+        <Card className="border-dashed">
+          <CardContent className="py-12 text-center text-sm text-brand-muted">
+            {t('noClaimsInQueue')}
+          </CardContent>
+        </Card>
       )}
+
+      {data && (
+        <InsurerPagination
+          page={page}
+          totalPages={data.totalPages}
+          totalElements={data.totalElements}
+          onPageChange={setPage}
+        />
+      )}
+
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t('createClaim')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('policyRef')}</Label>
+              <Input
+                placeholder="Policy UUID"
+                value={createForm.policyId}
+                onChange={(e) => setCreateForm({ ...createForm, policyId: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('claimType')}</Label>
+              <Input
+                value={createForm.claimType}
+                onChange={(e) => setCreateForm({ ...createForm, claimType: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t('description')}</Label>
+              <textarea
+                className="w-full rounded-lg border border-brand-border px-3 py-2 text-sm"
+                rows={3}
+                value={createForm.description}
+                onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })}
+              />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>{t('amount')}</Label>
+                <Input
+                  type="number"
+                  value={createForm.claimedAmount}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, claimedAmount: Number(e.target.value) })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>{t('incidentDate')}</Label>
+                <Input
+                  type="date"
+                  value={createForm.incidentDate}
+                  onChange={(e) => setCreateForm({ ...createForm, incidentDate: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreate(false)}>
+              {tCommon('cancel')}
+            </Button>
+            <Button
+              variant="pill"
+              loading={createMutation.isPending}
+              disabled={!createForm.policyId || !createForm.description}
+              onClick={() => createMutation.mutate()}
+            >
+              {tCommon('save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }

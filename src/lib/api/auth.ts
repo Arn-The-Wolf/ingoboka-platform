@@ -135,6 +135,18 @@ export const authApi = {
       // Best-effort logout
     }
   },
+
+  async activateAccount(token: string, password: string): Promise<void> {
+    await apiClient.post('/auth/activate-account', { token, password });
+  },
+
+  async changePassword(currentPassword: string, newPassword: string) {
+    const { data } = await apiClient.post<BackendAuthPayload>('/auth/change-password', {
+      currentPassword,
+      newPassword,
+    });
+    return mapAuthResponse(data);
+  },
 };
 
 export const customerApi = {

@@ -10,6 +10,7 @@ import {
   Settings,
   Shield,
   LogOut,
+  Users,
 } from 'lucide-react';
 import { usePathname } from '@/i18n/routing';
 import { cn, getInitials } from '@/lib/utils';
@@ -18,11 +19,22 @@ import { useAuthStore } from '@/store/auth-store';
 import { Button } from '@/components/ui/button';
 import { StaffSidebar, type StaffNavItem } from '@/components/layout/staff-sidebar';
 import { useStaffShell } from '@/components/layout/staff-shell';
+import type { UserRole } from '@/types';
 
-const navItems = [
+const ADMIN_NAV = [
   { href: '/insurer/dashboard', icon: LayoutDashboard, labelKey: 'overview' as const, exact: true },
   { href: '/insurer/claims', icon: FileText, labelKey: 'claimsQueue' as const },
   { href: '/insurer/applications', icon: ClipboardList, labelKey: 'applicationsQueue' as const },
+  { href: '/insurer/products', icon: Package, labelKey: 'products' as const },
+  { href: '/insurer/reports', icon: BarChart3, labelKey: 'reports' as const },
+  { href: '/insurer/partner', icon: Shield, labelKey: 'partner' as const },
+  { href: '/insurer/employees', icon: Users, labelKey: 'employeesTab' as const, adminOnly: true },
+  { href: '/insurer/settings', icon: Settings, labelKey: 'settings' as const },
+];
+
+const CLAIMS_OFFICER_NAV = [
+  { href: '/insurer/dashboard', icon: LayoutDashboard, labelKey: 'overview' as const, exact: true },
+  { href: '/insurer/claims', icon: FileText, labelKey: 'claimsQueue' as const },
   { href: '/insurer/products', icon: Package, labelKey: 'products' as const },
   { href: '/insurer/reports', icon: BarChart3, labelKey: 'reports' as const },
   { href: '/insurer/partner', icon: Shield, labelKey: 'partner' as const },
@@ -34,6 +46,13 @@ const ROLE_LABELS: Record<string, string> = {
   INSURER_CLAIMS_OFFICER: 'Claims Officer',
 };
 
+function navForRole(role?: UserRole) {
+  if (role === 'INSURER_CLAIMS_OFFICER') {
+    return CLAIMS_OFFICER_NAV;
+  }
+  return ADMIN_NAV.filter((item) => !item.adminOnly || role === 'INSURER_ADMIN');
+}
+
 export function Sidebar() {
   const t = useTranslations('insurer');
   const tCommon = useTranslations('common');
@@ -41,6 +60,8 @@ export function Sidebar() {
   const logout = useLogout();
   const user = useAuthStore((s) => s.user);
   const { collapsed } = useStaffShell();
+
+  const navItems = navForRole(user?.role);
 
   const items: StaffNavItem[] = navItems.map((item) => ({
     href: item.href,

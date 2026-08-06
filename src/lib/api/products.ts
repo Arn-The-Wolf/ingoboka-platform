@@ -1,5 +1,6 @@
 import { apiClient } from './client';
 import { unwrapPage } from './mappers';
+import { getWithFallback } from './integration-helpers';
 import type { NeedsAssessmentResult, RecommendedProduct } from '@/types';
 
 export interface ProductSummary {
@@ -221,10 +222,13 @@ export const productApi = {
     return { content, totalElements: data.totalElements ?? content.length };
   },
 
-  async listAdmin(page = 0, size = 20) {
-    const { data } = await apiClient.get<{ content?: Record<string, unknown>[]; totalElements?: number }>(
+  async listAdmin(page = 0, size = 20, status?: string) {
+    const params: Record<string, string | number> = { page, size };
+    if (status) params.status = status;
+    const data = await getWithFallback<{ content?: Record<string, unknown>[]; totalElements?: number }>(
       '/products/tenant',
-      { params: { page, size } }
+      '/insurer/products',
+      params
     );
     const content = unwrapPage(data).map(mapProduct);
     return { content, totalElements: data.totalElements ?? content.length };

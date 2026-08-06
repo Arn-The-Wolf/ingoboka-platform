@@ -252,6 +252,17 @@ export interface PartnerCreateInput {
   adminDefaultPassword?: string;
 }
 
+/** Payload for updating an existing partner organization. */
+export interface PartnerUpdateInput {
+  name?: string;
+  registrationNumber?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  addressLine?: string;
+  district?: string;
+  website?: string;
+}
+
 export interface PagedResult<T> {
   content: T[];
   totalElements: number;

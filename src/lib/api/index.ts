@@ -10,9 +10,12 @@ export {
   customerApiExt,
   insurerApi,
   type Organization,
+  type PartnerDetail,
   type AuditLogFilters,
   type AuditLogEntry,
   type PlatformSettings,
 } from './admin';
+export { insurerPortalApi } from './insurer-portal';
 export { notificationApi } from './notifications';
+export { staffApi, STAFF_ROLE_OPTIONS, type StaffMember, type StaffProfile } from './staff';
 export { mapBackendRole, isInsurerPortalRole } from './mappers';
