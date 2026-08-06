@@ -28,7 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { insurerStatusLabel } from '@/lib/insurer-status';
+import { claimStatusLabel } from '@/lib/insurer-status';
 import type { ApiError } from '@/types';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -121,7 +121,7 @@ export default function InsurerClaimsPage() {
         statusOptions={[
           { value: '', label: tCommon('allStatuses') },
           ...['SUBMITTED', 'UNDER_REVIEW', 'INFORMATION_REQUIRED', 'APPROVED', 'REJECTED'].map(
-            (s) => ({ value: s, label: insurerStatusLabel(s) })
+            (s) => ({ value: s, label: claimStatusLabel(s) })
           ),
         ]}
         sortOptions={[

@@ -60,6 +60,13 @@ export function createRegisterSchema(requiresEmail: boolean) {
       village: z.string().min(1, 'Village is required'),
       password: z.string().min(8, 'Password must be at least 8 characters'),
       confirmPassword: z.string(),
+      profilePictureUrl: z
+        .string()
+        .trim()
+        .optional()
+        .refine((v) => !v || v.startsWith('http://') || v.startsWith('https://'), {
+          message: 'Profile picture URL must start with http:// or https://',
+        }),
     })
     .refine((data) => data.password === data.confirmPassword, {
       message: 'Passwords do not match',

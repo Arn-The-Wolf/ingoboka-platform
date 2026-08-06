@@ -14,7 +14,7 @@ import { PageHeader } from '@/components/layout/page-header';
 import { LoadingLink } from '@/components/navigation/loading-link';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { Alert } from '@/components/ui/alert';
-import { insurerStatusLabel } from '@/lib/insurer-status';
+import { claimStatusLabel } from '@/lib/insurer-status';
 
 export default function InsurerDashboardPage() {
   const t = useTranslations('insurer');
@@ -28,7 +28,7 @@ export default function InsurerDashboardPage() {
   const claimsChart = useMemo(
     () =>
       (dashboard?.claimsByStatus ?? []).map((row) => ({
-        name: insurerStatusLabel(row.status),
+        name: claimStatusLabel(row.status),
         value: row.count,
       })),
     [dashboard?.claimsByStatus]
@@ -124,7 +124,7 @@ export default function InsurerDashboardPage() {
                 resolvedToday: dashboard.resolvedToday,
                 avgResolutionDays: dashboard.avgResolutionDays,
                 claimsByStatus: dashboard.claimsByStatus.map((row) => ({
-                  status: insurerStatusLabel(row.status),
+                  status: claimStatusLabel(row.status),
                   count: row.count,
                 })),
               }}

@@ -16,7 +16,8 @@ import {
   Filter,
 } from 'lucide-react';
 import { adminApi } from '@/lib/api';
-import type { ManagedUser } from '@/types';
+import { getApiErrorMessage } from '@/lib/api/integration-helpers';
+import type { ApiError, ManagedUser } from '@/types';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
@@ -127,14 +128,15 @@ export default function AdminUsersPage() {
   );
 
   const statusMutation = useMutation({
-    mutationFn: ({ id, newStatus }: { id: string; newStatus: string }) =>
+    mutationFn: ({ id, newStatus }: { id: string; newStatus: 'ACTIVE' | 'DISABLED' | 'LOCKED' }) =>
       adminApi.updateManagedUserStatus(id, newStatus),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'managed-users'] });
       toast.success(t('statusUpdated'));
       setStatusTarget(null);
     },
-    onError: () => toast.error(t('saveError')),
+    onError: (error: ApiError) =>
+      toast.error(t('saveError'), getApiErrorMessage(error)),
   });
 
   const resetFilters = () => {

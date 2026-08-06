@@ -68,7 +68,7 @@ import { ConfirmDialog } from '@/components/admin/confirm-dialog';
 
 import { useAdminToast } from '@/components/admin/admin-toast';
 
-import { orgStatusLabel, orgStatusTone, humanize } from '@/lib/status-label';
+import { orgStatusLabel, orgStatusTone, orgTypeLabel, orgCodeLabel } from '@/lib/status-label';
 
 import { cn } from '@/lib/utils';
 
@@ -136,7 +136,7 @@ export default function AdminPartnersPage() {
 
     content.forEach((o) => set.add(o.organizationType));
 
-    return Array.from(set).map((v) => ({ value: v, label: humanize(v) }));
+    return Array.from(set).map((v) => ({ value: v, label: orgTypeLabel(v) }));
 
   }, [content]);
 
@@ -402,7 +402,7 @@ export default function AdminPartnersPage() {
 
                     <p className="truncate font-semibold text-brand-primary-dark">{org.name}</p>
 
-                    <p className="text-sm text-brand-muted">{humanize(org.organizationType)}</p>
+                    <p className="text-sm text-brand-muted">{orgTypeLabel(org.organizationType)}</p>
 
                   </div>
 
@@ -412,7 +412,7 @@ export default function AdminPartnersPage() {
 
                 <div className="mb-4 space-y-1">
 
-                  {org.slug && <p className="truncate text-xs text-brand-muted">{org.slug}</p>}
+                  {org.slug && <p className="truncate text-xs text-brand-muted">{orgCodeLabel(org.slug)}</p>}
 
                   {org.contactEmail && (
 

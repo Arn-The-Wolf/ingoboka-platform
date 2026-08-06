@@ -14,6 +14,7 @@ import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ProfilePictureField } from '@/components/profile/profile-picture-field';
 
 export default function AgentSettingsPage() {
   const t = useTranslations('agent');
@@ -91,7 +92,12 @@ export default function AgentSettingsPage() {
             <h2 className="text-lg font-semibold text-brand-primary-dark">{t('personalSettings')}</h2>
           </div>
 
-          <div className="space-y-4">
+          <ProfilePictureField
+            fullName={profile?.fullName}
+            profilePictureUrl={profile?.profilePictureUrl ?? undefined}
+          />
+
+          <div className="space-y-4 pt-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t('firstName')}</Label>

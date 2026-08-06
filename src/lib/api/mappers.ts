@@ -53,6 +53,7 @@ export interface BackendUserPayload {
   roles?: string[];
   verified?: boolean;
   consentGiven?: boolean;
+  profilePictureUrl?: string;
 }
 
 export function mapAuthUser(raw?: BackendUserPayload | null): User {
@@ -78,6 +79,7 @@ export function mapAuthUser(raw?: BackendUserPayload | null): User {
     role: mapBackendRole(backendRole),
     verified: Boolean(raw.verified),
     consentGiven: Boolean(raw.consentGiven),
+    profilePictureUrl: raw.profilePictureUrl ? String(raw.profilePictureUrl) : undefined,
   };
 }
 

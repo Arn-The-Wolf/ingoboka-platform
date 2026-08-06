@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Bell, Check } from 'lucide-react';
 import { notificationApi } from '@/lib/api/notifications';
+import { InsurerPagination } from '@/components/insurer/insurer-pagination';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { Card, CardContent } from '@/components/ui/card';
@@ -14,14 +16,18 @@ import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { formatDate } from '@/lib/utils';
 import { cn } from '@/lib/utils';
 
+const DEFAULT_PAGE_SIZE = 10;
+
 export default function NotificationsPage() {
   const t = useTranslations('citizen.notifications');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['notifications', 'me'],
-    queryFn: () => notificationApi.listMine(),
+    queryKey: ['notifications', 'me', page, pageSize],
+    queryFn: () => notificationApi.listMine(page, pageSize),
   });
 
   const markReadMutation = useMutation({
@@ -31,6 +37,13 @@ export default function NotificationsPage() {
 
   const notifications = data?.content ?? [];
   const unreadCount = notifications.filter((n) => !n.readAt).length;
+  const totalPages = data?.totalPages ?? 1;
+  const totalElements = data?.totalElements ?? notifications.length;
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
 
   return (
     <>
@@ -106,6 +119,17 @@ export default function NotificationsPage() {
               {t('empty')}
             </CardContent>
           </Card>
+        )}
+
+        {!isLoading && !error && (
+          <InsurerPagination
+            page={page}
+            pageSize={pageSize}
+            totalPages={totalPages}
+            totalElements={totalElements}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+          />
         )}
 
         {error && (

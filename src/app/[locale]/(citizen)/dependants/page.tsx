@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl';
 import { Baby, Heart, Trash2, User, UserPlus, Users, Edit2, Plus, X } from 'lucide-react';
 import { customerApiExt } from '@/lib/api';
 import { useAdminToast } from '@/components/admin/admin-toast';
+import { InsurerPagination } from '@/components/insurer/insurer-pagination';
+import { DEPENDANT_AGE_ERROR, isDependantTooOld } from '@/lib/dependant-validation';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
@@ -31,6 +33,8 @@ const RELATIONSHIPS = [
   { value: 'SPOUSE', labelKey: 'relSpouse' as const, icon: Heart },
   { value: 'PARENT', labelKey: 'relParent' as const, icon: User },
 ] as const;
+
+const DEFAULT_PAGE_SIZE = 10;
 
 function relationshipIcon(relationship: string) {
   return RELATIONSHIPS.find((r) => r.value === relationship)?.icon ?? Users;
@@ -77,10 +81,13 @@ export default function DependantsPage() {
     relationship: 'CHILD',
     dateOfBirth: '',
   });
+  const [formError, setFormError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['dependants'],
-    queryFn: () => customerApiExt.listDependants(),
+    queryKey: ['dependants', page, pageSize],
+    queryFn: () => customerApiExt.listDependants(page, pageSize),
   });
 
   const addMutation = useMutation({
@@ -133,6 +140,7 @@ export default function DependantsPage() {
 
   const handleAddClick = () => {
     setForm({ firstName: '', lastName: '', relationship: 'CHILD', dateOfBirth: '' });
+    setFormError(null);
     setIsAddDialogOpen(true);
   };
 
@@ -158,7 +166,23 @@ export default function DependantsPage() {
     }
   };
 
-  const dependants = (data as Dependant[]) ?? [];
+  const validateForm = () => {
+    if (form.dateOfBirth && isDependantTooOld(form.dateOfBirth)) {
+      setFormError(DEPENDANT_AGE_ERROR);
+      return false;
+    }
+    setFormError(null);
+    return true;
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
+
+  const dependants = (data?.content as Dependant[]) ?? [];
+  const totalPages = data?.totalPages ?? 1;
+  const totalElements = data?.totalElements ?? dependants.length;
 
   if (isLoading) {
     return (
@@ -331,6 +355,18 @@ export default function DependantsPage() {
           </Card>
         )}
 
+        {!isLoading && dependants.length > 0 && (
+          <InsurerPagination
+            page={page}
+            pageSize={pageSize}
+            totalPages={totalPages}
+            totalElements={totalElements}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+            className="mt-4"
+          />
+        )}
+
         {/* Add Dependant Dialog */}
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogContent className="sm:max-w-md">
@@ -396,6 +432,7 @@ export default function DependantsPage() {
               {addMutation.error && (
                 <Alert variant="error">{(addMutation.error as Error).message}</Alert>
               )}
+              {formError && <Alert variant="error">{formError}</Alert>}
             </div>
             <DialogFooter>
               <Button
@@ -406,7 +443,9 @@ export default function DependantsPage() {
                 {t('cancel')}
               </Button>
               <Button
-                onClick={() => addMutation.mutate()}
+                onClick={() => {
+                  if (validateForm()) addMutation.mutate();
+                }}
                 loading={addMutation.isPending}
                 disabled={!form.firstName || !form.lastName}
                 variant="default"
@@ -480,6 +519,7 @@ export default function DependantsPage() {
               {editMutation.error && (
                 <Alert variant="error">{(editMutation.error as Error).message}</Alert>
               )}
+              {formError && <Alert variant="error">{formError}</Alert>}
             </div>
             <DialogFooter>
               <Button
@@ -490,7 +530,9 @@ export default function DependantsPage() {
                 {t('cancel')}
               </Button>
               <Button
-                onClick={() => editMutation.mutate()}
+                onClick={() => {
+                  if (validateForm()) editMutation.mutate();
+                }}
                 loading={editMutation.isPending}
                 disabled={!form.firstName || !form.lastName}
                 variant="default"

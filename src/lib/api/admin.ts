@@ -296,7 +296,10 @@ export const adminApi = {
   },
 
   /** Update a user's status. Deactivation = status DISABLED (soft-disable, never hard delete). */
-  async updateManagedUserStatus(id: string, status: string): Promise<ManagedUser> {
+  async updateManagedUserStatus(
+    id: string,
+    status: 'ACTIVE' | 'DISABLED' | 'LOCKED'
+  ): Promise<ManagedUser> {
     const { data } = await apiClient.patch<Record<string, unknown>>(`/admin/users/${id}/status`, {
       status,
     });
@@ -402,7 +405,11 @@ export const adminApi = {
           : raw.description
             ? String(raw.description)
             : undefined,
-      outcome: raw.outcome ? String(raw.outcome) : 'SUCCESS',
+      outcome: raw.outcome
+        ? String(raw.outcome).toUpperCase() === 'FAILURE'
+          ? 'FAILED'
+          : String(raw.outcome)
+        : 'SUCCESS',
       entityId: raw.entityId ? String(raw.entityId) : undefined,
     }));
     return { content, totalElements: data.totalElements ?? content.length };
@@ -524,9 +531,22 @@ export const agentApi = {
 };
 
 export const customerApiExt = {
-  async listDependants() {
-    const { data } = await apiClient.get<{ content?: unknown[] }>('/customer/dependants');
-    return unwrapPage(data);
+  async listDependants(page = 0, size = 10) {
+    const { data } = await apiClient.get<{
+      content?: unknown[];
+      totalElements?: number;
+      totalPages?: number;
+      page?: number;
+      size?: number;
+    }>('/customer/dependants', { params: { page, size } });
+    const content = unwrapPage(data);
+    return {
+      content,
+      totalElements: data.totalElements ?? content.length,
+      totalPages: data.totalPages ?? Math.max(1, Math.ceil((data.totalElements ?? content.length) / size)),
+      page: data.page ?? page,
+      size: data.size ?? size,
+    };
   },
 
   async addDependant(payload: {
@@ -551,6 +571,16 @@ export const customerApiExt = {
 
   async removeDependant(id: string) {
     await apiClient.delete(`/customer/dependants/${id}`);
+  },
+
+  async getNeedsAssessmentPreferences() {
+    const { data } = await apiClient.get<Record<string, unknown>>('/customer/preferences/needs-assessment');
+    return data;
+  },
+
+  async saveNeedsAssessmentPreferences(payload: Record<string, unknown>) {
+    const { data } = await apiClient.post('/customer/preferences/needs-assessment', payload);
+    return data;
   },
 
   async submitKyc() {

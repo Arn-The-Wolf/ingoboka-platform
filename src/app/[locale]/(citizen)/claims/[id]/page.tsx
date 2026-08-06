@@ -17,6 +17,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { claimStatusLabel } from '@/lib/insurer-status';
 import type { ApiError } from '@/types';
 
 export default function CitizenClaimDetailPage() {
@@ -81,7 +82,7 @@ export default function CitizenClaimDetailPage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg">{claim.claimNumber}</CardTitle>
                 <Badge variant={policyStatusVariant(claim.status)}>
-                  {statusLabelMap[claim.status] ?? claim.status}
+                  {statusLabelMap[claim.status] ?? claimStatusLabel(claim.status)}
                 </Badge>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">

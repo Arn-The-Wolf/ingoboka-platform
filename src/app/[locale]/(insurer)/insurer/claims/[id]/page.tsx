@@ -10,7 +10,7 @@ import { ClaimTimeline } from '@/components/insurer/claim-timeline';
 import { buildClaimTimeline } from '@/lib/claim-timeline-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { claimStatusTone, insurerStatusLabel } from '@/lib/insurer-status';
+import { claimStatusTone, claimStatusLabel } from '@/lib/insurer-status';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -76,7 +76,7 @@ export default function ClaimDetailPage() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>{claim.claimNumber}</CardTitle>
                 <Badge variant={claimStatusTone(claim.status)}>
-                  {insurerStatusLabel(claim.status)}
+                  {claimStatusLabel(claim.status)}
                 </Badge>
               </CardHeader>
               <CardContent className="space-y-4">

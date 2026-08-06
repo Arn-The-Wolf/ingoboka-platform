@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { claimStatusTone, insurerStatusLabel } from '@/lib/insurer-status';
+import { claimStatusTone, claimStatusLabel } from '@/lib/insurer-status';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Claim } from '@/types';
 import { ChevronRight } from 'lucide-react';
@@ -32,7 +32,7 @@ export function ClaimListItem({ claim }: ClaimListItemProps) {
               {formatCurrency(claim.amount, claim.currency)}
             </p>
             <Badge variant={claimStatusTone(claim.status)}>
-              {insurerStatusLabel(claim.status)}
+              {claimStatusLabel(claim.status)}
             </Badge>
             <ChevronRight className="h-5 w-5 text-brand-muted" />
           </div>

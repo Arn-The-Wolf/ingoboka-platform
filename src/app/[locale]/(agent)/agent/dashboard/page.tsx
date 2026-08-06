@@ -16,7 +16,7 @@ import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { applicationStatusTone, insurerStatusLabel } from '@/lib/insurer-status';
+import { applicationStatusTone, applicationStatusLabel } from '@/lib/insurer-status';
 import { formatCurrency } from '@/lib/utils';
 
 interface PlanOption {
@@ -186,7 +186,7 @@ export default function AgentDashboardPage() {
                 </p>
               </div>
               <Badge variant={applicationStatusTone(app.status)}>
-                {insurerStatusLabel(app.status)}
+                {applicationStatusLabel(app.status)}
               </Badge>
             </CardContent>
           </Card>

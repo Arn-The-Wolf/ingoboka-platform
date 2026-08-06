@@ -1,4 +1,5 @@
 import { PortalGuard } from '@/components/auth/portal-guard';
+import { AnnouncementBanner } from '@/components/citizen/announcement-banner';
 import { AdminSidebar } from '@/components/layout/admin-sidebar';
 import { StaffShell } from '@/components/layout/staff-shell';
 
@@ -10,6 +11,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         className="bg-gradient-to-br from-green-50 via-blue-50/30 to-purple-50/20"
       >
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <AnnouncementBanner />
           {/* Top padding clears the floating mobile menu; PageContainer supplies page gutters. */}
           <div className="pt-16 xl:pt-0">{children}</div>
         </main>

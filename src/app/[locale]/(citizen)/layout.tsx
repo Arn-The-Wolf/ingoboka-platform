@@ -1,4 +1,5 @@
 import { PortalGuard } from '@/components/auth/portal-guard';
+import { AnnouncementBanner } from '@/components/citizen/announcement-banner';
 import { CitizenSidebar } from '@/components/layout/citizen-sidebar';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { DashboardContent } from '@/components/layout/dashboard-content';
@@ -16,9 +17,10 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
         <CitizenSidebar />
         <DashboardContent
           className="ml-0 pb-20 lg:ml-64 lg:pb-0"
-          innerClassName="min-h-full"
+          innerClassName="min-h-full flex flex-col"
         >
-          <div id="main-content">{children}</div>
+          <AnnouncementBanner />
+          <div id="main-content" className="flex-1">{children}</div>
         </DashboardContent>
         <BottomNav />
       </div>

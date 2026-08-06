@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Mail, Pencil, UserX } from 'lucide-react';
 import type { StaffMember } from '@/lib/api/staff';
 import { staffEnrollmentLabel, staffStatusLabel } from '@/lib/insurer-status';
+import { roleLabel } from '@/lib/status-label';
 import { STAFF_ROLE_OPTIONS } from '@/lib/api/staff';
 import {
   Dialog,
@@ -21,9 +22,9 @@ function enrollmentBadge(status: string) {
   return 'pending' as const;
 }
 
-function roleLabel(roleCode?: string) {
+function staffRoleLabel(roleCode?: string) {
   if (!roleCode) return '—';
-  return STAFF_ROLE_OPTIONS.find((r) => r.value === roleCode)?.label ?? roleCode.replace(/_/g, ' ');
+  return STAFF_ROLE_OPTIONS.find((r) => r.value === roleCode)?.label ?? roleLabel(roleCode);
 }
 
 interface EmployeeDetailDialogProps {
@@ -75,7 +76,7 @@ export function EmployeeDetailDialog({
           <dl className="grid gap-3 text-sm">
             <div className="flex items-center justify-between gap-2">
               <dt className="text-brand-muted">{t('role')}</dt>
-              <dd className="font-medium">{roleLabel(employee.roleCode ?? employee.roles[0])}</dd>
+              <dd className="font-medium">{staffRoleLabel(employee.roleCode ?? employee.roles[0])}</dd>
             </div>
             <div className="flex items-center justify-between gap-2">
               <dt className="text-brand-muted">{tCommon('status')}</dt>

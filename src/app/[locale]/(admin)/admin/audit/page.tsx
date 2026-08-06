@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { auditActionLabel, outcomeLabel, outcomeTone, resourceTypeLabel } from '@/lib/status-label';
 import { formatDate } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 20;
@@ -40,7 +41,7 @@ const RESOURCE_TYPES = [
   'DATA_SUBJECT_REQUEST',
 ];
 
-const OUTCOMES = ['', 'SUCCESS', 'FAILURE', 'INFO'];
+const OUTCOMES = ['', 'SUCCESS', 'FAILED', 'PENDING', 'INFO'];
 
 export default function AdminAuditPage() {
   const t = useTranslations('admin');
@@ -120,11 +121,7 @@ export default function AdminAuditPage() {
     setApplied((prev) => ({ ...prev, sortBy: key, sortDir: nextDir, page: 0 }));
   };
 
-  const outcomeVariant = (value?: string) => {
-    if (value === 'FAILURE') return 'pending' as const;
-    if (value === 'INFO') return 'secondary' as const;
-    return 'active' as const;
-  };
+  const outcomeVariant = (value?: string) => outcomeTone(value);
 
   return (
     <PageContainer>
@@ -181,7 +178,7 @@ export default function AdminAuditPage() {
               >
                 {RESOURCE_TYPES.map((rt) => (
                   <option key={rt || 'all'} value={rt}>
-                    {rt || t('allResources')}
+                    {rt ? resourceTypeLabel(rt) : t('allResources')}
                   </option>
                 ))}
               </select>
@@ -196,7 +193,7 @@ export default function AdminAuditPage() {
               >
                 {OUTCOMES.map((o) => (
                   <option key={o || 'all'} value={o}>
-                    {o || t('allOutcomes')}
+                    {o ? outcomeLabel(o) : t('allOutcomes')}
                   </option>
                 ))}
               </select>
@@ -278,15 +275,15 @@ export default function AdminAuditPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      <p className="font-medium text-gray-800">{entry.action}</p>
+                      <p className="font-medium text-gray-800">{auditActionLabel(entry.action)}</p>
                       {entry.details && <p className="text-xs text-gray-500">{entry.details}</p>}
                     </td>
                     <td className="px-4 py-3">
-                      <Badge variant={outcomeVariant(entry.outcome)}>{entry.outcome ?? 'SUCCESS'}</Badge>
+                      <Badge variant={outcomeVariant(entry.outcome)}>{outcomeLabel(entry.outcome)}</Badge>
                     </td>
                     <td className="hidden px-4 py-3 text-gray-600 md:table-cell">{entry.actor}</td>
                     <td className="hidden px-4 py-3 text-gray-600 lg:table-cell">
-                      <span className="font-medium">{entry.resource}</span>
+                      <span className="font-medium">{resourceTypeLabel(entry.resource)}</span>
                       {entry.entityId && (
                         <p className="font-mono text-[10px] text-gray-400">{entry.entityId.slice(0, 8)}…</p>
                       )}

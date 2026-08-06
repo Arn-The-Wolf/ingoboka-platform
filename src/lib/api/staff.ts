@@ -40,6 +40,7 @@ export interface StaffProfile {
   roles: string[];
   organizationId?: string;
   organizationName?: string;
+  profilePictureUrl?: string;
 }
 
 export interface CreateStaffInput {
@@ -174,6 +175,7 @@ export const staffApi = {
       roles,
       organizationId: data.organizationId ? String(data.organizationId) : undefined,
       organizationName: data.organizationName ? String(data.organizationName) : undefined,
+      profilePictureUrl: data.profilePictureUrl ? String(data.profilePictureUrl) : undefined,
     };
   },
 
@@ -199,6 +201,7 @@ export const staffApi = {
       roles,
       organizationId: data.organizationId ? String(data.organizationId) : undefined,
       organizationName: data.organizationName ? String(data.organizationName) : undefined,
+      profilePictureUrl: data.profilePictureUrl ? String(data.profilePictureUrl) : undefined,
     } satisfies StaffProfile;
   },
 };

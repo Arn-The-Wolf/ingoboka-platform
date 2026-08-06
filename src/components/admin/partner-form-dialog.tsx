@@ -7,7 +7,7 @@ import { Building2, CheckCircle2, Pencil } from 'lucide-react';
 import { adminApi } from '@/lib/api';
 import type { Organization } from '@/lib/api/admin';
 import type { PartnerCreateInput, PartnerUpdateInput } from '@/types';
-import { humanize, orgStatusLabel } from '@/lib/status-label';
+import { orgStatusLabel, orgTypeLabel, orgCodeLabel } from '@/lib/status-label';
 import {
   Dialog,
   DialogContent,
@@ -196,9 +196,9 @@ export function PartnerFormDialog({ open, onOpenChange, partner }: PartnerFormDi
               {isEdit && partner && (
                 <div className="rounded-xl border border-brand-border/70 bg-brand-surface-container-low/40 p-3 text-sm">
                   <p className="text-brand-muted">
-                    {t('partnerCode')}: <span className="font-medium text-brand-primary-dark">{partner.slug}</span>
+                    {t('partnerCode')}: <span className="font-medium text-brand-primary-dark">{orgCodeLabel(partner.slug)}</span>
                     {' · '}
-                    {t('partnerType')}: <span className="font-medium text-brand-primary-dark">{humanize(partner.organizationType)}</span>
+                    {t('partnerType')}: <span className="font-medium text-brand-primary-dark">{orgTypeLabel(partner.organizationType)}</span>
                     {' · '}
                     {tCommon('status')}: <span className="font-medium text-brand-primary-dark">{orgStatusLabel(partner.status)}</span>
                   </p>

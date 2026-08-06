@@ -173,6 +173,7 @@ export const customerApi = {
         nationalId: data.nationalId ? String(data.nationalId) : stored.nationalId,
         verified: stored.verified || kycStatus === 'VERIFIED',
         consentGiven,
+        profilePictureUrl: stored.profilePictureUrl,
       };
     } catch {
       return stored;

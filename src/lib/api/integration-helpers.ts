@@ -1,6 +1,19 @@
 import { apiClient } from './client';
 import type { ApiError } from '@/types';
 
+/** Extract a human-readable message from a rejected API call. */
+export function getApiErrorMessage(error: unknown): string | undefined {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const apiError = error as ApiError & { detail?: string };
+  if (typeof apiError.message === 'string' && apiError.message.trim()) {
+    return apiError.message.trim();
+  }
+  if (typeof apiError.detail === 'string' && apiError.detail.trim()) {
+    return apiError.detail.trim();
+  }
+  return undefined;
+}
+
 function getErrorStatus(error: unknown): number | undefined {
   if (typeof error === 'object' && error !== null && 'status' in error) {
     return (error as ApiError).status;

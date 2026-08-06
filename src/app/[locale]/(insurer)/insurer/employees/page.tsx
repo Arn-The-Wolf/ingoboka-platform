@@ -22,6 +22,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { InsurerStatCard } from '@/components/insurer/insurer-stat-card';
 import { staffEnrollmentLabel, staffStatusLabel } from '@/lib/insurer-status';
+import { roleLabel } from '@/lib/status-label';
 import { STAFF_ROLE_OPTIONS } from '@/lib/api/staff';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -32,9 +33,9 @@ function enrollmentBadge(status: string) {
   return 'pending' as const;
 }
 
-function roleLabel(roleCode?: string) {
+function staffRoleLabel(roleCode?: string) {
   if (!roleCode) return '—';
-  return STAFF_ROLE_OPTIONS.find((r) => r.value === roleCode)?.label ?? roleCode.replace(/_/g, ' ');
+  return STAFF_ROLE_OPTIONS.find((r) => r.value === roleCode)?.label ?? roleLabel(roleCode);
 }
 
 export default function InsurerEmployeesPage() {
@@ -196,7 +197,7 @@ export default function InsurerEmployeesPage() {
                       <p className="font-medium text-brand-primary-dark">{employee.fullName}</p>
                       <p className="text-sm text-brand-muted">{employee.email}</p>
                       <p className="text-xs text-brand-muted">
-                        {roleLabel(employee.roleCode ?? employee.roles[0])}
+                        {staffRoleLabel(employee.roleCode ?? employee.roles[0])}
                       </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>

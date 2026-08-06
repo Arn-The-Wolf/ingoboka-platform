@@ -1,8 +1,44 @@
-import { humanize, type StatusTone } from '@/lib/status-label';
+import { humanizeLabel, type StatusTone } from '@/lib/status-label';
+
+const CLAIM_STATUS_LABELS: Record<string, string> = {
+  SUBMITTED: 'Submitted',
+  UNDER_REVIEW: 'Under review',
+  INFORMATION_REQUIRED: 'Information requested',
+  INFO_REQUESTED: 'Information requested',
+  APPROVED: 'Approved',
+  REJECTED: 'Rejected',
+  PAYMENT_PROCESSING: 'Payment processing',
+  CLOSED: 'Closed',
+};
+
+const APPLICATION_STATUS_LABELS: Record<string, string> = {
+  SUBMITTED: 'Submitted',
+  UNDER_REVIEW: 'Under review',
+  PENDING: 'Pending',
+  APPROVED: 'Approved',
+  REJECTED: 'Rejected',
+};
+
+/** Human-readable claim status for badges and timelines. */
+export function claimStatusLabel(status?: string | null): string {
+  if (!status) return '—';
+  return CLAIM_STATUS_LABELS[status] ?? humanizeLabel(status, 'sentence');
+}
+
+/** Human-readable application status. */
+export function applicationStatusLabel(status?: string | null): string {
+  if (!status) return '—';
+  return APPLICATION_STATUS_LABELS[status] ?? humanizeLabel(status, 'sentence');
+}
 
 /** Humanize any insurer-facing enum/status for display. */
 export function insurerStatusLabel(status?: string | null): string {
-  return humanize(status);
+  if (!status) return '—';
+  return (
+    CLAIM_STATUS_LABELS[status] ??
+    APPLICATION_STATUS_LABELS[status] ??
+    humanizeLabel(status, 'sentence')
+  );
 }
 
 export function claimStatusTone(status?: string | null): StatusTone {
@@ -46,7 +82,7 @@ export function productStatusLabel(status?: string | null): string {
     case 'ARCHIVED':
       return 'Archived';
     default:
-      return humanize(status);
+      return humanizeLabel(status, 'sentence');
   }
 }
 
@@ -87,7 +123,7 @@ export function staffStatusLabel(status?: string | null): string {
     case 'PENDING_EMAIL_VERIFICATION':
       return 'Pending email verification';
     default:
-      return humanize(status);
+      return humanizeLabel(status, 'sentence');
   }
 }
 
@@ -101,6 +137,6 @@ export function staffEnrollmentLabel(enrollmentStatus?: string | null): string {
     case 'PENDING':
       return 'Pending enrollment';
     default:
-      return humanize(enrollmentStatus);
+      return humanizeLabel(enrollmentStatus, 'sentence');
   }
 }
