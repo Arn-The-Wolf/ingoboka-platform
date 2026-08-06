@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import {
   ArrowRight,
@@ -12,14 +12,27 @@ import {
   Smartphone,
   Sprout,
   Store,
+  UserPlus,
   Users,
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { enrollmentApi } from '@/lib/api';
+import { enrollmentApi, customerApiExt } from '@/lib/api';
 import { setRecommendedProductIds } from '@/lib/recommended-products';
+import { DEPENDANT_AGE_ERROR, isDependantTooOld } from '@/lib/dependant-validation';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert } from '@/components/ui/alert';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 type QuestionId = 'occupation' | 'dependents' | 'smartphone' | 'payment' | 'income' | 'ready';
@@ -85,12 +98,25 @@ const QUESTION_META: Array<{
   },
 ];
 
+function dependantSlotsForRange(range: string): number {
+  if (range === '1-2') return 2;
+  if (range === '3-4') return 4;
+  if (range === '5+') return 5;
+  return 0;
+}
+
+type DependantDraft = { firstName: string; lastName: string; dateOfBirth: string };
+
 export default function NeedsAssessmentPage() {
   const t = useTranslations('citizen.needsAssessment');
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Partial<Record<QuestionId, string>>>({});
   const [showResults, setShowResults] = useState(false);
+  const [showDependantDialog, setShowDependantDialog] = useState(false);
+  const [dependantDrafts, setDependantDrafts] = useState<DependantDraft[]>([]);
+  const [dependantError, setDependantError] = useState<string | null>(null);
 
   const questions = useMemo(
     () =>
@@ -108,21 +134,52 @@ export default function NeedsAssessmentPage() {
   );
 
   const assessmentMutation = useMutation({
-    mutationFn: () =>
-      enrollmentApi.needsAssessment({
+    mutationFn: async () => {
+      await customerApiExt.saveNeedsAssessmentPreferences({
+        occupation: answers.occupation,
+        incomeRange: answers.income,
+        dependents: answers.dependents
+          ? parseInt(answers.dependents.replace(/\D/g, ''), 10) || 0
+          : 0,
+        primaryRisk: answers.occupation === 'MOTO_RIDER' ? 'ACCIDENT' : 'HEALTH',
+        paymentPreference: answers.payment,
+        smartphoneAccess: answers.smartphone,
+        answers,
+      });
+      return enrollmentApi.needsAssessment({
         occupation: answers.occupation ?? 'OTHER',
         incomeRange: answers.income,
         dependents: answers.dependents
           ? parseInt(answers.dependents.replace(/\D/g, ''), 10) || 0
           : undefined,
         primaryRisk: answers.occupation === 'MOTO_RIDER' ? 'ACCIDENT' : 'HEALTH',
-      }),
+      });
+    },
     onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['needs-assessment-preferences'] });
       const ids = result.recommendedProducts?.map((p) => p.id) ?? [];
       if (ids.length > 0) {
         setRecommendedProductIds(ids);
       }
       setTimeout(() => router.push('/products?recommended=true'), 2500);
+    },
+  });
+
+  const saveDependantsMutation = useMutation({
+    mutationFn: async (drafts: DependantDraft[]) => {
+      for (const draft of drafts) {
+        if (!draft.firstName.trim() || !draft.lastName.trim()) continue;
+        await customerApiExt.addDependant({
+          firstName: draft.firstName.trim(),
+          lastName: draft.lastName.trim(),
+          relationship: 'CHILD',
+          dateOfBirth: draft.dateOfBirth || undefined,
+        });
+      }
+    },
+    onSuccess: () => {
+      setShowDependantDialog(false);
+      setStep((s) => s + 1);
     },
   });
 
@@ -136,12 +193,36 @@ export default function NeedsAssessmentPage() {
   }
 
   function handleNext() {
+    if (question?.id === 'dependents' && answers.dependents && answers.dependents !== '0') {
+      const slots = dependantSlotsForRange(answers.dependents);
+      setDependantDrafts(
+        Array.from({ length: slots }, () => ({ firstName: '', lastName: '', dateOfBirth: '' }))
+      );
+      setDependantError(null);
+      setShowDependantDialog(true);
+      return;
+    }
     if (step < questions.length - 1) {
       setStep((s) => s + 1);
       return;
     }
     setShowResults(true);
     assessmentMutation.mutate();
+  }
+
+  function handleSaveDependants() {
+    const filled = dependantDrafts.filter((d) => d.firstName.trim() && d.lastName.trim());
+    if (filled.length === 0) {
+      setDependantError('Add at least one dependant or go back and select "None".');
+      return;
+    }
+    for (const draft of filled) {
+      if (draft.dateOfBirth && isDependantTooOld(draft.dateOfBirth)) {
+        setDependantError(DEPENDANT_AGE_ERROR);
+        return;
+      }
+    }
+    saveDependantsMutation.mutate(filled);
   }
 
   function handleSkip() {
@@ -262,6 +343,78 @@ export default function NeedsAssessmentPage() {
           </Button>
         </div>
       </PageContainer>
+
+      <Dialog open={showDependantDialog} onOpenChange={setShowDependantDialog}>
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-brand-primary" />
+              Add your dependants
+            </DialogTitle>
+            <DialogDescription>
+              You indicated {answers.dependents} dependants. Add their details below (must be under 18).
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {dependantDrafts.map((draft, index) => (
+              <div key={index} className="rounded-lg border border-brand-border p-3 space-y-2">
+                <p className="text-sm font-semibold text-brand-primary-dark">Dependant {index + 1}</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <div>
+                    <Label htmlFor={`dep-fn-${index}`}>First name</Label>
+                    <Input
+                      id={`dep-fn-${index}`}
+                      value={draft.firstName}
+                      onChange={(e) => {
+                        const next = [...dependantDrafts];
+                        next[index] = { ...next[index], firstName: e.target.value };
+                        setDependantDrafts(next);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor={`dep-ln-${index}`}>Last name</Label>
+                    <Input
+                      id={`dep-ln-${index}`}
+                      value={draft.lastName}
+                      onChange={(e) => {
+                        const next = [...dependantDrafts];
+                        next[index] = { ...next[index], lastName: e.target.value };
+                        setDependantDrafts(next);
+                      }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor={`dep-dob-${index}`}>Date of birth</Label>
+                  <Input
+                    id={`dep-dob-${index}`}
+                    type="date"
+                    value={draft.dateOfBirth}
+                    onChange={(e) => {
+                      const next = [...dependantDrafts];
+                      next[index] = { ...next[index], dateOfBirth: e.target.value };
+                      setDependantDrafts(next);
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+            {dependantError && <Alert variant="error">{dependantError}</Alert>}
+            {saveDependantsMutation.error && (
+              <Alert variant="error">{(saveDependantsMutation.error as Error).message}</Alert>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDependantDialog(false)}>
+              Cancel
+            </Button>
+            <Button loading={saveDependantsMutation.isPending} onClick={handleSaveDependants}>
+              Save &amp; continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

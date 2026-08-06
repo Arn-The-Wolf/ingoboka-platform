@@ -28,13 +28,23 @@ function mapNotification(raw: Record<string, unknown>): UserNotification {
 }
 
 export const notificationApi = {
-  async listMine(page = 0, size = 30) {
-    const { data } = await apiClient.get<{ content?: Record<string, unknown>[] }>(
-      '/notifications/me',
-      { params: { page, size } }
-    );
+  async listMine(page = 0, size = 10) {
+    const { data } = await apiClient.get<{
+      content?: Record<string, unknown>[];
+      totalElements?: number;
+      totalPages?: number;
+      page?: number;
+      size?: number;
+    }>('/notifications/me', { params: { page, size } });
     const content = unwrapPage(data).map((row) => mapNotification(row as Record<string, unknown>));
-    return { content, totalElements: content.length };
+    const totalElements = data.totalElements ?? content.length;
+    return {
+      content,
+      totalElements,
+      totalPages: data.totalPages ?? Math.max(1, Math.ceil(totalElements / size)),
+      page: data.page ?? page,
+      size: data.size ?? size,
+    };
   },
 
   async markRead(notificationId: string) {

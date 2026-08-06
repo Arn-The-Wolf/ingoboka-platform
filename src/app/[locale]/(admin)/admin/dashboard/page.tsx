@@ -16,7 +16,14 @@ import { Badge } from '@/components/ui/badge';
 import { DistributionChart } from '@/components/admin/distribution-chart';
 import { RwandaMap } from '@/components/admin/rwanda-map';
 import { getProvinceRegions } from '@/lib/rwanda-geo';
-import { orgStatusLabel, orgStatusTone } from '@/lib/status-label';
+import {
+  auditActionLabel,
+  orgStatusLabel,
+  orgStatusTone,
+  orgTypeLabel,
+  outcomeLabel,
+  resourceTypeLabel,
+} from '@/lib/status-label';
 import { formatDate, cn } from '@/lib/utils';
 
 export default function AdminDashboardPage() {
@@ -172,7 +179,7 @@ export default function AdminDashboardPage() {
                       </div>
                       <div>
                         <p className="font-semibold text-brand-primary-dark">{org.name}</p>
-                        <p className="text-sm text-brand-muted">{org.organizationType}</p>
+                        <p className="text-sm text-brand-muted">{orgTypeLabel(org.organizationType)}</p>
                       </div>
                     </div>
                     <Badge variant={orgStatusTone(org.status)}>{orgStatusLabel(org.status)}</Badge>
@@ -206,8 +213,8 @@ export default function AdminDashboardPage() {
                 <Card key={entry.id} className="border-blue-200 bg-white transition-all hover:border-blue-300 hover:shadow-md">
                   <CardContent className="flex items-start justify-between gap-3 p-4">
                     <div className="min-w-0">
-                      <p className="font-medium text-brand-primary-dark">{entry.action}</p>
-                      <p className="text-sm text-brand-muted">{entry.actor} · {entry.resource}</p>
+                      <p className="font-medium text-brand-primary-dark">{auditActionLabel(entry.action)}</p>
+                      <p className="text-sm text-brand-muted">{entry.actor} · {resourceTypeLabel(entry.resource)}</p>
                     </div>
                     <span className="shrink-0 text-xs text-brand-muted">{formatDate(entry.occurredAt)}</span>
                   </CardContent>

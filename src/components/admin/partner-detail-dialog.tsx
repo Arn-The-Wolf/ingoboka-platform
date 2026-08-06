@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Building2, Globe, Mail, MapPin, Phone, Hash } from 'lucide-react';
 import { adminApi } from '@/lib/api';
 import type { Organization } from '@/lib/api/admin';
-import { humanize, orgStatusLabel, orgStatusTone } from '@/lib/status-label';
+import { orgStatusLabel, orgStatusTone, orgTypeLabel, orgCodeLabel } from '@/lib/status-label';
 import {
   Dialog,
   DialogContent,
@@ -75,9 +75,9 @@ export function PartnerDetailDialog({ open, onOpenChange, partner }: PartnerDeta
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={orgStatusTone(detail.status)}>{orgStatusLabel(detail.status)}</Badge>
-              <Badge variant="secondary">{humanize(detail.organizationType)}</Badge>
+              <Badge variant="secondary">{orgTypeLabel(detail.organizationType)}</Badge>
               {detail.slug && (
-                <span className="text-xs text-brand-muted">{detail.slug}</span>
+                <span className="text-xs text-brand-muted">{orgCodeLabel(detail.slug)}</span>
               )}
             </div>
 

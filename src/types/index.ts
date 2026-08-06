@@ -14,6 +14,7 @@ export interface User {
   role: UserRole;
   verified: boolean;
   consentGiven: boolean;
+  profilePictureUrl?: string;
 }
 
 export interface AuthTokens {
@@ -40,6 +41,8 @@ export interface RegisterRequest {
   sector: string;
   cell: string;
   village: string;
+  /** Optional profile picture URL (http/https). */
+  profilePictureUrl?: string;
 }
 
 export interface OtpVerifyRequest {

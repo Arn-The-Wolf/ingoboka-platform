@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Home, Package, FileText, Users, LogOut, Shield, Bell } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
-import { cn, getInitials } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useLogout } from '@/hooks/use-auth';
 import { useAuthStore } from '@/store/auth-store';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { Button } from '@/components/ui/button';
 import { SidebarToggle } from '@/components/layout/sidebar-toggle';
 import { SidebarNavLink } from '@/components/layout/sidebar-nav-link';
@@ -82,9 +83,11 @@ export function CitizenSidebar() {
             href="/profile"
             className="mb-3 flex min-w-0 items-center gap-3 rounded-lg p-1 transition-colors hover:bg-brand-primary-darker/60"
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-accent text-sm font-medium text-brand-primary-dark">
-              {getInitials(user?.fullName ?? t('profile.fallbackName'))}
-            </div>
+            <UserAvatar
+              name={user?.fullName ?? t('profile.fallbackName')}
+              imageUrl={user?.profilePictureUrl}
+              initialsClassName="bg-brand-accent text-brand-primary-dark"
+            />
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-white">
                 {user?.fullName ?? t('profile.fallbackName')}

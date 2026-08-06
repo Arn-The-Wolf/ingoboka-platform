@@ -17,7 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { applicationStatusTone, insurerStatusLabel } from '@/lib/insurer-status';
+import { applicationStatusTone, applicationStatusLabel } from '@/lib/insurer-status';
 import { formatCurrency } from '@/lib/utils';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -74,10 +74,10 @@ export default function AgentApplicationsPage() {
         searchPlaceholder={t('searchApplications')}
         statusOptions={[
           { value: 'PENDING', label: t('pendingReview') },
-          { value: 'APPROVED', label: insurerStatusLabel('APPROVED') },
-          { value: 'REJECTED', label: insurerStatusLabel('REJECTED') },
-          { value: 'UNDER_REVIEW', label: insurerStatusLabel('UNDER_REVIEW') },
-          { value: 'SUBMITTED', label: insurerStatusLabel('SUBMITTED') },
+          { value: 'APPROVED', label: applicationStatusLabel('APPROVED') },
+          { value: 'REJECTED', label: applicationStatusLabel('REJECTED') },
+          { value: 'UNDER_REVIEW', label: applicationStatusLabel('UNDER_REVIEW') },
+          { value: 'SUBMITTED', label: applicationStatusLabel('SUBMITTED') },
           { value: '', label: tCommon('allStatuses') },
         ]}
         sortOptions={[
@@ -114,7 +114,7 @@ export default function AgentApplicationsPage() {
                   </div>
                 </div>
                 <Badge variant={applicationStatusTone(app.status)}>
-                  {insurerStatusLabel(app.status)}
+                  {applicationStatusLabel(app.status)}
                 </Badge>
               </CardContent>
             </Card>

@@ -1,6 +1,6 @@
 'use client';
 
-import { CheckCircle2, Circle, Clock } from 'lucide-react';
+import { CheckCircle2, Circle, CircleDot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface TimelineStep {
@@ -37,7 +37,7 @@ export function ClaimTimeline({ steps, className }: ClaimTimelineProps) {
                 <CheckCircle2 className="h-6 w-6 text-brand-primary" />
               )}
               {step.status === 'current' && (
-                <Clock className="h-6 w-6 text-brand-accent" />
+                <CircleDot className="h-6 w-6 text-brand-primary" aria-hidden />
               )}
               {step.status === 'pending' && (
                 <Circle className="h-6 w-6 text-brand-border" />

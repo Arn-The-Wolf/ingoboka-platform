@@ -3,6 +3,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useLocale, useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
+import { Mail, Phone } from 'lucide-react';
 import { LoadingLink } from '@/components/navigation/loading-link';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
@@ -12,6 +14,7 @@ import { PasswordField, PhoneField, TextField } from '@/components/auth/fields';
 import { WelcomeOverlay, useWelcomeSequence } from '@/components/auth/welcome-overlay';
 import { getPostAuthPath, useLogin } from '@/hooks/use-auth';
 import { useAdminToast } from '@/components/admin/admin-toast';
+import { adminApi } from '@/lib/api/admin';
 import { normalizeCitizenPhone } from '@/lib/auth/phone';
 import { loginSchema, type LoginFormData } from '@/lib/validators';
 import type { ApiError } from '@/types';
@@ -22,6 +25,12 @@ export default function LoginPage() {
   const login = useLogin();
   const welcome = useWelcomeSequence();
   const toast = useAdminToast();
+
+  const { data: platformConfig } = useQuery({
+    queryKey: ['platform', 'config'],
+    queryFn: () => adminApi.getPlatformSettings(),
+    staleTime: 5 * 60_000,
+  });
 
   const {
     register,
@@ -65,6 +74,13 @@ export default function LoginPage() {
   };
 
   const error = login.error as ApiError | null;
+  const isDeactivated =
+    error?.code === 'ACCOUNT_DISABLED' ||
+    (error?.message?.toLowerCase().includes('deactivated') ?? false) ||
+    (error?.message?.toLowerCase().includes('disabled') ?? false);
+
+  const supportEmail = platformConfig?.supportEmail ?? 'support@ingoboka.rw';
+  const supportPhone = platformConfig?.supportPhone ?? '+250788000000';
 
   return (
     <div className="space-y-5">
@@ -82,7 +98,26 @@ export default function LoginPage() {
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {error && <Alert variant="error">{error.message}</Alert>}
+        {error && isDeactivated && (
+          <Alert variant="warning" className="space-y-2">
+            <p className="font-semibold">Account deactivated</p>
+            <p className="text-sm">
+              Your Ingoboka account is inactive or has been deactivated. Please contact support to
+              restore access.
+            </p>
+            <div className="mt-2 flex flex-col gap-1 text-sm">
+              <a href={`mailto:${supportEmail}`} className="inline-flex items-center gap-2 font-medium text-brand-primary hover:underline">
+                <Mail className="h-4 w-4" />
+                {supportEmail}
+              </a>
+              <a href={`tel:${supportPhone.replace(/\s/g, '')}`} className="inline-flex items-center gap-2 font-medium text-brand-primary hover:underline">
+                <Phone className="h-4 w-4" />
+                {supportPhone}
+              </a>
+            </div>
+          </Alert>
+        )}
+        {error && !isDeactivated && <Alert variant="error">{error.message}</Alert>}
 
         <div className="space-y-1.5 animate-fade-in-up stagger-1">
           <span className="text-sm font-medium text-brand-primary-dark">{t('loginMethod')}</span>

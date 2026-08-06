@@ -1,16 +1,23 @@
 import type { ClaimStatusHistoryItem } from '@/types';
 import type { TimelineStep } from '@/components/insurer/claim-timeline';
+import { claimStatusLabel } from '@/lib/insurer-status';
 import { formatDate } from '@/lib/utils';
 
-const STATUS_LABELS: Record<string, string> = {
+const TIMELINE_STEP_LABELS: Record<string, string> = {
   SUBMITTED: 'Claim submitted',
   UNDER_REVIEW: 'Under review',
   INFORMATION_REQUIRED: 'Information requested',
+  INFO_REQUESTED: 'Information requested',
   APPROVED: 'Claim approved',
   REJECTED: 'Claim rejected',
   PAYMENT_PROCESSING: 'Payment processing',
   CLOSED: 'Claim closed',
 };
+
+function timelineLabel(status: string, backendLabel?: string | null): string {
+  if (backendLabel && backendLabel !== status) return backendLabel;
+  return TIMELINE_STEP_LABELS[status] ?? claimStatusLabel(status);
+}
 
 function stepStatus(
   index: number,
@@ -31,7 +38,7 @@ export function buildClaimTimeline(
     const currentIndex = statusHistory.length - 1;
     return statusHistory.map((item, index) => ({
       id: `${item.status}-${index}`,
-      label: item.label || STATUS_LABELS[item.status] || item.status,
+      label: timelineLabel(item.status, item.label),
       description: item.note,
       date: item.occurredAt ? formatDate(item.occurredAt) : undefined,
       status: stepStatus(index, currentIndex),
@@ -41,14 +48,14 @@ export function buildClaimTimeline(
   return [
     {
       id: 'submitted',
-      label: STATUS_LABELS.SUBMITTED,
+      label: TIMELINE_STEP_LABELS.SUBMITTED,
       description: 'Your claim has been received.',
       date: submittedAt ? formatDate(submittedAt) : undefined,
       status: 'done',
     },
     {
       id: 'review',
-      label: STATUS_LABELS.UNDER_REVIEW,
+      label: TIMELINE_STEP_LABELS.UNDER_REVIEW,
       description: 'An adjuster is reviewing your documents.',
       status:
         currentStatus === 'SUBMITTED'

@@ -15,7 +15,7 @@ import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert } from '@/components/ui/alert';
 import { AdminSelect } from '@/components/admin/admin-select';
-import { insurerStatusLabel } from '@/lib/insurer-status';
+import { claimStatusLabel } from '@/lib/insurer-status';
 
 export default function InsurerReportsPage() {
   const t = useTranslations('insurer');
@@ -31,7 +31,7 @@ export default function InsurerReportsPage() {
     const rows = dashboard?.claimsByStatus ?? [];
     const filtered = statusFilter ? rows.filter((r) => r.status === statusFilter) : rows;
     return filtered.map((row) => ({
-      name: insurerStatusLabel(row.status),
+      name: claimStatusLabel(row.status),
       value: row.count,
     }));
   }, [dashboard?.claimsByStatus, statusFilter]);
@@ -76,7 +76,7 @@ export default function InsurerReportsPage() {
                 { value: '', label: tCommon('allStatuses') },
                 ...(dashboard.claimsByStatus ?? []).map((row) => ({
                   value: row.status,
-                  label: insurerStatusLabel(row.status),
+                  label: claimStatusLabel(row.status),
                 })),
               ]}
               aria-label="Claim status filter"
@@ -98,7 +98,7 @@ export default function InsurerReportsPage() {
               resolvedToday: dashboard.resolvedToday,
               avgResolutionDays: dashboard.avgResolutionDays,
               claimsByStatus: (dashboard.claimsByStatus ?? []).map((row) => ({
-                status: insurerStatusLabel(row.status),
+                status: claimStatusLabel(row.status),
                 count: row.count,
               })),
             }}

@@ -214,12 +214,22 @@ function mapProductDetailPayload(data: Record<string, unknown>): ProductDetail {
 
 export const productApi = {
   async list(page = 0, size = 20) {
-    const { data } = await apiClient.get<{ content?: Record<string, unknown>[]; totalElements?: number }>(
-      '/products',
-      { params: { page, size } }
-    );
+    const { data } = await apiClient.get<{
+      content?: Record<string, unknown>[];
+      totalElements?: number;
+      totalPages?: number;
+      page?: number;
+      size?: number;
+    }>('/products', { params: { page, size } });
     const content = unwrapPage(data).map(mapProduct);
-    return { content, totalElements: data.totalElements ?? content.length };
+    const totalElements = data.totalElements ?? content.length;
+    return {
+      content,
+      totalElements,
+      totalPages: data.totalPages ?? Math.max(1, Math.ceil(totalElements / size)),
+      page: data.page ?? page,
+      size: data.size ?? size,
+    };
   },
 
   async listAdmin(page = 0, size = 20, status?: string) {
@@ -248,6 +258,7 @@ export const productApi = {
     name: string;
     category: string;
     description?: string;
+    heroImageUrl?: string;
     plans: Array<{
       code: string;
       name: string;
@@ -265,6 +276,7 @@ export const productApi = {
       name: payload.name,
       category: payload.category,
       description: payload.description,
+      heroImageUrl: payload.heroImageUrl,
     });
     const productId = String(product.id);
     for (const plan of payload.plans) {

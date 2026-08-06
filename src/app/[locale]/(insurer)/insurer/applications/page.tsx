@@ -21,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { applicationStatusTone, insurerStatusLabel } from '@/lib/insurer-status';
+import { applicationStatusTone, applicationStatusLabel } from '@/lib/insurer-status';
 import { formatCurrency } from '@/lib/utils';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -118,9 +118,9 @@ export default function InsurerApplicationsPage() {
         searchPlaceholder={t('searchApplications')}
         statusOptions={[
           { value: 'PENDING', label: t('pendingApplications') },
-          { value: 'APPROVED', label: insurerStatusLabel('APPROVED') },
-          { value: 'REJECTED', label: insurerStatusLabel('REJECTED') },
-          { value: 'UNDER_REVIEW', label: insurerStatusLabel('UNDER_REVIEW') },
+          { value: 'APPROVED', label: applicationStatusLabel('APPROVED') },
+          { value: 'REJECTED', label: applicationStatusLabel('REJECTED') },
+          { value: 'UNDER_REVIEW', label: applicationStatusLabel('UNDER_REVIEW') },
           { value: '', label: tCommon('allStatuses') },
         ]}
         sortOptions={[
@@ -158,7 +158,7 @@ export default function InsurerApplicationsPage() {
                     </div>
                   </div>
                   <Badge variant={applicationStatusTone(app.status)}>
-                    {insurerStatusLabel(app.status)}
+                    {applicationStatusLabel(app.status)}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap gap-2">

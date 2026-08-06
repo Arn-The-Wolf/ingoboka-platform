@@ -34,7 +34,7 @@ const STEP_FIELDS: Record<number, StepField[]> = {
   1: ['firstName', 'lastName'],
   2: ['phone', 'nationalId'],
   3: ['province', 'district', 'sector', 'cell', 'village'],
-  4: ['email', 'password', 'confirmPassword'],
+  4: ['email', 'password', 'confirmPassword', 'profilePictureUrl'],
 };
 
 export default function RegisterPage() {
@@ -69,6 +69,7 @@ export default function RegisterPage() {
       email: '',
       password: '',
       confirmPassword: '',
+      profilePictureUrl: '',
     },
   });
 
@@ -102,6 +103,9 @@ export default function RegisterPage() {
         cell: data.cell,
         village: data.village,
         ...(data.email?.trim() ? { email: data.email.trim().toLowerCase() } : {}),
+        ...(data.profilePictureUrl?.trim()
+          ? { profilePictureUrl: data.profilePictureUrl.trim() }
+          : {}),
       },
       {
         onSuccess: () => {
@@ -257,6 +261,15 @@ export default function RegisterPage() {
                 autoComplete="new-password"
                 error={errors.confirmPassword?.message}
                 {...register('confirmPassword')}
+              />
+              <TextField
+                id="profilePictureUrl"
+                type="url"
+                label={`${t('profilePictureUrl')} (${t('optional')})`}
+                placeholder="https://…"
+                hint={t('profilePictureUrlHint')}
+                error={errors.profilePictureUrl?.message}
+                {...register('profilePictureUrl')}
               />
             </>
           )}

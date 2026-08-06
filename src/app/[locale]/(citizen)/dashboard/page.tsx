@@ -7,6 +7,7 @@ import { usePolicies, usePolicyActivity } from '@/hooks/use-policies';
 import { PolicyHeroCard } from '@/components/citizen/policy-hero-card';
 import { PolicyListItem } from '@/components/citizen/policy-list-item';
 import { QuickActionCard } from '@/components/citizen/quick-action-card';
+import { CitizenDashboardInfo } from '@/components/citizen/dashboard-info';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { Card, CardContent } from '@/components/ui/card';
@@ -104,6 +105,8 @@ export default function CitizenDashboardPage() {
                   </div>
                 </section>
               )}
+
+              <CitizenDashboardInfo />
             </div>
 
             <aside className="space-y-6">

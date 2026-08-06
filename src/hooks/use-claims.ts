@@ -7,7 +7,7 @@ import type { ClaimDecisionRequest } from '@/types';
 export function useClaims(page = 0, size = 10) {
   return useQuery({
     queryKey: ['claims', page, size],
-    queryFn: () => insurerPortalApi.listClaims({ page, size }),
+    queryFn: () => claimApi.list(page, size),
   });
 }
 

@@ -26,6 +26,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { formatCurrency, cn } from '@/lib/utils';
+import { humanizeLabel } from '@/lib/status-label';
 
 const CATEGORIES = ['BUNDLE', 'HEALTH', 'ACCIDENT', 'FUNERAL', 'BUSINESS'] as const;
 
@@ -58,6 +59,7 @@ export function ProductFormDialog({ open, onOpenChange, onSuccess }: ProductForm
     name: '',
     category: 'BUNDLE' as (typeof CATEGORIES)[number],
     description: '',
+    heroImageUrl: '',
     benefits: DEFAULT_BENEFITS.map((b) => b.id),
     ageRange: '18 - 65 Years Old',
     location: 'Rwanda (All Provinces)',
@@ -77,6 +79,7 @@ export function ProductFormDialog({ open, onOpenChange, onSuccess }: ProductForm
         name: form.name,
         category: form.category,
         description: form.description || undefined,
+        heroImageUrl: form.heroImageUrl.trim() || undefined,
         plans: [
           {
             code: form.planCode,
@@ -180,6 +183,17 @@ export function ProductFormDialog({ open, onOpenChange, onSuccess }: ProductForm
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Product image URL</Label>
+              <Input
+                placeholder="https://example.com/product-image.jpg"
+                value={form.heroImageUrl}
+                onChange={(e) => setForm({ ...form, heroImageUrl: e.target.value })}
+              />
+              <p className="text-xs text-brand-muted">
+                Optional. Paste an image URL related to this product name/category. Citizens see this on product cards.
+              </p>
             </div>
             <Button className="w-full sm:w-auto" variant="pill" disabled={!form.code || !form.name} onClick={() => setFormStep(2)}>
               Continue
@@ -287,7 +301,7 @@ export function ProductFormDialog({ open, onOpenChange, onSuccess }: ProductForm
                 <ShieldCheck className="mt-0.5 h-5 w-5 text-brand-primary" />
                 <div>
                   <p className="font-semibold text-brand-primary-dark">{form.name} ({form.code})</p>
-                  <p className="text-brand-muted">{form.category}</p>
+                  <p className="text-brand-muted">{humanizeLabel(form.category, 'title')}</p>
                 </div>
               </div>
               <p className="text-lg font-bold text-brand-primary">

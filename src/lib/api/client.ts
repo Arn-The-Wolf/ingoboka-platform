@@ -77,12 +77,15 @@ apiClient.interceptors.response.use(
   }
 );
 
-function normalizeApiError(error: AxiosError<ApiError & { success?: boolean }>): ApiError {
+function normalizeApiError(
+  error: AxiosError<ApiError & { success?: boolean; detail?: string; title?: string }>
+): ApiError {
   const body = error.response?.data;
-  if (body?.message) {
+  const message = body?.message?.trim() || body?.detail?.trim() || body?.title?.trim();
+  if (message) {
     return {
-      message: body.message,
-      code: body.code,
+      message,
+      code: body?.code,
       status: error.response?.status,
     };
   }

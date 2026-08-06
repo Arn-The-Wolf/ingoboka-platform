@@ -5,8 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import { LoadingLink } from '@/components/navigation/loading-link';
-import { productApi } from '@/lib/api';
+import { productApi, customerApiExt } from '@/lib/api';
 import { getRecommendedProductIds, clearRecommendedProductIds } from '@/lib/recommended-products';
+import { InsurerPagination } from '@/components/insurer/insurer-pagination';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { ProductCard } from '@/components/citizen/product-card';
@@ -16,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 const FILTERS = ['All', 'Accident', 'Health', 'Funeral', 'Business'] as const;
+const DEFAULT_PAGE_SIZE = 9;
 
 function ProductsSkeleton() {
   return (
@@ -33,6 +35,16 @@ export default function ProductsPage() {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>('All');
   const [recommendedIds, setRecommendedIds] = useState<Set<string>>(new Set());
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
+  const { data: prefs } = useQuery({
+    queryKey: ['needs-assessment-preferences'],
+    queryFn: () => customerApiExt.getNeedsAssessmentPreferences(),
+    retry: false,
+  });
+
+  const needsAssessmentCompleted = Boolean(prefs?.completed);
 
   useEffect(() => {
     const ids = getRecommendedProductIds();
@@ -42,8 +54,8 @@ export default function ProductsPage() {
   }, []);
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['products'],
-    queryFn: () => productApi.list(),
+    queryKey: ['products', page, pageSize],
+    queryFn: () => productApi.list(page, pageSize),
   });
 
   const filtered = useMemo(() => {
@@ -72,6 +84,14 @@ export default function ProductsPage() {
     }
   }, [recommendedIds, data?.content?.length]);
 
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
+
+  const totalPages = data?.totalPages ?? 1;
+  const totalElements = data?.totalElements ?? filtered.length;
+
   return (
     <>
       <CitizenHeader title={t('products')} />
@@ -88,15 +108,17 @@ export default function ProductsPage() {
               </div>
             </div>
           </div>
-          <LoadingLink
-            href="/products/needs-assessment"
-            className="flex flex-col justify-center rounded-2xl border border-brand-secondary/30 bg-brand-accent/15 p-6 text-sm transition-colors hover:bg-brand-accent/25"
-          >
-            <span className="text-lg font-semibold text-brand-primary-dark">Not sure which plan fits?</span>
-            <span className="mt-2 text-brand-muted">
-              Take our 2-minute needs assessment for personalized recommendations.
-            </span>
-          </LoadingLink>
+          {!needsAssessmentCompleted && (
+            <LoadingLink
+              href="/products/needs-assessment"
+              className="flex flex-col justify-center rounded-2xl border border-brand-secondary/30 bg-brand-accent/15 p-6 text-sm transition-colors hover:bg-brand-accent/25"
+            >
+              <span className="text-lg font-semibold text-brand-primary-dark">Not sure which plan fits?</span>
+              <span className="mt-2 text-brand-muted">
+                Take our 2-minute needs assessment for personalized recommendations.
+              </span>
+            </LoadingLink>
+          )}
         </section>
 
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
@@ -160,6 +182,18 @@ export default function ProductsPage() {
               No products match your search.
             </CardContent>
           </Card>
+        )}
+
+        {!isLoading && !error && (
+          <InsurerPagination
+            page={page}
+            pageSize={pageSize}
+            totalPages={totalPages}
+            totalElements={totalElements}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+            pageSizeOptions={[9, 12, 20, 50]}
+          />
         )}
       </PageContainer>
     </>

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { BadgeCheck, IdCard, User } from 'lucide-react';
+import { BadgeCheck, IdCard } from 'lucide-react';
 import { customerApi, customerApiExt } from '@/lib/api';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { useAuthStore } from '@/store/auth-store';
+import { ProfilePictureField } from '@/components/profile/profile-picture-field';
+import { UserAvatar } from '@/components/ui/user-avatar';
 
 export default function ProfilePage() {
   const t = useTranslations('citizen.profile');
@@ -52,16 +54,20 @@ export default function ProfilePage() {
 
         <Card className="mb-6 border-brand-border/60 shadow-card">
           <CardContent className="p-6">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-primary-light">
-                <User className="h-6 w-6 text-brand-primary" />
-              </div>
+            <div className="mb-6 flex items-center gap-3">
+              <UserAvatar name={user?.fullName} imageUrl={user?.profilePictureUrl} className="h-12 w-12" />
               <div>
                 <p className="text-lg font-semibold text-brand-primary-dark">{user?.fullName}</p>
                 <p className="text-sm text-brand-muted">{user?.phone ?? user?.email}</p>
               </div>
             </div>
-            <dl className="space-y-3 text-sm">
+
+            <ProfilePictureField
+              fullName={user?.fullName}
+              profilePictureUrl={user?.profilePictureUrl}
+            />
+
+            <dl className="mt-6 space-y-3 text-sm">
               <div className="flex justify-between border-b border-brand-border/40 pb-2">
                 <dt className="text-brand-muted">{t('email')}</dt>
                 <dd className="font-medium">{user?.email ?? '—'}</dd>

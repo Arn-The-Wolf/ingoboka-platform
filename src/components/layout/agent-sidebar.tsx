@@ -5,6 +5,8 @@ import { LayoutDashboard, ClipboardList, Settings, LogOut } from 'lucide-react';
 import { usePathname } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { useLogout } from '@/hooks/use-auth';
+import { useAuthStore } from '@/store/auth-store';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { Button } from '@/components/ui/button';
 import { StaffSidebar, type StaffNavItem } from '@/components/layout/staff-sidebar';
 import { useStaffShell } from '@/components/layout/staff-shell';
@@ -20,6 +22,7 @@ export function AgentSidebar() {
   const tCommon = useTranslations('common');
   const pathname = usePathname();
   const logout = useLogout();
+  const user = useAuthStore((s) => s.user);
   const { collapsed } = useStaffShell();
 
   const items: StaffNavItem[] = navItems.map((item) => ({
@@ -33,7 +36,15 @@ export function AgentSidebar() {
     <StaffSidebar
       items={items}
       footer={
-        <Button
+        <>
+          <div className={cn('mb-3 flex items-center gap-3 px-1', collapsed && 'xl:hidden')}>
+            <UserAvatar name={user?.fullName ?? 'User'} imageUrl={user?.profilePictureUrl} />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-white">{user?.fullName ?? 'User'}</p>
+              <p className="truncate text-xs text-blue-50/70">{t('settings')}</p>
+            </div>
+          </div>
+          <Button
           variant="ghost"
           size="sm"
           className={cn(
@@ -47,6 +58,7 @@ export function AgentSidebar() {
           <LogOut className="h-4 w-4 shrink-0" />
           <span className={cn(collapsed && 'xl:hidden')}>{tCommon('logout')}</span>
         </Button>
+        </>
       }
     />
   );

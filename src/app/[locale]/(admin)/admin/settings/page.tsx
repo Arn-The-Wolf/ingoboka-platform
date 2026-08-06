@@ -15,8 +15,9 @@ import {
   Settings,
   Shield,
   Wrench,
+  User,
 } from 'lucide-react';
-import { adminApi, type PlatformSettings } from '@/lib/api';
+import { adminApi, staffApi, type PlatformSettings } from '@/lib/api';
 import { useAdminToast } from '@/components/admin/admin-toast';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
@@ -26,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert } from '@/components/ui/alert';
+import { ProfilePictureField } from '@/components/profile/profile-picture-field';
 import type { ApiError } from '@/types';
 
 type FormState = PlatformSettings;
@@ -75,6 +77,11 @@ export default function AdminSettingsPage() {
   const { data: settings, isLoading, error } = useQuery({
     queryKey: ['admin', 'settings'],
     queryFn: () => adminApi.getPlatformSettings(),
+  });
+
+  const { data: staffProfile } = useQuery({
+    queryKey: ['staff', 'profile'],
+    queryFn: () => staffApi.getProfile(),
   });
 
   const [form, setForm] = useState<FormState | null>(null);
@@ -145,6 +152,19 @@ export default function AdminSettingsPage() {
           {tCommon('error')}
         </Alert>
       )}
+
+      <Card className="mb-6 border-brand-border/60 shadow-card">
+        <CardContent className="p-6">
+          <div className="mb-4 flex items-center gap-3">
+            <User className="h-5 w-5 text-brand-primary" />
+            <h2 className="text-lg font-semibold text-brand-primary-dark">{t('personalProfile')}</h2>
+          </div>
+          <ProfilePictureField
+            fullName={staffProfile?.fullName}
+            profilePictureUrl={staffProfile?.profilePictureUrl ?? undefined}
+          />
+        </CardContent>
+      </Card>
 
       {form && (
         <div className="space-y-4">

@@ -13,12 +13,14 @@ import {
   Users,
 } from 'lucide-react';
 import { usePathname } from '@/i18n/routing';
-import { cn, getInitials } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useLogout } from '@/hooks/use-auth';
 import { useAuthStore } from '@/store/auth-store';
+import { UserAvatar } from '@/components/ui/user-avatar';
 import { Button } from '@/components/ui/button';
 import { StaffSidebar, type StaffNavItem } from '@/components/layout/staff-sidebar';
 import { useStaffShell } from '@/components/layout/staff-shell';
+import { roleLabel } from '@/lib/status-label';
 import type { UserRole } from '@/types';
 
 const ADMIN_NAV = [
@@ -76,13 +78,11 @@ export function Sidebar() {
       footer={
         <>
           <div className={cn('mb-3 flex items-center gap-3 px-1', collapsed && 'xl:hidden')}>
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-accent text-sm font-medium text-brand-primary-dark">
-              {getInitials(user?.fullName ?? 'User')}
-            </div>
+            <UserAvatar name={user?.fullName ?? 'User'} imageUrl={user?.profilePictureUrl} />
             <div className="min-w-0">
               <p className="truncate text-sm font-medium text-white">{user?.fullName ?? 'User'}</p>
               <p className="truncate text-xs text-blue-50/70">
-                {user?.role ? (ROLE_LABELS[user.role] ?? user.role) : ''}
+                {user?.role ? (ROLE_LABELS[user.role] ?? roleLabel(user.role)) : ''}
               </p>
             </div>
           </div>
