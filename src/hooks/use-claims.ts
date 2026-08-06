@@ -38,6 +38,18 @@ export function useClaimAppeal(id: string) {
   });
 }
 
+export function useClaimCancel(id: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => claimApi.cancel(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claims', id] });
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+    },
+  });
+}
+
 export function useClaimDecision(id: string) {
   const queryClient = useQueryClient();
 

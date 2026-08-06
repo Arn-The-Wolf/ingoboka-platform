@@ -12,14 +12,17 @@ import {
   Shield,
   ChevronDown,
   ChevronUp,
+  Star,
 } from 'lucide-react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { productApi } from '@/lib/api';
+import { useRecommendedProductIds } from '@/hooks/use-recommended-products';
 import { getProductHeroImage } from '@/lib/product-images';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Alert } from '@/components/ui/alert';
 import { formatCurrency, cn } from '@/lib/utils';
 import type { ProductPlan } from '@/lib/api/products';
@@ -54,6 +57,8 @@ export default function ProductDetailPage() {
   const [frequency, setFrequency] = useState<'daily' | 'weekly' | 'monthly'>('monthly');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const { recommendedIds } = useRecommendedProductIds();
+  const isRecommended = recommendedIds.has(productId);
 
   const quiz = useMemo(
     () => [
@@ -150,6 +155,14 @@ export default function ProductDetailPage() {
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
+          {isRecommended && (
+            <div className="absolute right-4 top-4 z-20">
+              <Badge className="gap-1 bg-brand-accent text-brand-primary-dark shadow-sm">
+                <Star className="h-3 w-3 fill-current" />
+                {t('recommended')}
+              </Badge>
+            </div>
+          )}
           <div className="absolute bottom-0 left-0 z-20 w-full p-4">
             <span className="mb-2 inline-block rounded-full bg-brand-accent px-3 py-0.5 text-xs font-semibold uppercase tracking-wider text-brand-primary-dark">
               {product.category || t('defaultCategory')}

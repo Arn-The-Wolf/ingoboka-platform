@@ -7,10 +7,12 @@ import type {
   ManagedUser,
   ManagedUserCreateInput,
   ManagedUserUpdateInput,
+  NeedsAssessmentPreferences,
   PagedResult,
   PartnerCreateInput,
   PartnerUpdateInput,
   PolicyReportSummary,
+  RecommendedProduct,
   UserRole,
 } from '@/types';
 
@@ -530,6 +532,36 @@ export const agentApi = {
   },
 };
 
+function mapRecommendedProduct(raw: Record<string, unknown>): RecommendedProduct {
+  return {
+    id: String(raw.id ?? ''),
+    name: String(raw.name ?? ''),
+    category: String(raw.category ?? ''),
+    startingPremium: Number(raw.startingPremium ?? 0),
+    currency: String(raw.currency ?? 'RWF'),
+    matchScore: Number(raw.matchScore ?? 0),
+    reason: raw.reason ? String(raw.reason) : undefined,
+  };
+}
+
+function mapNeedsAssessmentPreferences(raw: Record<string, unknown>): NeedsAssessmentPreferences {
+  const recommendedProducts = Array.isArray(raw.recommendedProducts)
+    ? raw.recommendedProducts.map((p) => mapRecommendedProduct(p as Record<string, unknown>))
+    : undefined;
+  return {
+    completed: Boolean(raw.completed),
+    completedAt: raw.completedAt ? String(raw.completedAt) : undefined,
+    preferences:
+      raw.preferences && typeof raw.preferences === 'object'
+        ? (raw.preferences as Record<string, unknown>)
+        : undefined,
+    recommendedCategories: Array.isArray(raw.recommendedCategories)
+      ? raw.recommendedCategories.map(String)
+      : undefined,
+    recommendedProducts,
+  };
+}
+
 export const customerApiExt = {
   async listDependants(page = 0, size = 10) {
     const { data } = await apiClient.get<{
@@ -573,14 +605,14 @@ export const customerApiExt = {
     await apiClient.delete(`/customer/dependants/${id}`);
   },
 
-  async getNeedsAssessmentPreferences() {
+  async getNeedsAssessmentPreferences(): Promise<NeedsAssessmentPreferences> {
     const { data } = await apiClient.get<Record<string, unknown>>('/customer/preferences/needs-assessment');
-    return data;
+    return mapNeedsAssessmentPreferences(data);
   },
 
-  async saveNeedsAssessmentPreferences(payload: Record<string, unknown>) {
-    const { data } = await apiClient.post('/customer/preferences/needs-assessment', payload);
-    return data;
+  async saveNeedsAssessmentPreferences(payload: Record<string, unknown>): Promise<NeedsAssessmentPreferences> {
+    const { data } = await apiClient.post<Record<string, unknown>>('/customer/preferences/needs-assessment', payload);
+    return mapNeedsAssessmentPreferences(data);
   },
 
   async submitKyc() {

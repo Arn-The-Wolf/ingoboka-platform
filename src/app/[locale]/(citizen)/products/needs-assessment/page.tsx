@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { enrollmentApi, customerApiExt } from '@/lib/api';
-import { setRecommendedProductIds } from '@/lib/recommended-products';
 import { DEPENDANT_AGE_ERROR, isDependantTooOld } from '@/lib/dependant-validation';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
@@ -155,12 +154,8 @@ export default function NeedsAssessmentPage() {
         primaryRisk: answers.occupation === 'MOTO_RIDER' ? 'ACCIDENT' : 'HEALTH',
       });
     },
-    onSuccess: (result) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['needs-assessment-preferences'] });
-      const ids = result.recommendedProducts?.map((p) => p.id) ?? [];
-      if (ids.length > 0) {
-        setRecommendedProductIds(ids);
-      }
       setTimeout(() => router.push('/products?recommended=true'), 2500);
     },
   });

@@ -1,12 +1,12 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
 import { LoadingLink } from '@/components/navigation/loading-link';
-import { productApi, customerApiExt } from '@/lib/api';
-import { getRecommendedProductIds, clearRecommendedProductIds } from '@/lib/recommended-products';
+import { productApi } from '@/lib/api';
+import { useRecommendedProductIds } from '@/hooks/use-recommended-products';
 import { InsurerPagination } from '@/components/insurer/insurer-pagination';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
@@ -34,24 +34,9 @@ export default function ProductsPage() {
   const tCommon = useTranslations('common');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>('All');
-  const [recommendedIds, setRecommendedIds] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-
-  const { data: prefs } = useQuery({
-    queryKey: ['needs-assessment-preferences'],
-    queryFn: () => customerApiExt.getNeedsAssessmentPreferences(),
-    retry: false,
-  });
-
-  const needsAssessmentCompleted = Boolean(prefs?.completed);
-
-  useEffect(() => {
-    const ids = getRecommendedProductIds();
-    if (ids.size > 0) {
-      setRecommendedIds(ids);
-    }
-  }, []);
+  const { recommendedIds, needsAssessmentCompleted } = useRecommendedProductIds();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['products', page, pageSize],
@@ -77,12 +62,6 @@ export default function ProductsPage() {
       return matchesSearch && matchesFilter;
     });
   }, [data?.content, search, filter, recommendedIds]);
-
-  useEffect(() => {
-    if (recommendedIds.size > 0 && data?.content?.length) {
-      clearRecommendedProductIds();
-    }
-  }, [recommendedIds, data?.content?.length]);
 
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);

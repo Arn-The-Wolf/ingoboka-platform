@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { useClaim, useClaimAppeal } from '@/hooks/use-claims';
+import { useClaim, useClaimAppeal, useClaimCancel } from '@/hooks/use-claims';
 import { ClaimTimeline } from '@/components/insurer/claim-timeline';
 import { buildClaimTimeline } from '@/lib/claim-timeline-utils';
+import { ConfirmDialog } from '@/components/admin/confirm-dialog';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,21 +21,27 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { claimStatusLabel } from '@/lib/insurer-status';
 import type { ApiError } from '@/types';
 
+const CANCELLABLE_STATUSES = new Set(['DRAFT', 'SUBMITTED']);
+
 export default function CitizenClaimDetailPage() {
   const t = useTranslations('citizen.claims');
   const tCommon = useTranslations('common');
+  const router = useRouter();
   const params = useParams();
   const id = params.id as string;
   const { data: claim, isLoading, error, refetch } = useClaim(id);
   const appealMutation = useClaimAppeal(id);
+  const cancelMutation = useClaimCancel(id);
   const [appealReason, setAppealReason] = useState('');
   const [appealSubmitted, setAppealSubmitted] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const statusLabelMap: Record<string, string> = {
     SUBMITTED: tCommon('submitted'),
     UNDER_REVIEW: tCommon('underReview'),
     APPROVED: tCommon('approved'),
     REJECTED: tCommon('rejected'),
+    CANCELLED: t('cancelled'),
     INFO_REQUESTED: t('infoRequested'),
   };
 
@@ -48,6 +55,17 @@ export default function CitizenClaimDetailPage() {
       },
     });
   };
+
+  const handleCancel = () => {
+    cancelMutation.mutate(undefined, {
+      onSuccess: () => {
+        setCancelOpen(false);
+        router.push('/claims');
+      },
+    });
+  };
+
+  const canCancel = claim ? CANCELLABLE_STATUSES.has(claim.status) : false;
 
   return (
     <>
@@ -99,8 +117,24 @@ export default function CitizenClaimDetailPage() {
                   {formatDate(claim.submittedAt)}
                 </p>
                 <p className="text-brand-muted">{claim.description}</p>
+                {canCancel && (
+                  <div className="pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCancelOpen(true)}
+                      loading={cancelMutation.isPending}
+                    >
+                      {t('cancelClaim')}
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
+
+            {cancelMutation.error && (
+              <Alert variant="error">{(cancelMutation.error as ApiError).message}</Alert>
+            )}
 
             <Card>
               <CardHeader>
@@ -150,6 +184,16 @@ export default function CitizenClaimDetailPage() {
           </div>
         )}
       </PageContainer>
+
+      <ConfirmDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        title={t('cancelClaimTitle')}
+        description={t('cancelClaimDescription')}
+        confirmLabel={t('cancelClaimConfirm')}
+        onConfirm={handleCancel}
+        loading={cancelMutation.isPending}
+      />
     </>
   );
 }
