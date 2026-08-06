@@ -3,7 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge, policyStatusVariant } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
+import { claimStatusTone, insurerStatusLabel } from '@/lib/insurer-status';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Claim } from '@/types';
 import { ChevronRight } from 'lucide-react';
@@ -14,15 +15,6 @@ interface ClaimListItemProps {
 
 export function ClaimListItem({ claim }: ClaimListItemProps) {
   const t = useTranslations('insurer');
-  const tCommon = useTranslations('common');
-
-  const statusLabelMap: Record<string, string> = {
-    SUBMITTED: tCommon('submitted'),
-    UNDER_REVIEW: tCommon('underReview'),
-    APPROVED: tCommon('approved'),
-    REJECTED: tCommon('rejected'),
-    INFO_REQUESTED: t('requestInfo'),
-  };
 
   return (
     <Link href={`/insurer/claims/${claim.id}`}>
@@ -39,8 +31,8 @@ export function ClaimListItem({ claim }: ClaimListItemProps) {
             <p className="font-semibold text-brand-primary-dark">
               {formatCurrency(claim.amount, claim.currency)}
             </p>
-            <Badge variant={policyStatusVariant(claim.status)}>
-              {statusLabelMap[claim.status]}
+            <Badge variant={claimStatusTone(claim.status)}>
+              {insurerStatusLabel(claim.status)}
             </Badge>
             <ChevronRight className="h-5 w-5 text-brand-muted" />
           </div>

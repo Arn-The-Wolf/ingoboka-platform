@@ -1,10 +1,17 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { useMutation } from '@tanstack/react-query';
 import { authApi, customerApi } from '@/lib/api';
 import { isInsurerPortalRole } from '@/lib/api/mappers';
 import { normalizeCitizenPhone } from '@/lib/auth/phone';
+import {
+  readPendingVerification,
+  resolvePendingVerificationFromUrl,
+  savePendingVerification,
+} from '@/lib/auth/pending-verification';
 import { useAuthStore } from '@/store/auth-store';
 import type { ConsentRequest, LoginRequest, RegisterRequest, UserRole } from '@/types';
 import { getPathname, routing } from '@/i18n/routing';
@@ -51,11 +58,70 @@ export function useRegister() {
       await authApi.register(payload);
       return config;
     },
-    onSuccess: (_config, variables) => {
-      setPendingPhone(normalizeCitizenPhone(variables.phone));
+    onSuccess: (config, variables) => {
+      const phone = normalizeCitizenPhone(variables.phone);
+      setPendingPhone(phone);
       setPendingEmail(variables.email ?? null);
+      savePendingVerification({
+        phone,
+        email: variables.email ?? null,
+        verifyHint: config.verifyHint ?? null,
+      });
     },
   });
+}
+
+/** Restore pending OTP context after a full-page redirect (query param + sessionStorage). */
+export function usePendingVerification() {
+  const searchParams = useSearchParams();
+  const pendingPhone = useAuthStore((s) => s.pendingPhone);
+  const pendingEmail = useAuthStore((s) => s.pendingEmail);
+  const verifyHint = useAuthStore((s) => s.verifyHint);
+  const setPendingPhone = useAuthStore((s) => s.setPendingPhone);
+  const setPendingEmail = useAuthStore((s) => s.setPendingEmail);
+  const setVerifyHint = useAuthStore((s) => s.setVerifyHint);
+  const [ready, setReady] = useState(false);
+  const [restored, setRestored] = useState<{
+    phone: string | null;
+    email: string | null;
+    verifyHint: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    if (pendingPhone) {
+      setReady(true);
+      return;
+    }
+
+    const resolved =
+      resolvePendingVerificationFromUrl(searchParams.get('phone')) ?? readPendingVerification();
+
+    if (resolved?.phone) {
+      setRestored({
+        phone: resolved.phone,
+        email: resolved.email,
+        verifyHint: resolved.verifyHint,
+      });
+      setPendingPhone(resolved.phone);
+      setPendingEmail(resolved.email);
+      setVerifyHint(resolved.verifyHint);
+    }
+
+    setReady(true);
+  }, [
+    pendingPhone,
+    searchParams,
+    setPendingEmail,
+    setPendingPhone,
+    setVerifyHint,
+  ]);
+
+  return {
+    ready,
+    phone: pendingPhone ?? restored?.phone ?? null,
+    email: pendingEmail ?? restored?.email ?? null,
+    verifyHint: verifyHint ?? restored?.verifyHint ?? null,
+  };
 }
 
 export function useVerifyOtp() {

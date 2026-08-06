@@ -12,19 +12,17 @@ import { OtpPinInput } from '@/components/ui/otp-pin-input';
 import { AuthBackButton } from '@/components/layout/auth-back-button';
 import { StepIndicator } from '@/components/ui/step-indicator';
 import { WelcomeOverlay, useWelcomeSequence } from '@/components/auth/welcome-overlay';
-import { getPostAuthPath, useResendOtp, useVerifyOtp } from '@/hooks/use-auth';
+import { getPostAuthPath, usePendingVerification, useResendOtp, useVerifyOtp } from '@/hooks/use-auth';
 import { useOtpDeliveryConfig } from '@/hooks/use-otp-config';
-import { useAuthStore } from '@/store/auth-store';
 import { maskEmail } from '@/lib/auth/phone';
 import { otpSchema, type OtpFormData } from '@/lib/validators';
 import type { ApiError } from '@/types';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function VerifyPage() {
   const t = useTranslations('auth');
   const locale = useLocale();
-  const pendingPhone = useAuthStore((s) => s.pendingPhone);
-  const pendingEmail = useAuthStore((s) => s.pendingEmail);
-  const verifyHint = useAuthStore((s) => s.verifyHint);
+  const { ready, phone, email: pendingEmail, verifyHint } = usePendingVerification();
   const verify = useVerifyOtp();
   const resend = useResendOtp();
   const welcome = useWelcomeSequence();
@@ -74,15 +72,23 @@ export default function VerifyPage() {
     if (isEmailMode && pendingEmail) {
       return t('verifyCodeToEmail', { email: maskEmail(pendingEmail) });
     }
-    if (pendingPhone) {
+    if (phone) {
       return isEmailMode
-        ? t('verifyEmailWithPhoneLogin', { phone: pendingPhone })
-        : t('otpSent', { phone: pendingPhone });
+        ? t('verifyEmailWithPhoneLogin', { phone })
+        : t('otpSent', { phone });
     }
     return t('verifySubtitle');
   })();
 
-  if (!pendingPhone) {
+  if (!ready) {
+    return (
+      <div className="flex justify-center py-16">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!phone) {
     return (
       <div className="space-y-6">
         <AuthBackButton href="/register" />

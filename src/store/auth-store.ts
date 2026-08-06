@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
 import { setAccessToken } from '@/lib/api/client';
+import { clearPendingVerification } from '@/lib/auth/pending-verification';
 
 interface AuthState {
   user: User | null;
@@ -32,7 +33,16 @@ export const useAuthStore = create<AuthState>()(
 
       setAuth: (user, accessToken, refreshToken) => {
         setAccessToken(accessToken);
-        set({ user, accessToken, refreshToken, isAuthenticated: true });
+        clearPendingVerification();
+        set({
+          user,
+          accessToken,
+          refreshToken,
+          isAuthenticated: true,
+          pendingPhone: null,
+          pendingEmail: null,
+          verifyHint: null,
+        });
       },
 
       setPendingPhone: (phone) => set({ pendingPhone: phone }),
@@ -46,6 +56,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => {
         setAccessToken(null);
+        clearPendingVerification();
         set({
           user: null,
           accessToken: null,

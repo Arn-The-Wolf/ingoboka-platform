@@ -1,13 +1,13 @@
 'use client';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { claimApi } from '@/lib/api';
+import { claimApi, insurerPortalApi } from '@/lib/api';
 import type { ClaimDecisionRequest } from '@/types';
 
-export function useClaims() {
+export function useClaims(page = 0, size = 10) {
   return useQuery({
-    queryKey: ['claims'],
-    queryFn: () => claimApi.list(),
+    queryKey: ['claims', page, size],
+    queryFn: () => insurerPortalApi.listClaims({ page, size }),
   });
 }
 
@@ -21,8 +21,8 @@ export function useClaim(id: string) {
 
 export function useInsurerStats() {
   return useQuery({
-    queryKey: ['insurer', 'stats'],
-    queryFn: () => claimApi.getInsurerStats(),
+    queryKey: ['insurer', 'dashboard'],
+    queryFn: () => insurerPortalApi.getStats(),
   });
 }
 
@@ -47,7 +47,7 @@ export function useClaimDecision(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claims'] });
       queryClient.invalidateQueries({ queryKey: ['claims', id] });
-      queryClient.invalidateQueries({ queryKey: ['insurer', 'stats'] });
+      queryClient.invalidateQueries({ queryKey: ['insurer', 'dashboard'] });
     },
   });
 }

@@ -5,10 +5,12 @@ import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 import { FileText, ShieldCheck, Users } from 'lucide-react';
 import { useClaim, useClaimDecision } from '@/hooks/use-claims';
+import { useAdminToast } from '@/components/admin/admin-toast';
 import { ClaimTimeline } from '@/components/insurer/claim-timeline';
 import { buildClaimTimeline } from '@/lib/claim-timeline-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge, policyStatusVariant } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
+import { claimStatusTone, insurerStatusLabel } from '@/lib/insurer-status';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -24,18 +26,17 @@ export default function ClaimDetailPage() {
   const id = params.id as string;
   const { data: claim, isLoading, error, refetch } = useClaim(id);
   const decision = useClaimDecision(id);
+  const toast = useAdminToast();
   const [notes, setNotes] = useState('');
 
-  const statusLabelMap: Record<string, string> = {
-    SUBMITTED: tCommon('submitted'),
-    UNDER_REVIEW: tCommon('underReview'),
-    APPROVED: tCommon('approved'),
-    REJECTED: tCommon('rejected'),
-    INFO_REQUESTED: t('requestInfo'),
-  };
-
   const handleDecision = (decisionType: 'APPROVE' | 'REJECT' | 'REQUEST_INFO') => {
-    decision.mutate({ decision: decisionType, notes: notes || undefined });
+    decision.mutate(
+      { decision: decisionType, notes: notes || undefined },
+      {
+        onSuccess: () => toast.success(t('decisionSaved')),
+        onError: () => toast.error(tCommon('error')),
+      }
+    );
   };
 
   return (
@@ -74,8 +75,8 @@ export default function ClaimDetailPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>{claim.claimNumber}</CardTitle>
-                <Badge variant={policyStatusVariant(claim.status)}>
-                  {statusLabelMap[claim.status]}
+                <Badge variant={claimStatusTone(claim.status)}>
+                  {insurerStatusLabel(claim.status)}
                 </Badge>
               </CardHeader>
               <CardContent className="space-y-4">

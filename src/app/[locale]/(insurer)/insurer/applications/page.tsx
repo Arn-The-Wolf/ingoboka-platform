@@ -1,41 +1,89 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from '@/i18n/routing';
+import { useAuthStore } from '@/store/auth-store';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { ClipboardList } from 'lucide-react';
-import { insurerApi } from '@/lib/api';
+import { insurerPortalApi } from '@/lib/api';
 import { useAdminToast } from '@/components/admin/admin-toast';
+import {
+  DEFAULT_LIST_FILTERS,
+  InsurerListToolbar,
+  type ListToolbarFilters,
+} from '@/components/insurer/insurer-list-toolbar';
+import { InsurerPagination } from '@/components/insurer/insurer-pagination';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ListSkeleton } from '@/components/ui/list-skeleton';
 import { Alert } from '@/components/ui/alert';
-import { Badge, policyStatusVariant } from '@/components/ui/badge';
+import { Badge } from '@/components/ui/badge';
+import { applicationStatusTone, insurerStatusLabel } from '@/lib/insurer-status';
 import { formatCurrency } from '@/lib/utils';
 
+const PAGE_SIZE = 10;
+
 export default function InsurerApplicationsPage() {
+  const router = useRouter();
+  const user = useAuthStore((s) => s.user);
+
+  useEffect(() => {
+    if (user?.role === 'INSURER_CLAIMS_OFFICER') {
+      router.replace('/insurer/dashboard');
+    }
+  }, [user, router]);
+
   const t = useTranslations('insurer');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
   const toast = useAdminToast();
+  const [page, setPage] = useState(0);
+  const [filters, setFilters] = useState<ListToolbarFilters>({
+    ...DEFAULT_LIST_FILTERS,
+    status: 'PENDING',
+    sortBy: 'submittedAt',
+  });
   const [actionId, setActionId] = useState<string | null>(null);
 
+  const queryFilters = useMemo(
+    () => ({
+      page,
+      size: PAGE_SIZE,
+      status: filters.status || undefined,
+      search: filters.search || undefined,
+      sortBy: filters.sortBy,
+      sortDir: filters.sortDir,
+    }),
+    [page, filters]
+  );
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ['insurer', 'applications', 'PENDING'],
-    queryFn: () => insurerApi.listApplications(0, 50, 'PENDING'),
+    queryKey: ['insurer', 'applications', queryFilters],
+    queryFn: () => insurerPortalApi.listApplications(queryFilters),
     retry: false,
   });
 
   const reviewMutation = useMutation({
-    mutationFn: ({ id, decision }: { id: string; decision: 'APPROVE' | 'REJECT' }) =>
-      insurerApi.reviewApplication(id, decision),
+    mutationFn: ({
+      id,
+      decision,
+    }: {
+      id: string;
+      decision: 'APPROVE' | 'REJECT' | 'REQUEST_INFO';
+    }) => insurerPortalApi.reviewApplication(id, decision),
     onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ['insurer', 'applications'] });
+      queryClient.invalidateQueries({ queryKey: ['insurer', 'dashboard'] });
       setActionId(null);
       toast.success(
-        vars.decision === 'APPROVE' ? t('applicationApproved') : t('applicationRejected')
+        vars.decision === 'APPROVE'
+          ? t('applicationApproved')
+          : vars.decision === 'REJECT'
+            ? t('applicationRejected')
+            : t('applicationInfoRequested')
       );
     },
     onError: () => {
@@ -46,9 +94,36 @@ export default function InsurerApplicationsPage() {
 
   const applications = data?.content ?? [];
 
+  const handleFilterChange = (patch: Partial<ListToolbarFilters>) => {
+    setFilters((prev) => ({ ...prev, ...patch }));
+    setPage(0);
+  };
+
   return (
     <PageContainer>
-      <PageHeader title={t('applicationsQueue')} subtitle={t('applicationsSubtitle')} />
+      <PageHeader
+        title={t('applicationsQueue')}
+        subtitle={t('pendingCount', { count: data?.totalElements ?? 0 })}
+      />
+
+      <InsurerListToolbar
+        filters={filters}
+        onChange={handleFilterChange}
+        searchPlaceholder={t('searchApplications')}
+        statusOptions={[
+          { value: 'PENDING', label: t('pendingApplications') },
+          { value: 'APPROVED', label: insurerStatusLabel('APPROVED') },
+          { value: 'REJECTED', label: insurerStatusLabel('REJECTED') },
+          { value: 'UNDER_REVIEW', label: insurerStatusLabel('UNDER_REVIEW') },
+          { value: '', label: tCommon('allStatuses') },
+        ]}
+        sortOptions={[
+          { value: 'submittedAt', label: t('sortSubmitted') },
+          { value: 'applicationNumber', label: t('applicationRef') },
+          { value: 'premiumAmount', label: t('premium') },
+          { value: 'status', label: tCommon('status') },
+        ]}
+      />
 
       {isLoading && <ListSkeleton rows={6} />}
 
@@ -76,13 +151,15 @@ export default function InsurerApplicationsPage() {
                       </p>
                     </div>
                   </div>
-                  <Badge variant={policyStatusVariant(app.status)}>{app.status}</Badge>
+                  <Badge variant={applicationStatusTone(app.status)}>
+                    {insurerStatusLabel(app.status)}
+                  </Badge>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <Button
                     size="sm"
                     variant="pill"
-                    className="flex-1"
+                    className="flex-1 min-w-[100px]"
                     loading={reviewMutation.isPending && actionId === `${app.id}-approve`}
                     onClick={() => {
                       setActionId(`${app.id}-approve`);
@@ -94,7 +171,7 @@ export default function InsurerApplicationsPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 min-w-[100px]"
                     loading={reviewMutation.isPending && actionId === `${app.id}-reject`}
                     onClick={() => {
                       setActionId(`${app.id}-reject`);
@@ -103,19 +180,23 @@ export default function InsurerApplicationsPage() {
                   >
                     {t('rejectApplication')}
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="flex-1 min-w-[100px]"
+                    loading={reviewMutation.isPending && actionId === `${app.id}-info`}
+                    onClick={() => {
+                      setActionId(`${app.id}-info`);
+                      reviewMutation.mutate({ id: app.id, decision: 'REQUEST_INFO' });
+                    }}
+                  >
+                    {t('requestInfo')}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
-      )}
-
-      {reviewMutation.isSuccess && (
-        <Alert variant="default" className="mt-4">
-          {reviewMutation.variables?.decision === 'APPROVE'
-            ? t('applicationApproved')
-            : t('applicationRejected')}
-        </Alert>
       )}
 
       {!isLoading && applications.length === 0 && (
@@ -125,6 +206,15 @@ export default function InsurerApplicationsPage() {
             <p className="mt-1 text-sm text-brand-muted">{t('noApplicationsHint')}</p>
           </CardContent>
         </Card>
+      )}
+
+      {data && (
+        <InsurerPagination
+          page={page}
+          totalPages={data.totalPages}
+          totalElements={data.totalElements}
+          onPageChange={setPage}
+        />
       )}
     </PageContainer>
   );
