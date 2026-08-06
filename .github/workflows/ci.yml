@@ -1,24 +1,39 @@
+# NOTE: "Failed to resolve action download info" / "Service Unavailable" during job
+# preparation is usually a GitHub Actions outage — re-run the workflow.
+
 name: CI
 
 on:
   push:
     branches:
       - main
+      - staging
+      - headie-one
       - 'feat/**'
   pull_request:
     branches:
       - main
+      - staging
+      - headie-one
       - 'feat/**'
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   frontend-ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
           cache-dependency-path: package-lock.json
       - name: Install and build
@@ -26,3 +41,20 @@ jobs:
           npm ci
           npm run lint
           npm run build
+  deploy:
+    needs: frontend-ci
+    if: >-
+      success() && github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/headie-one' || github.ref == 'refs/heads/staging')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          vercel-args: ${{ github.ref == 'refs/heads/main' && '--prod' || '' }}
