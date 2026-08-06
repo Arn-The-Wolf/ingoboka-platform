@@ -225,13 +225,22 @@ export const productApi = {
   async listAdmin(page = 0, size = 20, status?: string) {
     const params: Record<string, string | number> = { page, size };
     if (status) params.status = status;
-    const data = await getWithFallback<{ content?: Record<string, unknown>[]; totalElements?: number }>(
-      '/products/tenant',
-      '/insurer/products',
-      params
-    );
+    const data = await getWithFallback<{
+      content?: Record<string, unknown>[];
+      totalElements?: number;
+      totalPages?: number;
+      page?: number;
+      size?: number;
+    }>('/products/tenant', '/insurer/products', params);
     const content = unwrapPage(data).map(mapProduct);
-    return { content, totalElements: data.totalElements ?? content.length };
+    const totalElements = data.totalElements ?? content.length;
+    return {
+      content,
+      totalElements,
+      totalPages: data.totalPages ?? Math.max(1, Math.ceil(totalElements / size)),
+      page: data.page ?? page,
+      size: data.size ?? size,
+    };
   },
 
   async create(payload: {

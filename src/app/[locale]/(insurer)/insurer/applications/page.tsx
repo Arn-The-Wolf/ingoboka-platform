@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { applicationStatusTone, insurerStatusLabel } from '@/lib/insurer-status';
 import { formatCurrency } from '@/lib/utils';
 
-const PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
 
 export default function InsurerApplicationsPage() {
   const router = useRouter();
@@ -41,6 +41,7 @@ export default function InsurerApplicationsPage() {
   const queryClient = useQueryClient();
   const toast = useAdminToast();
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [filters, setFilters] = useState<ListToolbarFilters>({
     ...DEFAULT_LIST_FILTERS,
     status: 'PENDING',
@@ -51,13 +52,13 @@ export default function InsurerApplicationsPage() {
   const queryFilters = useMemo(
     () => ({
       page,
-      size: PAGE_SIZE,
+      size: pageSize,
       status: filters.status || undefined,
       search: filters.search || undefined,
       sortBy: filters.sortBy,
       sortDir: filters.sortDir,
     }),
-    [page, filters]
+    [page, pageSize, filters]
   );
 
   const { data, isLoading, error } = useQuery({
@@ -96,6 +97,11 @@ export default function InsurerApplicationsPage() {
 
   const handleFilterChange = (patch: Partial<ListToolbarFilters>) => {
     setFilters((prev) => ({ ...prev, ...patch }));
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setPage(0);
   };
 
@@ -211,9 +217,11 @@ export default function InsurerApplicationsPage() {
       {data && (
         <InsurerPagination
           page={page}
+          pageSize={pageSize}
           totalPages={data.totalPages}
           totalElements={data.totalElements}
           onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
         />
       )}
     </PageContainer>

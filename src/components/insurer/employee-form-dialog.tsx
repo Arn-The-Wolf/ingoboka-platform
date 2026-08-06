@@ -13,13 +13,20 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { AdminSelect } from '@/components/admin/admin-select';
-import { STAFF_ROLE_OPTIONS, type CreateStaffInput } from '@/lib/api/staff';
+import {
+  STAFF_ROLE_OPTIONS,
+  type CreateStaffInput,
+  type StaffMember,
+  type UpdateStaffInput,
+} from '@/lib/api/staff';
 
 interface EmployeeFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (input: CreateStaffInput) => void;
+  onSubmit: (input: CreateStaffInput | UpdateStaffInput) => void;
   loading?: boolean;
+  mode?: 'create' | 'edit';
+  employee?: StaffMember | null;
 }
 
 export function EmployeeFormDialog({
@@ -27,9 +34,12 @@ export function EmployeeFormDialog({
   onOpenChange,
   onSubmit,
   loading,
+  mode = 'create',
+  employee,
 }: EmployeeFormDialogProps) {
   const t = useTranslations('insurer.employees');
   const tCommon = useTranslations('common');
+  const isEdit = mode === 'edit';
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -38,16 +48,33 @@ export function EmployeeFormDialog({
   const [roleCode, setRoleCode] = useState('CLAIMS_OFFICER');
 
   useEffect(() => {
-    if (!open) {
+    if (!open) return;
+    if (isEdit && employee) {
+      setFirstName(employee.firstName);
+      setLastName(employee.lastName);
+      setEmail(employee.email);
+      setPhoneNumber(employee.phoneNumber ?? '');
+      setRoleCode(employee.roleCode ?? employee.roles[0] ?? 'CLAIMS_OFFICER');
+    } else {
       setFirstName('');
       setLastName('');
       setEmail('');
       setPhoneNumber('');
       setRoleCode('CLAIMS_OFFICER');
     }
-  }, [open]);
+  }, [open, isEdit, employee]);
 
   const handleSubmit = () => {
+    if (isEdit) {
+      onSubmit({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        phoneNumber: phoneNumber.trim() || undefined,
+        roleCode,
+      });
+      return;
+    }
     onSubmit({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -62,7 +89,7 @@ export function EmployeeFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('inviteTitle')}</DialogTitle>
+          <DialogTitle>{isEdit ? t('editTitle') : t('inviteTitle')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="grid gap-4 sm:grid-cols-2">
@@ -91,7 +118,7 @@ export function EmployeeFormDialog({
               options={STAFF_ROLE_OPTIONS.map((r) => ({ value: r.value, label: r.label }))}
             />
           </div>
-          <p className="text-sm text-brand-muted">{t('inviteHint')}</p>
+          {!isEdit && <p className="text-sm text-brand-muted">{t('inviteHint')}</p>}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -103,7 +130,7 @@ export function EmployeeFormDialog({
             disabled={!firstName.trim() || !lastName.trim() || !email.trim()}
             onClick={handleSubmit}
           >
-            {t('sendInvite')}
+            {isEdit ? tCommon('save') : t('sendInvite')}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -70,3 +70,37 @@ export function isProductPublished(status?: string | null): boolean {
 export function isProductDraft(status?: string | null): boolean {
   return status === 'DRAFT' || !status;
 }
+
+/** Human-readable staff account status for insurer employee management. */
+export function staffStatusLabel(status?: string | null): string {
+  switch (status) {
+    case 'ACTIVE':
+      return 'Active';
+    case 'DISABLED':
+      return 'Deactivated';
+    case 'LOCKED':
+      return 'Locked';
+    case 'PENDING_ACTIVATION':
+      return 'Pending invite';
+    case 'PENDING_PASSWORD_CHANGE':
+      return 'Pending password change';
+    case 'PENDING_EMAIL_VERIFICATION':
+      return 'Pending email verification';
+    default:
+      return humanize(status);
+  }
+}
+
+/** Human-readable staff enrollment badge label. */
+export function staffEnrollmentLabel(enrollmentStatus?: string | null): string {
+  switch (enrollmentStatus) {
+    case 'COMPLETED':
+      return 'Enrolled';
+    case 'DISABLED':
+      return 'Deactivated';
+    case 'PENDING':
+      return 'Pending enrollment';
+    default:
+      return humanize(enrollmentStatus);
+  }
+}

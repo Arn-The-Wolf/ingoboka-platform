@@ -31,7 +31,7 @@ import {
 import { insurerStatusLabel } from '@/lib/insurer-status';
 import type { ApiError } from '@/types';
 
-const PAGE_SIZE = 10;
+const DEFAULT_PAGE_SIZE = 10;
 
 export default function InsurerClaimsPage() {
   const t = useTranslations('insurer');
@@ -39,6 +39,7 @@ export default function InsurerClaimsPage() {
   const queryClient = useQueryClient();
   const toast = useAdminToast();
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [filters, setFilters] = useState<ListToolbarFilters>(DEFAULT_LIST_FILTERS);
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -52,7 +53,7 @@ export default function InsurerClaimsPage() {
   const queryFilters = useMemo(
     () => ({
       page,
-      size: PAGE_SIZE,
+      size: pageSize,
       status: filters.status || undefined,
       search: filters.search || undefined,
       province: filters.province || undefined,
@@ -60,7 +61,7 @@ export default function InsurerClaimsPage() {
       sortBy: filters.sortBy,
       sortDir: filters.sortDir,
     }),
-    [page, filters]
+    [page, pageSize, filters]
   );
 
   const { data, isLoading, error, refetch } = useQuery({
@@ -91,6 +92,11 @@ export default function InsurerClaimsPage() {
 
   const handleFilterChange = (patch: Partial<ListToolbarFilters>) => {
     setFilters((prev) => ({ ...prev, ...patch }));
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setPage(0);
   };
 
@@ -153,9 +159,11 @@ export default function InsurerClaimsPage() {
       {data && (
         <InsurerPagination
           page={page}
+          pageSize={pageSize}
           totalPages={data.totalPages}
           totalElements={data.totalElements}
           onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
         />
       )}
 

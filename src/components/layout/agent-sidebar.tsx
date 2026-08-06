@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { LayoutDashboard, Users, LogOut } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, Settings, LogOut } from 'lucide-react';
 import { usePathname } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
 import { useLogout } from '@/hooks/use-auth';
@@ -10,8 +10,9 @@ import { StaffSidebar, type StaffNavItem } from '@/components/layout/staff-sideb
 import { useStaffShell } from '@/components/layout/staff-shell';
 
 const navItems = [
-  { href: '/agent/dashboard', icon: LayoutDashboard, labelKey: 'dashboard' as const },
-  { href: '/agent/dashboard', icon: Users, labelKey: 'applications' as const },
+  { href: '/agent/dashboard', icon: LayoutDashboard, labelKey: 'dashboard' as const, exact: true },
+  { href: '/agent/applications', icon: ClipboardList, labelKey: 'applications' as const },
+  { href: '/agent/settings', icon: Settings, labelKey: 'settings' as const },
 ];
 
 export function AgentSidebar() {
@@ -25,7 +26,7 @@ export function AgentSidebar() {
     href: item.href,
     icon: item.icon,
     label: t(item.labelKey),
-    active: pathname.startsWith(item.href),
+    active: item.exact ? pathname === item.href : pathname.startsWith(item.href),
   }));
 
   return (

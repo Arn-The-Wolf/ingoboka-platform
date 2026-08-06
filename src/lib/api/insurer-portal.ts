@@ -236,13 +236,13 @@ export const insurerPortalApi = {
 
     const page = filters.page ?? 0;
     const size = filters.size ?? 10;
-    const start = page * size;
-    const paged = content.slice(start, start + size);
+    const totalElements = data.totalElements ?? content.length;
+    const totalPages = data.totalPages ?? Math.max(1, Math.ceil(totalElements / size));
 
     return {
-      content: paged,
-      totalElements: content.length,
-      totalPages: Math.max(1, Math.ceil(content.length / size)),
+      content,
+      totalElements,
+      totalPages,
       page,
       size,
     };
