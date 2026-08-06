@@ -60,7 +60,7 @@ function JsonChip({ data, active }: { data: Record<string, string>; active?: boo
   return (
     <pre
       className={cn(
-        'mt-3 w-full overflow-hidden rounded-lg border px-3 py-2 text-left font-mono text-[10px] leading-relaxed transition-all duration-500',
+        'mt-3 w-full min-w-0 overflow-visible whitespace-pre-wrap break-words rounded-lg border px-3 py-2 text-left font-mono text-[11px] leading-relaxed transition-all duration-500',
         active
           ? 'border-brand-primary/50 bg-brand-primary-light/40 shadow-sm ring-1 ring-brand-primary/20'
           : 'border-brand-border/60 bg-brand-surface-container/60 text-brand-outline'
@@ -70,7 +70,7 @@ function JsonChip({ data, active }: { data: Record<string, string>; active?: boo
       {Object.entries(data).map(([key, value], i) => (
         <motion.span
           key={key}
-          className="block pl-3"
+          className="block break-words pl-3"
           initial={{ opacity: 0.35, x: -4 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
@@ -90,7 +90,7 @@ function JsonChip({ data, active }: { data: Record<string, string>; active?: boo
 function DataFlowBridge({ keys, delay }: { keys: string[]; delay: number }) {
   return (
     <div
-      className="relative mx-1 flex h-full min-w-[3.5rem] flex-1 shrink-0 flex-col items-center justify-center pt-16"
+      className="relative mx-1 flex w-10 shrink-0 flex-col items-center self-start pt-7"
       aria-hidden
     >
       <div className="relative h-8 w-full">
@@ -153,10 +153,10 @@ export function PolicyFlow() {
         </AnimatedSection>
 
         {/* Desktop / tablet: horizontal flow with animated data transfer */}
-        <div className="hidden lg:flex lg:items-start lg:justify-between">
+        <div className="hidden lg:flex lg:items-stretch lg:gap-1">
           {POLICY_FLOW.map((step, index) => (
-            <div key={step.id} className="flex min-w-0 flex-1 items-start">
-              <div className="min-w-0 flex-1">
+            <div key={step.id} className="flex min-w-0 flex-1 items-stretch">
+              <div className="flex min-w-0 flex-1">
                 <FlowNode step={step} index={index} accent={step.id === PAY_ACCENT} t={t} />
               </div>
               {index < POLICY_FLOW.length - 1 && (
@@ -219,9 +219,9 @@ function FlowNode({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.15 }}
-      className="flex flex-col items-center text-center"
+      className="flex h-full w-full min-w-0 flex-col items-center text-center"
     >
-      <div className="relative">
+      <div className="relative shrink-0">
         <motion.div
           whileHover={{ scale: 1.08, rotate: 4 }}
           animate={{
@@ -242,11 +242,13 @@ function FlowNode({
           {index + 1}
         </span>
       </div>
-      <h3 className="mt-4 text-sm font-semibold text-brand-primary-dark">
+      <h3 className="mt-4 shrink-0 text-sm font-semibold text-brand-primary-dark">
         {t(`steps.${step.id}.title`)}
       </h3>
-      <p className="mt-1 text-xs leading-relaxed text-brand-muted">{t(`steps.${step.id}.desc`)}</p>
-      <JsonChip data={step.sample} active />
+      <p className="mt-1 flex-1 text-xs leading-relaxed text-brand-muted">{t(`steps.${step.id}.desc`)}</p>
+      <div className="mt-auto w-full min-w-0 shrink-0">
+        <JsonChip data={step.sample} active />
+      </div>
     </motion.div>
   );
 }
