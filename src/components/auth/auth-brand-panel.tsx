@@ -1,7 +1,8 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Clock, Shield, ShieldCheck, Wallet } from 'lucide-react';
+import { Clock, ShieldCheck, Wallet } from 'lucide-react';
+import Image from 'next/image';
 
 /** Branded left column for the desktop auth layout: illustration + value props. */
 export function AuthBrandPanel() {
@@ -22,8 +23,8 @@ export function AuthBrandPanel() {
 
       <div className="auth-brand-pad relative flex h-full min-h-0 flex-col justify-between">
         <div className="relative flex shrink-0 items-center gap-3 animate-fade-in">
-          <div className="auth-brand-logo flex items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20">
-            <Shield className="h-5 w-5 xl:h-6 xl:w-6" />
+          <div className="auth-brand-logo flex items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20 p-1.5">
+            <Image src="/images/brand/ingoboka-mark-light.svg" alt="" width={28} height={28} aria-hidden />
           </div>
           <div>
             <p className="text-lg font-bold xl:text-xl">{tCommon('appName')}</p>
@@ -42,8 +43,8 @@ export function AuthBrandPanel() {
             <div className="auth-brand-card max-w-sm rounded-2xl border border-white/20 bg-white/10 shadow-modal backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20">
-                    <Shield className="h-4 w-4" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 p-1">
+                    <Image src="/images/brand/ingoboka-mark-light.svg" alt="" width={20} height={20} aria-hidden />
                   </div>
                   <span className="text-sm font-bold tracking-wide">{tCommon('appName')}</span>
                 </div>

@@ -1,9 +1,10 @@
 'use client';
 
 import { type ReactNode } from 'react';
-import { Shield, type LucideIcon } from 'lucide-react';
+import { type LucideIcon } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
+import { IngobokaLogo } from '@/components/ui/ingoboka-logo';
 import { SidebarToggle } from '@/components/layout/sidebar-toggle';
 import { SidebarNavLink } from '@/components/layout/sidebar-nav-link';
 import { useStaffShell } from '@/components/layout/staff-shell';
@@ -27,7 +28,7 @@ interface StaffSidebarProps {
  * state from {@link useStaffShell}: an overlay drawer below `xl`, a collapsible
  * persistent rail at `xl`+.
  */
-export function StaffSidebar({ items, brandLabel = 'Ingoboka', footer }: StaffSidebarProps) {
+export function StaffSidebar({ items, footer }: StaffSidebarProps) {
   const { collapsed, toggleCollapsed, mobileOpen, closeMobile } = useStaffShell();
 
   return (
@@ -53,10 +54,7 @@ export function StaffSidebar({ items, brandLabel = 'Ingoboka', footer }: StaffSi
             collapsed && 'xl:hidden'
           )}
         >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
-            <Shield className="h-5 w-5" />
-          </div>
-          <p className="truncate text-lg font-bold">{brandLabel}</p>
+          <IngobokaLogo theme="dark" size="sm" showWordmark wordmarkClassName="truncate text-lg font-bold" />
         </Link>
 
         {/* Desktop collapse / expand rail control. */}

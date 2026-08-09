@@ -1,9 +1,8 @@
 'use client';
 
 import { ReactNode, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { Shield } from 'lucide-react';
 import { AuthBrandPanel } from '@/components/auth/auth-brand-panel';
+import { IngobokaLogo } from '@/components/ui/ingoboka-logo';
 import { LocaleSwitcher } from './locale-switcher';
 
 interface AuthShellProps {
@@ -14,9 +13,6 @@ const LOCK_CLASS = 'auth-scroll-lock';
 
 /** Auth pages — branded split-panel layout on desktop, single column on mobile. */
 export function AuthShell({ children }: AuthShellProps) {
-  const tCommon = useTranslations('common');
-
-  // Lock document scroll so neither login nor registration can scroll the page.
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
@@ -79,10 +75,7 @@ export function AuthShell({ children }: AuthShellProps) {
         <main className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-brand-background">
           <div className="flex shrink-0 items-center justify-between px-4 py-2.5 sm:py-3 lg:justify-end lg:px-6 lg:py-3">
             <div className="flex items-center gap-2 lg:hidden">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary text-white shadow-elevated">
-                <Shield className="h-5 w-5" />
-              </div>
-              <span className="text-lg font-bold text-brand-primary-dark">{tCommon('appName')}</span>
+              <IngobokaLogo size="sm" showWordmark />
             </div>
             <LocaleSwitcher />
           </div>
