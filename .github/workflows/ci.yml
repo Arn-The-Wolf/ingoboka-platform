@@ -1,24 +1,40 @@
+# NOTE: "Failed to resolve action download info" / "Service Unavailable" during job
+# preparation is usually a GitHub Actions outage — re-run the workflow.
+
 name: CI
 
 on:
   push:
     branches:
       - main
+      - staging
+      - headie-one
       - 'feat/**'
   pull_request:
     branches:
       - main
+      - staging
+      - headie-one
       - 'feat/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   frontend-ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
           cache-dependency-path: package-lock.json
       - name: Install and build

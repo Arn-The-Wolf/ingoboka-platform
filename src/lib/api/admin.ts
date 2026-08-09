@@ -311,7 +311,7 @@ export const adminApi = {
   /** Onboard a new partner organization. */
   async createPartner(input: PartnerCreateInput): Promise<Organization> {
     const { data } = await apiClient.post<Record<string, unknown>>('/partners', {
-      country: 'Rwanda',
+      country: 'RW',
       ...input,
     });
     const partner =
