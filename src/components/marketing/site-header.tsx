@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { usePathname } from '@/i18n/routing';
 import { LoadingLink } from '@/components/navigation/loading-link';
 import { Button } from '@/components/ui/button';
+import { IngobokaLogo } from '@/components/ui/ingoboka-logo';
 import { LocaleSwitcher } from '@/components/layout/locale-switcher';
 import { cn } from '@/lib/utils';
 
@@ -26,7 +27,6 @@ function isActive(pathname: string, href: string, exact?: boolean) {
 
 export function SiteHeader() {
   const t = useTranslations('landing');
-  const tCommon = useTranslations('common');
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -49,8 +49,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-brand-border/60 bg-brand-background/95 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 lg:h-20 lg:px-8">
-        <LoadingLink href="/" className="text-xl font-bold tracking-tight text-brand-primary transition-colors hover:text-brand-primary-dark lg:text-2xl">
-          {tCommon('appName')}
+        <LoadingLink href="/" className="transition-opacity hover:opacity-90">
+          <IngobokaLogo variant="full" size="md" showWordmark={false} />
         </LoadingLink>
 
         <nav className="hidden items-center gap-6 xl:flex" aria-label="Main">

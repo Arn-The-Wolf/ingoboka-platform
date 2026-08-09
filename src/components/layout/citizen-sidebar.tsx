@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Home, Package, FileText, Users, LogOut, Shield, Bell } from 'lucide-react';
+import { Home, Package, FileText, Users, LogOut, Bell } from 'lucide-react';
 import { Link, usePathname } from '@/i18n/routing';
 import { cn } from '@/lib/utils';
+import { IngobokaLogo } from '@/components/ui/ingoboka-logo';
 import { useLogout } from '@/hooks/use-auth';
 import { useAuthStore } from '@/store/auth-store';
 import { UserAvatar } from '@/components/ui/user-avatar';
@@ -46,10 +47,7 @@ export function CitizenSidebar() {
         ) : (
           <>
             <Link href="/" className="flex min-w-0 items-center gap-2 transition-opacity hover:opacity-90">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/20 text-white">
-                <Shield className="h-5 w-5" />
-              </div>
-              <p className="truncate text-lg font-bold">{tCommon('appName')}</p>
+              <IngobokaLogo theme="dark" size="sm" showWordmark />
             </Link>
             <SidebarToggle collapsed={false} onToggle={() => setIsCollapsed(true)} />
           </>

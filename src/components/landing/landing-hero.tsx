@@ -1,7 +1,8 @@
 'use client';
 
 // Deployment: 2026-08-01 23:54 - Fixed API proxy and button navigation
-import { ArrowRight, Shield, CheckCircle2, Smartphone } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Smartphone } from 'lucide-react';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
@@ -10,7 +11,7 @@ import { Button } from '@/components/ui/button';
 
 const STATS = [
   { key: 'hero.statAffordable' as const, icon: CheckCircle2 },
-  { key: 'hero.statClaims' as const, icon: Shield },
+  { key: 'hero.statClaims' as const, icon: CheckCircle2 },
   { key: 'hero.statDigital' as const, icon: Smartphone },
 ];
 
@@ -148,9 +149,15 @@ export function LandingHero() {
                     className="absolute -inset-4 rounded-full bg-brand-accent/20 blur-xl" 
                   />
                   
-                  {/* Main shield circle */}
-                  <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-brand-primary shadow-elevated lg:h-48 lg:w-48 xl:h-56 xl:w-56">
-                    <Shield className="h-20 w-20 text-white lg:h-24 lg:w-24 xl:h-28 xl:w-28" strokeWidth={1.25} />
+                  {/* Main brand mark */}
+                  <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-[#005127] shadow-elevated lg:h-48 lg:w-48 xl:h-56 xl:w-56">
+                    <Image
+                      src="/images/brand/ingoboka-mark-light.svg"
+                      alt="Ingoboka"
+                      width={112}
+                      height={112}
+                      className="h-20 w-20 lg:h-24 lg:w-24 xl:h-28 xl:w-28"
+                    />
                   </div>
                   
                   {/* Floating checkmark icon */}
