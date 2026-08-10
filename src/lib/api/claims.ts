@@ -48,6 +48,10 @@ export const claimApi = {
   },
 
   async decide(id: string, payload: ClaimDecisionRequest): Promise<Claim> {
+    const notes = payload.notes?.trim();
+    if (!notes) {
+      throw new Error('A reason is required for this claim decision');
+    }
     const decision =
       payload.decision === 'APPROVE'
         ? 'APPROVED'
@@ -56,7 +60,7 @@ export const claimApi = {
           : 'REQUEST_INFO';
     const { data } = await apiClient.post<Record<string, unknown>>(`/admin/claims/${id}/decision`, {
       decision,
-      reason: payload.notes ?? decision,
+      reason: notes,
     });
     return mapClaim(data);
   },

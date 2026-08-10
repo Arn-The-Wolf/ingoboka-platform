@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/routing';
 import { useClaim, useClaimAppeal, useClaimCancel } from '@/hooks/use-claims';
 import { ClaimTimeline } from '@/components/insurer/claim-timeline';
-import { buildClaimTimeline } from '@/lib/claim-timeline-utils';
+import { buildClaimTimeline, getLatestDecisionNote } from '@/lib/claim-timeline-utils';
 import { ConfirmDialog } from '@/components/admin/confirm-dialog';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
@@ -66,6 +66,11 @@ export default function CitizenClaimDetailPage() {
   };
 
   const canCancel = claim ? CANCELLABLE_STATUSES.has(claim.status) : false;
+  const decisionNote = claim ? getLatestDecisionNote(claim.statusHistory, claim.status) : undefined;
+  const showDecisionReason =
+    claim &&
+    ['APPROVED', 'REJECTED', 'INFO_REQUESTED'].includes(claim.status) &&
+    !!decisionNote;
 
   return (
     <>
@@ -134,6 +139,17 @@ export default function CitizenClaimDetailPage() {
 
             {cancelMutation.error && (
               <Alert variant="error">{(cancelMutation.error as ApiError).message}</Alert>
+            )}
+
+            {showDecisionReason && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">{t('decisionReasonTitle')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-brand-muted">{decisionNote}</p>
+                </CardContent>
+              </Card>
             )}
 
             <Card>

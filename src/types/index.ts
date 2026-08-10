@@ -156,7 +156,7 @@ export interface PolicyReportSummary {
 
 export interface ClaimDecisionRequest {
   decision: 'APPROVE' | 'REJECT' | 'REQUEST_INFO';
-  notes?: string;
+  notes: string;
 }
 
 export interface InsurerStats {

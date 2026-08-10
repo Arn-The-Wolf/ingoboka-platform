@@ -95,6 +95,7 @@ export function mapAuthResponse(raw: BackendAuthPayload) {
 export function mapPolicyStatus(status?: string): Policy['status'] {
   switch (status) {
     case 'ACTIVE':
+    case 'GRACE_PERIOD':
       return 'ACTIVE';
     case 'PENDING_PAYMENT':
       return 'PENDING';
@@ -131,6 +132,13 @@ export function mapPolicy(raw: Record<string, unknown>): Policy {
 export function mapPolicyCard(raw: Record<string, unknown>): PolicyCard {
   const premium = Number(raw.premium ?? raw.premiumAmount ?? 0);
   const coverage = raw.coverageAmount != null ? Number(raw.coverageAmount) : premium;
+  const qrToken = String(raw.qrToken ?? raw.qrVerificationToken ?? '');
+  const verificationUrl = raw.verificationUrl ? String(raw.verificationUrl) : '';
+  const appBase = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') ?? 'http://localhost:3000';
+  const qrPayload =
+    verificationUrl ||
+    (qrToken ? `${appBase}/en/verify/${qrToken}` : String(raw.qrPayload ?? ''));
+
   return {
     policyId: String(raw.policyId ?? raw.id ?? ''),
     policyNumber: String(raw.policyNumber ?? ''),
@@ -142,7 +150,7 @@ export function mapPolicyCard(raw: Record<string, unknown>): PolicyCard {
     currency: String(raw.currency ?? 'RWF'),
     validFrom: String(raw.startDate ?? raw.validFrom ?? ''),
     validTo: String(raw.endDate ?? raw.validTo ?? ''),
-    qrPayload: String(raw.qrToken ?? raw.qrPayload ?? ''),
+    qrPayload,
   };
 }
 
@@ -151,7 +159,11 @@ export function mapPublicVerification(raw: Record<string, unknown>): PublicVerif
     valid: Boolean(raw.valid),
     policyNumber: raw.policyNumber ? String(raw.policyNumber) : undefined,
     productName: raw.productName ? String(raw.productName) : undefined,
-    insurerName: raw.insurerCode ? String(raw.insurerCode) : undefined,
+    insurerName: raw.insurerName
+      ? String(raw.insurerName)
+      : raw.insurerCode
+        ? String(raw.insurerCode)
+        : undefined,
     status: raw.status ? mapPolicyStatus(String(raw.status)) : undefined,
     validFrom: raw.startDate ? String(raw.startDate) : undefined,
     validTo: raw.endDate ? String(raw.endDate) : undefined,

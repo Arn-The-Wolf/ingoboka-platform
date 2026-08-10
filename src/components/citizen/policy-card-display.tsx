@@ -1,12 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useTranslations } from 'next-intl';
-import { CitizenHeader } from '@/components/layout/citizen-header';
 import { Badge, policyStatusVariant } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { downloadPolicyCardPdf } from '@/lib/policy-card-pdf';
 import type { PolicyCard } from '@/types';
-import { Shield } from 'lucide-react';
+import { Download, Shield } from 'lucide-react';
 
 interface PolicyCardDisplayProps {
   card: PolicyCard;
@@ -16,6 +18,16 @@ interface PolicyCardDisplayProps {
 export function PolicyCardDisplay({ card }: PolicyCardDisplayProps) {
   const t = useTranslations('citizen');
   const tCommon = useTranslations('common');
+  const [downloading, setDownloading] = useState(false);
+
+  async function handleDownloadPdf() {
+    setDownloading(true);
+    try {
+      await downloadPolicyCardPdf(card);
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   return (
     <div className="w-full max-w-md space-y-6">
@@ -27,6 +39,7 @@ export function PolicyCardDisplay({ card }: PolicyCardDisplayProps) {
       <div className="relative aspect-[1.58/1] overflow-hidden rounded-xl border border-white/10 bg-brand-primary p-6 text-white shadow-xl">
         <div className="pointer-events-none absolute -right-12 -top-12 h-48 w-48 rounded-full bg-brand-accent/20 blur-3xl" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/5" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-brand-accent" />
 
         <div className="relative flex h-full flex-col justify-between">
           <div className="flex items-start justify-between">
@@ -66,11 +79,21 @@ export function PolicyCardDisplay({ card }: PolicyCardDisplayProps) {
           size={180}
           level="M"
           includeMargin
-          className="rounded-lg bg-white p-2"
+          fgColor="#005127"
+          className="rounded-lg bg-white p-2 ring-2 ring-brand-accent/40"
         />
         <p className="text-center text-xs text-brand-muted">
           {card.holderName} · {formatDate(card.validFrom)} – {formatDate(card.validTo)}
         </p>
+        <Button
+          variant="outline"
+          className="mt-2 w-full border-brand-primary/30 text-brand-primary-dark hover:bg-brand-primary-light"
+          onClick={handleDownloadPdf}
+          loading={downloading}
+        >
+          <Download className="mr-2 h-4 w-4" />
+          {t('downloadPdf')}
+        </Button>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { PortalGuard } from '@/components/auth/portal-guard';
 import { AnnouncementBanner } from '@/components/citizen/announcement-banner';
+import { UrgentNotificationBanner } from '@/components/citizen/urgent-notification-banner';
 import { CitizenSidebar } from '@/components/layout/citizen-sidebar';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { DashboardContent } from '@/components/layout/dashboard-content';
@@ -20,6 +21,7 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
           innerClassName="min-h-full flex flex-col"
         >
           <AnnouncementBanner />
+          <UrgentNotificationBanner />
           <div id="main-content" className="flex-1">{children}</div>
         </DashboardContent>
         <BottomNav />

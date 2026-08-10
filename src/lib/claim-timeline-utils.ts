@@ -87,3 +87,24 @@ export function buildClaimTimeline(
     },
   ];
 }
+
+const DECISION_STATUSES = new Set(['APPROVED', 'REJECTED', 'INFO_REQUESTED', 'INFORMATION_REQUIRED']);
+
+/** Latest insurer reason shown to the citizen on detail views. */
+export function getLatestDecisionNote(
+  statusHistory: ClaimStatusHistoryItem[] | undefined,
+  currentStatus: string
+): string | undefined {
+  if (!statusHistory?.length) return undefined;
+  const matching = statusHistory.filter(
+    (item) => DECISION_STATUSES.has(item.status) && item.note?.trim()
+  );
+  if (matching.length > 0) {
+    return matching[matching.length - 1].note?.trim();
+  }
+  if (DECISION_STATUSES.has(currentStatus)) {
+    const latest = statusHistory[statusHistory.length - 1];
+    return latest.note?.trim() || undefined;
+  }
+  return undefined;
+}

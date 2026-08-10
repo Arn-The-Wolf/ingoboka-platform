@@ -14,6 +14,7 @@ import { claimStatusTone, claimStatusLabel } from '@/lib/insurer-status';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Link } from '@/i18n/routing';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { ArrowLeft } from 'lucide-react';
@@ -30,14 +31,21 @@ export default function ClaimDetailPage() {
   const [notes, setNotes] = useState('');
 
   const handleDecision = (decisionType: 'APPROVE' | 'REJECT' | 'REQUEST_INFO') => {
+    const trimmedNotes = notes.trim();
+    if (!trimmedNotes) {
+      toast.error(t('notesRequired'));
+      return;
+    }
     decision.mutate(
-      { decision: decisionType, notes: notes || undefined },
+      { decision: decisionType, notes: trimmedNotes },
       {
         onSuccess: () => toast.success(t('decisionSaved')),
         onError: () => toast.error(tCommon('error')),
       }
     );
   };
+
+  const notesMissing = !notes.trim();
 
   return (
     <div className="p-6 lg:p-8">
@@ -137,20 +145,28 @@ export default function ClaimDetailPage() {
               {decision.error && (
                 <Alert variant="error">{(decision.error as ApiError).message}</Alert>
               )}
-              <textarea
-                className="w-full rounded-lg border border-brand-border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
-                rows={3}
-                placeholder="Notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-              />
+              <div className="space-y-2">
+                <Label htmlFor="decision-notes">{t('decisionNotesLabel')}</Label>
+                <textarea
+                  id="decision-notes"
+                  className="w-full rounded-lg border border-brand-border p-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                  rows={3}
+                  placeholder={t('decisionNotesPlaceholder')}
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  required
+                />
+                {notesMissing && (
+                  <p className="text-xs text-amber-700">{t('notesRequired')}</p>
+                )}
+              </div>
               <div className="space-y-2">
                 <Button
                   className="w-full"
                   variant="pill"
                   onClick={() => handleDecision('APPROVE')}
                   loading={decision.isPending}
-                  disabled={claim.status === 'APPROVED'}
+                  disabled={claim.status === 'APPROVED' || notesMissing}
                 >
                   {t('approve')}
                 </Button>
@@ -159,7 +175,7 @@ export default function ClaimDetailPage() {
                   className="w-full"
                   onClick={() => handleDecision('REJECT')}
                   loading={decision.isPending}
-                  disabled={claim.status === 'REJECTED'}
+                  disabled={claim.status === 'REJECTED' || notesMissing}
                 >
                   {t('reject')}
                 </Button>
@@ -168,6 +184,7 @@ export default function ClaimDetailPage() {
                   className="w-full"
                   onClick={() => handleDecision('REQUEST_INFO')}
                   loading={decision.isPending}
+                  disabled={notesMissing}
                 >
                   {t('requestInfo')}
                 </Button>
