@@ -1,6 +1,7 @@
 import { apiClient } from './client';
 import { normalizeCitizenPhone } from '@/lib/auth/phone';
 import { mapAuthResponse, mapAuthUser, type BackendAuthPayload } from './mappers';
+import { profilePictureApi } from './profile-picture';
 import { useAuthStore } from '@/store/auth-store';
 import type {
   AuthTokens,
@@ -116,7 +117,7 @@ export const authApi = {
     await apiClient.post('/auth/resend-otp', { phone: normalized, phoneNumber: normalized });
   },
 
-  async refresh(refreshToken: string): Promise<AuthTokens> {
+  async refresh(refreshToken: string): Promise<AuthTokens & { user?: User }> {
     const { data } = await apiClient.post<BackendAuthPayload>('/auth/refresh', {
       refreshToken,
     });
@@ -125,6 +126,7 @@ export const authApi = {
       accessToken: mapped.accessToken,
       refreshToken: mapped.refreshToken,
       expiresIn: mapped.expiresIn,
+      user: mapped.user,
     };
   },
 
@@ -154,6 +156,14 @@ export const customerApi = {
     const stored = useAuthStore.getState().user;
     if (!stored) return mapAuthUser(null);
 
+    let profilePictureUrl = stored.profilePictureUrl;
+    try {
+      const pic = await profilePictureApi.get();
+      profilePictureUrl = pic.profilePictureUrl ?? undefined;
+    } catch {
+      /* keep stored URL */
+    }
+
     try {
       const { data } = await apiClient.get<Record<string, unknown>>('/customers/me');
       const kycStatus = String(data.kycStatus ?? '');
@@ -173,10 +183,10 @@ export const customerApi = {
         nationalId: data.nationalId ? String(data.nationalId) : stored.nationalId,
         verified: stored.verified || kycStatus === 'VERIFIED',
         consentGiven,
-        profilePictureUrl: stored.profilePictureUrl,
+        profilePictureUrl,
       };
     } catch {
-      return stored;
+      return { ...stored, profilePictureUrl };
     }
   },
 

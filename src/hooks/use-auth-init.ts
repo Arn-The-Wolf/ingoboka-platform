@@ -1,9 +1,18 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { authApi, customerApi } from '@/lib/api';
+import { authApi, customerApi, profilePictureApi } from '@/lib/api';
 import { setAccessToken, setTokenRefreshHandler, setUnauthorizedHandler } from '@/lib/api/client';
 import { useAuthStore } from '@/store/auth-store';
+
+async function refreshProfilePictureUrl(): Promise<string | undefined | null> {
+  try {
+    const pic = await profilePictureApi.get();
+    return pic.profilePictureUrl;
+  } catch {
+    return undefined;
+  }
+}
 
 export function useAuthInit() {
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -26,7 +35,8 @@ export function useAuthInit() {
       if (!rt || !u) return null;
       try {
         const tokens = await authApi.refresh(rt);
-        setAuth(u, tokens.accessToken, tokens.refreshToken);
+        const nextUser = tokens.user ?? u;
+        setAuth(nextUser, tokens.accessToken, tokens.refreshToken);
         return tokens.accessToken;
       } catch {
         logout();
@@ -42,7 +52,8 @@ export function useAuthInit() {
     authApi
       .refresh(refreshToken)
       .then((tokens) => {
-        setAuth(user, tokens.accessToken, tokens.refreshToken);
+        const nextUser = tokens.user ?? user;
+        setAuth(nextUser, tokens.accessToken, tokens.refreshToken);
       })
       .catch(() => {
         logout();
@@ -51,14 +62,25 @@ export function useAuthInit() {
 
   useEffect(() => {
     if (hydrated.current || !accessToken || !user) return;
-    if (user.role !== 'CITIZEN') return;
     hydrated.current = true;
 
-    customerApi
-      .getMe()
-      .then((profile) => updateUser(profile))
-      .catch(() => {
-        /* keep JWT user */
-      });
+    const hydrate = async () => {
+      if (user.role === 'CITIZEN') {
+        try {
+          const profile = await customerApi.getMe();
+          updateUser(profile);
+          return;
+        } catch {
+          /* fall through to profile picture refresh */
+        }
+      }
+
+      const profilePictureUrl = await refreshProfilePictureUrl();
+      if (profilePictureUrl !== undefined) {
+        updateUser({ profilePictureUrl: profilePictureUrl ?? undefined });
+      }
+    };
+
+    void hydrate();
   }, [accessToken, user, updateUser]);
 }

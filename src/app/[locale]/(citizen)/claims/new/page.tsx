@@ -58,27 +58,19 @@ export default function NewClaimPage() {
         claimedAmount: Number(claimedAmount),
       });
       const claimId = (created as { id: string }).id;
-      await claimApi.submit(claimId);
 
-      let uploadFailed = false;
-      if (files.length > 0) {
-        try {
-          for (let i = 0; i < files.length; i++) {
-            setUploadProgress(`Uploading ${files[i].name} (${i + 1}/${files.length})…`);
-            await claimApi.uploadDocuments(claimId, [files[i]]);
-          }
-        } catch {
-          uploadFailed = true;
-        } finally {
-          setUploadProgress(null);
-        }
+      for (let i = 0; i < files.length; i++) {
+        setUploadProgress(`Uploading ${files[i].name} (${i + 1}/${files.length})…`);
+        await claimApi.uploadDocuments(claimId, [files[i]]);
       }
+      setUploadProgress(null);
 
-      return { uploadFailed };
+      await claimApi.submit(claimId);
+      return { claimId };
     },
-    onSuccess: ({ uploadFailed }) => {
-      toast.success(uploadFailed ? tCommon('submitted') : tCommon('submitted'));
-      router.push(uploadFailed ? '/claims?uploadPartial=1' : '/claims');
+    onSuccess: () => {
+      toast.success(tCommon('submitted'));
+      router.push('/claims');
     },
     onError: () => toast.error(tCommon('error')),
   });
@@ -210,6 +202,9 @@ export default function NewClaimPage() {
                     onChange={handleFileChange}
                   />
                   <p className="text-xs text-brand-muted">{t('uploadHint')}</p>
+                  {files.length === 0 && (
+                    <p className="text-xs text-amber-700">{t('proofRequired')}</p>
+                  )}
                   {files.length > 0 && (
                     <p className="text-xs text-brand-primary">
                       {t('filesSelected', { count: files.length })}
@@ -223,7 +218,7 @@ export default function NewClaimPage() {
                   <Button
                     className="flex-1"
                     variant="pill"
-                    disabled={!description}
+                    disabled={!description || files.length === 0}
                     onClick={() => setStep(4)}
                   >
                     {t('review')}
@@ -273,7 +268,7 @@ export default function NewClaimPage() {
                   <Button
                     className="flex-1"
                     variant="pill-accent"
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || files.length === 0}
                     loading={mutation.isPending}
                     onClick={() => mutation.mutate()}
                   >
