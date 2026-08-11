@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
-import { ArrowLeft, ChevronRight, Plus } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { useClaims } from '@/hooks/use-claims';
+import { useClaims, useClaimDelete } from '@/hooks/use-claims';
+import { ConfirmDialog } from '@/components/admin/confirm-dialog';
 import { InsurerPagination } from '@/components/insurer/insurer-pagination';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
@@ -17,7 +18,7 @@ import { Alert } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { claimStatusLabel } from '@/lib/insurer-status';
-import type { ApiError } from '@/types';
+import type { ApiError, Claim } from '@/types';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -28,13 +29,16 @@ export default function CitizenClaimsPage() {
   const showUploadWarning = searchParams.get('uploadPartial') === '1';
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [deleteTarget, setDeleteTarget] = useState<Claim | null>(null);
   const { data, isLoading, error, refetch } = useClaims(page, pageSize);
+  const deleteMutation = useClaimDelete();
 
   const claims = data?.content ?? [];
   const totalPages = data?.totalPages ?? 1;
   const totalElements = data?.totalElements ?? claims.length;
 
   const statusLabelMap: Record<string, string> = {
+    DRAFT: t('draft'),
     SUBMITTED: tCommon('submitted'),
     UNDER_REVIEW: tCommon('underReview'),
     APPROVED: tCommon('approved'),
@@ -46,6 +50,16 @@ export default function CitizenClaimsPage() {
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
     setPage(0);
+  };
+
+  const handleDelete = () => {
+    if (!deleteTarget) return;
+    deleteMutation.mutate(deleteTarget.id, {
+      onSuccess: () => {
+        setDeleteTarget(null);
+        refetch();
+      },
+    });
   };
 
   return (
@@ -103,9 +117,9 @@ export default function CitizenClaimsPage() {
 
         <div className="space-y-3">
           {claims.map((claim) => (
-            <LoadingLink key={claim.id} href={`/claims/${claim.id}`}>
-              <Card className="transition-shadow hover:shadow-elevated">
-                <CardContent className="flex items-center justify-between p-4">
+            <Card key={claim.id} className="transition-shadow hover:shadow-elevated">
+              <CardContent className="flex items-center justify-between p-4">
+                <LoadingLink href={`/claims/${claim.id}`} className="min-w-0 flex-1">
                   <div className="space-y-1">
                     <p className="font-medium text-brand-primary-dark">{claim.claimNumber}</p>
                     <p className="text-sm text-brand-muted">{claim.policyNumber}</p>
@@ -113,20 +127,33 @@ export default function CitizenClaimsPage() {
                       {formatDate(claim.submittedAt)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <p className="font-semibold text-brand-primary-dark">
-                        {formatCurrency(claim.amount, claim.currency)}
-                      </p>
-                      <Badge variant={policyStatusVariant(claim.status)} className="mt-1">
-                        {statusLabelMap[claim.status] ?? claimStatusLabel(claim.status)}
-                      </Badge>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-brand-muted" />
+                </LoadingLink>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="font-semibold text-brand-primary-dark">
+                      {formatCurrency(claim.amount, claim.currency)}
+                    </p>
+                    <Badge variant={policyStatusVariant(claim.status)} className="mt-1">
+                      {statusLabelMap[claim.status] ?? claimStatusLabel(claim.status)}
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
-            </LoadingLink>
+                  {claim.status === 'DRAFT' && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 text-destructive hover:text-destructive"
+                      aria-label={t('deleteDraft')}
+                      onClick={() => setDeleteTarget(claim)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                  <LoadingLink href={`/claims/${claim.id}`}>
+                    <ChevronRight className="h-5 w-5 text-brand-muted" />
+                  </LoadingLink>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
@@ -141,6 +168,16 @@ export default function CitizenClaimsPage() {
           />
         )}
       </PageContainer>
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title={t('deleteDraftTitle')}
+        description={t('deleteDraftDescription')}
+        confirmLabel={t('deleteDraftConfirm')}
+        onConfirm={handleDelete}
+        loading={deleteMutation.isPending}
+      />
     </>
   );
 }
