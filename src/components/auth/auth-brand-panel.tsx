@@ -16,7 +16,7 @@ export function AuthBrandPanel() {
   ];
 
   return (
-    <aside className="auth-brand-panel relative hidden h-full min-h-0 w-full min-w-0 flex-col justify-between overflow-hidden bg-gradient-to-br from-brand-primary via-brand-primary to-brand-primary-dark text-white lg:flex">
+    <aside className="auth-brand-panel relative hidden h-full min-h-0 w-full min-w-0 flex-col justify-between overflow-hidden bg-gradient-to-br from-brand-primary via-brand-primary to-brand-primary-darker text-white lg:flex">
       <div className="pointer-events-none absolute inset-0 auth-dot-pattern opacity-20" />
       <div className="pointer-events-none absolute -right-20 top-16 h-64 w-64 rounded-full bg-brand-accent/20 blur-3xl animate-float" />
       <div className="pointer-events-none absolute -left-12 bottom-8 h-52 w-52 rounded-full bg-white/10 blur-3xl animate-float-delayed" />

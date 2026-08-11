@@ -308,6 +308,31 @@ export const productApi = {
     return data;
   },
 
+  async update(
+    id: string,
+    payload: {
+      name: string;
+      category: string;
+      description?: string;
+      heroImageUrl?: string;
+    }
+  ) {
+    const { data } = await apiClient.put<Record<string, unknown>>(`/products/${id}`, {
+      name: payload.name,
+      category: payload.category,
+      description: payload.description,
+      heroImageUrl: payload.heroImageUrl,
+    });
+    return mapProduct(data);
+  },
+
+  async unpublish(id: string, archive = false) {
+    const { data } = await apiClient.post<Record<string, unknown>>(`/products/${id}/unpublish`, {
+      archive,
+    });
+    return mapProduct(data);
+  },
+
   async getById(id: string): Promise<ProductDetail> {
     const { data } = await apiClient.get<Record<string, unknown>>(`/products/${id}/detail`);
     return mapProductDetailPayload(data);

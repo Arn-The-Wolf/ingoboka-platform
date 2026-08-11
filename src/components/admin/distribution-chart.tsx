@@ -37,18 +37,18 @@ interface DistributionChartProps {
   className?: string;
 }
 
-/** Brand-aligned categorical palette (greens → amber accents). */
+/** Brand-aligned categorical palette (blues → gold accents). */
 export const CHART_COLORS = [
-  '#005127',
-  '#1B6B3A',
-  '#0A7B4E',
-  '#3F9D6B',
-  '#7BC49A',
+  '#0B3A6E',
+  '#1E5AA8',
+  '#3B82C4',
+  '#5B9BD5',
+  '#93C5FD',
   '#FDAA30',
   '#F4A228',
   '#855300',
   '#782C39',
-  '#B0D8C1',
+  '#C8DDF0',
 ];
 
 const TYPES: { type: ChartType; icon: typeof ChartPie; labelKey: 'pie' | 'bar' | 'line' }[] = [
@@ -145,9 +145,9 @@ export function DistributionChart({
                 <Line
                   type="monotone"
                   dataKey="value"
-                  stroke="#005127"
+                  stroke="#0B3A6E"
                   strokeWidth={2.5}
-                  dot={{ r: 3, fill: '#1B6B3A' }}
+                  dot={{ r: 3, fill: '#1E5AA8' }}
                   activeDot={{ r: 5 }}
                   animationDuration={900}
                 />

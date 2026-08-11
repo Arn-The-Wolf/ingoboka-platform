@@ -110,6 +110,10 @@ export function isProductDraft(status?: string | null): boolean {
   return status === 'DRAFT' || !status;
 }
 
+export function isProductArchived(status?: string | null): boolean {
+  return status === 'ARCHIVED';
+}
+
 /** Human-readable staff account status for insurer employee management. */
 export function staffStatusLabel(status?: string | null): string {
   switch (status) {

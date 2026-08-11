@@ -1,4 +1,5 @@
 import { PortalGuard } from '@/components/auth/portal-guard';
+import { OnboardingGuard } from '@/components/auth/onboarding-guard';
 import { AnnouncementBanner } from '@/components/citizen/announcement-banner';
 import { AdminSidebar } from '@/components/layout/admin-sidebar';
 import { StaffShell } from '@/components/layout/staff-shell';
@@ -6,9 +7,10 @@ import { StaffShell } from '@/components/layout/staff-shell';
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <PortalGuard allowedRoles={['PLATFORM_ADMIN']}>
+      <OnboardingGuard>
       <StaffShell
         sidebar={<AdminSidebar />}
-        className="bg-gradient-to-br from-green-50 via-blue-50/30 to-purple-50/20"
+        className="bg-gradient-to-br from-brand-primary-light via-blue-50/30 to-purple-50/20"
       >
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
           <AnnouncementBanner />
@@ -16,6 +18,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="pt-16 xl:pt-0">{children}</div>
         </main>
       </StaffShell>
+      </OnboardingGuard>
     </PortalGuard>
   );
 }

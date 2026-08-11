@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { Building2, Lock, Mail, Phone, Save, User } from 'lucide-react';
+import { useRouter } from '@/i18n/routing';
 import { authApi, insurerApi, staffApi } from '@/lib/api';
+import { getApiErrorMessage } from '@/lib/api/integration-helpers';
 import { useAdminToast } from '@/components/admin/admin-toast';
 import { CurrencyToggle } from '@/components/insurer/currency-toggle';
 import { PageContainer } from '@/components/layout/page-container';
@@ -21,10 +23,14 @@ import { useCurrency } from '@/hooks/use-currency';
 
 export default function InsurerSettingsPage() {
   const t = useTranslations('insurer');
+  const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
   const queryClient = useQueryClient();
   const toast = useAdminToast();
+  const router = useRouter();
   const user = useAuthStore((s) => s.user);
+  const updateUser = useAuthStore((s) => s.updateUser);
+  const setAuth = useAuthStore((s) => s.setAuth);
   const isAdmin = user?.role === 'INSURER_ADMIN';
   const { currency, setCurrency, fx } = useCurrency();
 
@@ -101,21 +107,36 @@ export default function InsurerSettingsPage() {
         email: personalEmail,
         phoneNumber: personalPhone || undefined,
       }),
-    onSuccess: () => {
+    onSuccess: (updated) => {
       queryClient.invalidateQueries({ queryKey: ['staff', 'profile'] });
+      if (updated.requiresEmailVerification) {
+        updateUser({
+          email: updated.email,
+          requiresEmailVerification: true,
+          emailVerified: false,
+          status: 'PENDING_EMAIL_VERIFICATION',
+        });
+        toast.info(t('profileSaved'), tAuth('verifyEmailAfterChange'));
+        router.replace('/verify-email');
+        return;
+      }
       toast.success(t('profileSaved'));
     },
-    onError: () => toast.error(tCommon('error')),
+    onError: (err) => toast.error(tCommon('error'), getApiErrorMessage(err)),
   });
 
   const passwordMutation = useMutation({
     mutationFn: () => authApi.changePassword(currentPassword, newPassword),
-    onSuccess: () => {
+    onSuccess: (result) => {
       setCurrentPassword('');
       setNewPassword('');
+      setAuth(result.user, result.accessToken, result.refreshToken);
       toast.success(t('passwordChanged'));
+      if (result.user.requiresEmailVerification) {
+        router.replace('/verify-email');
+      }
     },
-    onError: () => toast.error(tCommon('error')),
+    onError: (err) => toast.error(tCommon('error'), getApiErrorMessage(err)),
   });
 
   if (isLoading || profileLoading) {

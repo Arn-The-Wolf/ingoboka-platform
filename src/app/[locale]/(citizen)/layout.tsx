@@ -1,4 +1,5 @@
 import { PortalGuard } from '@/components/auth/portal-guard';
+import { OnboardingGuard } from '@/components/auth/onboarding-guard';
 import { AnnouncementBanner } from '@/components/citizen/announcement-banner';
 import { UrgentNotificationBanner } from '@/components/citizen/urgent-notification-banner';
 import { CitizenSidebar } from '@/components/layout/citizen-sidebar';
@@ -8,6 +9,7 @@ import { DashboardContent } from '@/components/layout/dashboard-content';
 export default function CitizenLayout({ children }: { children: React.ReactNode }) {
   return (
     <PortalGuard allowedRoles={['CITIZEN']}>
+      <OnboardingGuard>
       <div className="flex h-screen overflow-hidden bg-brand-background">
         <a
           href="#main-content"
@@ -26,6 +28,7 @@ export default function CitizenLayout({ children }: { children: React.ReactNode 
         </DashboardContent>
         <BottomNav />
       </div>
+      </OnboardingGuard>
     </PortalGuard>
   );
 }

@@ -99,7 +99,7 @@ export default function AdminPoliciesPage() {
       <div className="mb-6 relative max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-muted" />
         <Input
-          className="pl-9 bg-white border-green-200 focus:border-green-500 focus:ring-green-500"
+          className="pl-9 bg-white border-brand-primary/20 focus:border-brand-primary focus:ring-brand-primary"
           placeholder={t('searchPolicies')}
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
@@ -117,9 +117,9 @@ export default function AdminPoliciesPage() {
 
       {!isLoading && paginatedPolicies.length > 0 && (
         <>
-          <div className="overflow-hidden rounded-xl border border-green-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border border-brand-primary/20 bg-white shadow-sm">
             <table className="w-full text-sm">
-              <thead className="border-b border-green-100 bg-gradient-to-r from-green-50 to-blue-50">
+              <thead className="border-b border-brand-primary/10 bg-gradient-to-r from-brand-primary-light to-blue-50">
                 <tr>
                   <th className="px-4 py-3 text-left font-semibold text-gray-700">
                     {t('policyNumber')}
@@ -146,13 +146,13 @@ export default function AdminPoliciesPage() {
                   <tr 
                     key={policy.id} 
                     className={cn(
-                      "border-b border-green-50 last:border-0 hover:bg-green-50/50 transition-colors",
-                      index % 2 === 0 && "bg-green-50/20"
+                      "border-b border-brand-primary/5 last:border-0 hover:bg-brand-primary-light/50 transition-colors",
+                      index % 2 === 0 && "bg-brand-primary-light/20"
                     )}
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-green-400 to-blue-500 text-white">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-brand-primary to-brand-secondary text-white">
                           <Shield className="h-4 w-4" />
                         </div>
                         <span className="font-medium text-gray-800">{policy.policyNumber}</span>
@@ -195,7 +195,7 @@ export default function AdminPoliciesPage() {
                   size="sm"
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="border-green-200 hover:bg-green-50"
+                  className="border-brand-primary/20 hover:bg-brand-primary-light"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   Previous
@@ -208,7 +208,7 @@ export default function AdminPoliciesPage() {
                   size="sm"
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  className="border-green-200 hover:bg-green-50"
+                  className="border-brand-primary/20 hover:bg-brand-primary-light"
                 >
                   Next
                   <ChevronRight className="h-4 w-4" />
@@ -220,7 +220,7 @@ export default function AdminPoliciesPage() {
       )}
 
       {!isLoading && paginatedPolicies.length === 0 && (
-        <Card className="border-dashed border-green-200">
+        <Card className="border-dashed border-brand-primary/20">
           <CardContent className="py-12 text-center">
             <FileText className="mx-auto h-12 w-12 text-gray-400 mb-3" />
             <p className="font-medium text-gray-700">

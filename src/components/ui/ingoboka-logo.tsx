@@ -9,7 +9,7 @@ const FULL_SRC = '/images/brand/ingoboka-logo.svg';
 
 type IngobokaLogoProps = {
   variant?: 'mark' | 'full';
-  /** Light surfaces use green wordmark; dark surfaces use white wordmark beside the mark. */
+  /** Light surfaces use blue wordmark; dark surfaces use white wordmark beside the mark. */
   theme?: 'light' | 'dark';
   showWordmark?: boolean;
   className?: string;

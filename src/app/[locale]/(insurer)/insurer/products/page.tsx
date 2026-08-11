@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Package, Plus } from 'lucide-react';
-import { productApi } from '@/lib/api';
+import { Package, Plus, Pencil } from 'lucide-react';
+import { productApi, type ProductSummary } from '@/lib/api/products';
 import { useAdminToast } from '@/components/admin/admin-toast';
 import {
   DEFAULT_LIST_FILTERS,
@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   isProductDraft,
   isProductPublished,
+  isProductArchived,
   productStatusLabel,
   productStatusTone,
   insurerStatusLabel,
@@ -40,6 +41,7 @@ export default function InsurerProductsPage() {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [showForm, setShowForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<ProductSummary | null>(null);
   const [filters, setFilters] = useState<ListToolbarFilters>({
     ...DEFAULT_LIST_FILTERS,
     sortBy: 'name',
@@ -59,6 +61,16 @@ export default function InsurerProductsPage() {
     onError: (err: Error) => toast.error(err.message || tCommon('error')),
   });
 
+  const unpublishMutation = useMutation({
+    mutationFn: ({ id, archive }: { id: string; archive?: boolean }) =>
+      productApi.unpublish(id, archive),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['insurer', 'products'] });
+      toast.success(variables.archive ? t('productArchived') : t('productUnpublished'));
+    },
+    onError: (err: Error) => toast.error(err.message || tCommon('error')),
+  });
+
   const products = data?.content ?? [];
 
   const handleFilterChange = (patch: Partial<ListToolbarFilters>) => {
@@ -69,6 +81,21 @@ export default function InsurerProductsPage() {
   const handlePageSizeChange = (size: number) => {
     setPageSize(size);
     setPage(0);
+  };
+
+  const openCreate = () => {
+    setEditingProduct(null);
+    setShowForm(true);
+  };
+
+  const openEdit = (product: ProductSummary) => {
+    setEditingProduct(product);
+    setShowForm(true);
+  };
+
+  const handleFormOpenChange = (open: boolean) => {
+    setShowForm(open);
+    if (!open) setEditingProduct(null);
   };
 
   return (
@@ -84,7 +111,7 @@ export default function InsurerProductsPage() {
           </p>
         </div>
         {!readOnly && (
-          <Button variant="pill" onClick={() => setShowForm(true)} className="gap-2">
+          <Button variant="pill" onClick={openCreate} className="gap-2">
             <Plus className="h-4 w-4" />
             {t('createProduct')}
           </Button>
@@ -136,19 +163,51 @@ export default function InsurerProductsPage() {
                 <Badge variant={productStatusTone(product.status)}>
                   {productStatusLabel(product.status)}
                 </Badge>
-                {isProductDraft(product.status) && !readOnly && (
-                  <Button
-                    size="sm"
-                    variant="pill"
-                    loading={publishMutation.isPending}
-                    onClick={() => publishMutation.mutate(product.id)}
-                  >
-                    {t('publish')}
-                  </Button>
+                {!readOnly && isProductDraft(product.status) && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1"
+                      onClick={() => openEdit(product)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      {tCommon('edit')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="pill"
+                      loading={publishMutation.isPending}
+                      onClick={() => publishMutation.mutate(product.id)}
+                    >
+                      {t('publish')}
+                    </Button>
+                  </>
                 )}
-                {isProductPublished(product.status) && (
+                {!readOnly && isProductPublished(product.status) && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      loading={unpublishMutation.isPending}
+                      onClick={() => unpublishMutation.mutate({ id: product.id })}
+                    >
+                      {t('unpublish')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-brand-muted"
+                      loading={unpublishMutation.isPending}
+                      onClick={() => unpublishMutation.mutate({ id: product.id, archive: true })}
+                    >
+                      {t('archiveProduct')}
+                    </Button>
+                  </>
+                )}
+                {!readOnly && isProductArchived(product.status) && (
                   <Button size="sm" variant="outline" disabled>
-                    {t('published')}
+                    {productStatusLabel('ARCHIVED')}
                   </Button>
                 )}
               </div>
@@ -181,10 +240,11 @@ export default function InsurerProductsPage() {
       {!readOnly && (
         <ProductFormDialog
           open={showForm}
-          onOpenChange={setShowForm}
+          onOpenChange={handleFormOpenChange}
+          product={editingProduct}
           onSuccess={() => {
             queryClient.invalidateQueries({ queryKey: ['insurer', 'products'] });
-            toast.success(t('productCreated'));
+            toast.success(editingProduct ? t('productUpdated') : t('productCreated'));
           }}
         />
       )}

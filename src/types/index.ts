@@ -15,6 +15,11 @@ export interface User {
   verified: boolean;
   consentGiven: boolean;
   profilePictureUrl?: string;
+  mustChangePassword?: boolean;
+  requiresEmailVerification?: boolean;
+  accountActive?: boolean;
+  emailVerified?: boolean;
+  status?: string;
 }
 
 export interface AuthTokens {
@@ -171,6 +176,8 @@ export interface ApiError {
   message: string;
   code?: string;
   status?: number;
+  fieldErrors?: Record<string, string>;
+  errors?: Record<string, string>;
 }
 
 export interface PaginatedResponse<T> {

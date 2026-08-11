@@ -54,7 +54,7 @@ export function getProductHeroImage(
     const url = product.heroImageUrl.trim();
     // Accept relative paths or localhost URLs, but skip external URLs like Unsplash
     // since they may not exist or cause CORS issues
-    if (url.startsWith('/') || url.startsWith('http://localhost') || url.includes('185.181.10.165') || url.includes('4.168.192.169')) {
+    if (url.startsWith('/') || url.startsWith('http://localhost') || url.includes('4.168.192.169')) {
       return url;
     }
   }

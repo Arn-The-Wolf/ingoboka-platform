@@ -31,7 +31,7 @@ export function InsurerStatsChart({ stats, title }: InsurerStatsChartProps) {
               <XAxis dataKey="status" tick={{ fontSize: 11 }} />
               <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
               <Tooltip />
-              <Bar dataKey="count" fill="#1E5AA8" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#0B3A6E" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

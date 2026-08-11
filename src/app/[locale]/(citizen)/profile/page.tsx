@@ -1,15 +1,20 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { BadgeCheck, IdCard } from 'lucide-react';
+import { useRouter } from '@/i18n/routing';
 import { customerApi, customerApiExt } from '@/lib/api';
+import { getApiErrorMessage } from '@/lib/api/integration-helpers';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { PageSkeleton } from '@/components/ui/page-skeleton';
 import { useAuthStore } from '@/store/auth-store';
 import { ProfilePictureField } from '@/components/profile/profile-picture-field';
@@ -17,9 +22,13 @@ import { UserAvatar } from '@/components/ui/user-avatar';
 
 export default function ProfilePage() {
   const t = useTranslations('citizen.profile');
+  const tAuth = useTranslations('auth');
   const tCommon = useTranslations('common');
+  const router = useRouter();
   const queryClient = useQueryClient();
   const storedUser = useAuthStore((s) => s.user);
+  const updateUser = useAuthStore((s) => s.updateUser);
+  const [emailDraft, setEmailDraft] = useState(storedUser?.email ?? '');
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ['profile', 'me'],
@@ -27,6 +36,26 @@ export default function ProfilePage() {
   });
 
   const user = profile ?? storedUser;
+
+  useEffect(() => {
+    if (user?.email) setEmailDraft(user.email);
+  }, [user?.email]);
+
+  const emailMutation = useMutation({
+    mutationFn: () => customerApi.updateAccount({ email: emailDraft }),
+    onSuccess: (account) => {
+      updateUser({
+        email: account.email,
+        requiresEmailVerification: account.requiresEmailVerification,
+        emailVerified: account.emailVerified,
+        status: account.status,
+      });
+      queryClient.invalidateQueries({ queryKey: ['profile', 'me'] });
+      if (account.requiresEmailVerification) {
+        router.replace('/verify-email');
+      }
+    },
+  });
 
   const kycMutation = useMutation({
     mutationFn: () => customerApiExt.submitKyc(),
@@ -43,6 +72,7 @@ export default function ProfilePage() {
   }
 
   const verified = user?.verified;
+  const emailChanged = emailDraft.trim().toLowerCase() !== (user?.email ?? '').trim().toLowerCase();
 
   return (
     <>
@@ -67,11 +97,33 @@ export default function ProfilePage() {
               profilePictureUrl={user?.profilePictureUrl}
             />
 
-            <dl className="mt-6 space-y-3 text-sm">
-              <div className="flex justify-between border-b border-brand-border/40 pb-2">
-                <dt className="text-brand-muted">{t('email')}</dt>
-                <dd className="font-medium">{user?.email ?? '—'}</dd>
+            <div className="mt-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="profile-email">{t('email')}</Label>
+                <Input
+                  id="profile-email"
+                  type="email"
+                  value={emailDraft}
+                  onChange={(e) => setEmailDraft(e.target.value)}
+                />
+                <p className="text-xs text-brand-muted">{tAuth('verifyEmailAfterChange')}</p>
               </div>
+              {emailMutation.error && (
+                <Alert variant="error">{getApiErrorMessage(emailMutation.error) ?? tCommon('error')}</Alert>
+              )}
+              {emailChanged && (
+                <Button
+                  variant="pill-accent"
+                  loading={emailMutation.isPending}
+                  disabled={!emailDraft.trim()}
+                  onClick={() => emailMutation.mutate()}
+                >
+                  {t('saveEmail')}
+                </Button>
+              )}
+            </div>
+
+            <dl className="mt-6 space-y-3 border-t border-brand-border/40 pt-6 text-sm">
               <div className="flex justify-between border-b border-brand-border/40 pb-2">
                 <dt className="text-brand-muted">{t('nationalId')}</dt>
                 <dd className="font-medium">{user?.nationalId ?? '—'}</dd>
@@ -99,7 +151,7 @@ export default function ProfilePage() {
             )}
             {kycMutation.error && (
               <Alert variant="error" className="mb-4">
-                {(kycMutation.error as Error).message}
+                {getApiErrorMessage(kycMutation.error) ?? tCommon('error')}
               </Alert>
             )}
             <Button

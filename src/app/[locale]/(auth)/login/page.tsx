@@ -2,6 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSearchParams } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
 import { Mail, Phone } from 'lucide-react';
@@ -17,11 +18,14 @@ import { useAdminToast } from '@/components/admin/admin-toast';
 import { adminApi } from '@/lib/api/admin';
 import { normalizeCitizenPhone } from '@/lib/auth/phone';
 import { loginSchema, type LoginFormData } from '@/lib/validators';
+import { getApiErrorMessage, applyApiFieldErrors } from '@/lib/api/integration-helpers';
 import type { ApiError } from '@/types';
 
 export default function LoginPage() {
   const t = useTranslations('auth');
   const locale = useLocale();
+  const searchParams = useSearchParams();
+  const passwordResetSuccess = searchParams.get('reset') === 'success';
   const login = useLogin();
   const welcome = useWelcomeSequence();
   const toast = useAdminToast();
@@ -37,6 +41,7 @@ export default function LoginPage() {
     handleSubmit,
     watch,
     setValue,
+    setError,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -67,7 +72,15 @@ export default function LoginPage() {
         },
         onError: (err) => {
           const apiErr = err as ApiError;
-          toast.error(t('loginFailed'), apiErr?.message);
+          applyApiFieldErrors<LoginFormData>(apiErr, setError);
+          const message = getApiErrorMessage(apiErr) ?? t('loginFailed');
+          if (apiErr.code === 'INVALID_PASSWORD' || apiErr.fieldErrors?.password) {
+            setError('password', {
+              type: 'server',
+              message: apiErr.fieldErrors?.password ?? message,
+            });
+          }
+          toast.error(t('loginFailed'), message);
         },
       }
     );
@@ -98,6 +111,9 @@ export default function LoginPage() {
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {passwordResetSuccess && (
+          <Alert variant="success">{t('forgotPassword.resetSuccess')}</Alert>
+        )}
         {error && isDeactivated && (
           <Alert variant="warning" className="space-y-2">
             <p className="font-semibold">Account deactivated</p>
@@ -117,7 +133,9 @@ export default function LoginPage() {
             </div>
           </Alert>
         )}
-        {error && !isDeactivated && <Alert variant="error">{error.message}</Alert>}
+        {error && !isDeactivated && !error.fieldErrors?.password && (
+          <Alert variant="error">{getApiErrorMessage(error) ?? error.message}</Alert>
+        )}
 
         <div className="space-y-1.5 animate-fade-in-up stagger-1">
           <span className="text-sm font-medium text-brand-primary-dark">{t('loginMethod')}</span>
@@ -174,6 +192,14 @@ export default function LoginPage() {
             error={errors.password?.message}
             {...register('password')}
           />
+          <div className="mt-2 text-right">
+            <LoadingLink
+              href="/forgot-password"
+              className="text-sm font-medium text-brand-primary hover:underline"
+            >
+              {t('forgotPasswordLink')}
+            </LoadingLink>
+          </div>
         </div>
 
         <Button
