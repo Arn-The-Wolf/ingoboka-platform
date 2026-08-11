@@ -302,8 +302,8 @@ export default function AdminSettingsPage() {
           <Card className="border-brand-border/60 shadow-card">
             <CardContent className="space-y-4 p-6">
               <div className="mb-2 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
-                  <Bell className="h-5 w-5 text-green-700" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-primary-light">
+                  <Bell className="h-5 w-5 text-brand-primary" />
                 </div>
                 <div>
                   <p className="font-semibold text-brand-primary-dark">{t('notificationsSection')}</p>

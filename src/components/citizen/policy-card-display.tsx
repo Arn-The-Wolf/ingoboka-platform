@@ -79,7 +79,7 @@ export function PolicyCardDisplay({ card }: PolicyCardDisplayProps) {
           size={180}
           level="M"
           includeMargin
-          fgColor="#005127"
+          fgColor="#0B3A6E"
           className="rounded-lg bg-white p-2 ring-2 ring-brand-accent/40"
         />
         <p className="text-center text-xs text-brand-muted">

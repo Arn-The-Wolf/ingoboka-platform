@@ -37,6 +37,7 @@ export interface StaffProfile {
   fullName: string;
   status: string;
   emailVerified: boolean;
+  requiresEmailVerification?: boolean;
   roles: string[];
   organizationId?: string;
   organizationName?: string;
@@ -172,6 +173,7 @@ export const staffApi = {
       fullName: [firstName, lastName].filter(Boolean).join(' ').trim() || String(data.email ?? ''),
       status: String(data.status ?? ''),
       emailVerified: Boolean(data.emailVerified),
+      requiresEmailVerification: Boolean(data.requiresEmailVerification ?? !data.emailVerified),
       roles,
       organizationId: data.organizationId ? String(data.organizationId) : undefined,
       organizationName: data.organizationName ? String(data.organizationName) : undefined,
@@ -198,6 +200,7 @@ export const staffApi = {
       fullName: [firstName, lastName].filter(Boolean).join(' ').trim(),
       status: String(data.status ?? ''),
       emailVerified: Boolean(data.emailVerified),
+      requiresEmailVerification: Boolean(data.requiresEmailVerification ?? !data.emailVerified),
       roles,
       organizationId: data.organizationId ? String(data.organizationId) : undefined,
       organizationName: data.organizationName ? String(data.organizationName) : undefined,

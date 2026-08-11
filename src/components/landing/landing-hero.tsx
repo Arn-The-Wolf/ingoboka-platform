@@ -131,7 +131,7 @@ export function LandingHero() {
               transition={{ duration: 0.8, delay: 0.5 }}
               className="flex aspect-square w-full max-w-sm items-center justify-center perspective-1000 xl:max-w-md"
             >
-              <div className="absolute inset-4 rounded-3xl bg-[radial-gradient(#1E5AA8_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
+              <div className="absolute inset-4 rounded-3xl bg-[radial-gradient(#0B3A6E_1px,transparent_1px)] [background-size:24px_24px] opacity-15" />
               <motion.div 
                 whileHover={{ scale: 1.02, rotateY: 5 }}
                 transition={{ duration: 0.4 }}
@@ -150,7 +150,7 @@ export function LandingHero() {
                   />
                   
                   {/* Main brand mark */}
-                  <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-[#005127] shadow-elevated lg:h-48 lg:w-48 xl:h-56 xl:w-56">
+                  <div className="relative flex h-40 w-40 items-center justify-center rounded-full bg-brand-primary shadow-elevated lg:h-48 lg:w-48 xl:h-56 xl:w-56">
                     <Image
                       src="/images/brand/ingoboka-mark-light.svg"
                       alt="Ingoboka"

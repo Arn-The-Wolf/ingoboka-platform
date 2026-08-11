@@ -149,6 +149,54 @@ export const authApi = {
     });
     return mapAuthResponse(data);
   },
+
+  async confirmEmailVerification(token: string): Promise<void> {
+    await apiClient.post('/auth/verify-email/confirm', { token });
+  },
+
+  async confirmEmailOtp(code: string): Promise<AuthTokens & { user: User }> {
+    const normalized = code.replace(/\D/g, '').slice(0, 6);
+    const { data } = await apiClient.post<BackendAuthPayload>('/auth/verify-email/otp', {
+      code: normalized,
+    });
+    return mapAuthResponse(data);
+  },
+
+  async resendEmailVerificationOtp(): Promise<void> {
+    await apiClient.post('/auth/verify-email/resend-otp');
+  },
+
+  async requestPasswordReset(email: string): Promise<void> {
+    await apiClient.post('/auth/forgot-password/request', {
+      email: email.trim().toLowerCase(),
+    });
+  },
+
+  async verifyPasswordResetOtp(email: string, code: string): Promise<{ resetToken: string }> {
+    const normalized = code.replace(/\D/g, '').slice(0, 6);
+    const { data } = await apiClient.post<{ resetToken: string }>(
+      '/auth/forgot-password/verify-otp',
+      {
+        email: email.trim().toLowerCase(),
+        otp: normalized,
+        code: normalized,
+      }
+    );
+    return data;
+  },
+
+  async resendPasswordResetOtp(email: string): Promise<void> {
+    await apiClient.post('/auth/forgot-password/resend-otp', {
+      email: email.trim().toLowerCase(),
+    });
+  },
+
+  async resetPassword(token: string, newPassword: string): Promise<void> {
+    await apiClient.post('/auth/forgot-password/reset', {
+      token,
+      newPassword,
+    });
+  },
 };
 
 export const customerApi = {
@@ -209,5 +257,22 @@ export const customerApi = {
       throw error;
     }
     return { consentGiven: true };
+  },
+
+  async updateAccount(payload: { email: string }): Promise<{
+    email: string;
+    requiresEmailVerification: boolean;
+    emailVerified: boolean;
+    status: string;
+  }> {
+    const { data } = await apiClient.put<Record<string, unknown>>('/customers/me/account', {
+      email: payload.email.trim().toLowerCase(),
+    });
+    return {
+      email: String(data.email ?? payload.email),
+      requiresEmailVerification: Boolean(data.requiresEmailVerification),
+      emailVerified: Boolean(data.emailVerified),
+      status: String(data.status ?? ''),
+    };
   },
 };

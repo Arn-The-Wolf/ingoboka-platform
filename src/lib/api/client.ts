@@ -1,5 +1,6 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type { ApiError } from '@/types';
+import { getApiErrorMessage } from '@/lib/api/integration-helpers';
 import { getApiBaseUrl } from '@/lib/api/config';
 
 const API_BASE_URL = getApiBaseUrl();
@@ -14,6 +15,7 @@ export const apiClient = axios.create({
 
 let accessToken: string | null = null;
 let onUnauthorized: (() => void) | null = null;
+let onForbidden: ((error: ApiError) => void) | null = null;
 let refreshAccessToken: (() => Promise<string | null>) | null = null;
 
 export function setAccessToken(token: string | null) {
@@ -27,6 +29,10 @@ export function setAccessToken(token: string | null) {
 
 export function setUnauthorizedHandler(handler: () => void) {
   onUnauthorized = handler;
+}
+
+export function setForbiddenHandler(handler: (error: ApiError) => void) {
+  onForbidden = handler;
 }
 
 export function setTokenRefreshHandler(handler: () => Promise<string | null>) {
@@ -73,20 +79,41 @@ apiClient.interceptors.response.use(
     if (status === 401) {
       onUnauthorized?.();
     }
+    if (status === 403) {
+      const normalized = normalizeApiError(error);
+      onForbidden?.(normalized);
+    }
     return Promise.reject(normalizeApiError(error));
   }
 );
 
 function normalizeApiError(
-  error: AxiosError<ApiError & { success?: boolean; detail?: string; title?: string }>
+  error: AxiosError<
+    ApiError & {
+      success?: boolean;
+      detail?: string;
+      title?: string;
+      fieldErrors?: Record<string, string>;
+      errors?: Record<string, string>;
+    }
+  >
 ): ApiError {
   const body = error.response?.data;
-  const message = body?.message?.trim() || body?.detail?.trim() || body?.title?.trim();
-  if (message) {
-    return {
-      message,
+  const fieldErrors = body?.fieldErrors ?? body?.errors;
+  const rawMessage = body?.message?.trim() || body?.detail?.trim() || body?.title?.trim();
+  const status = error.response?.status;
+
+  if (rawMessage || fieldErrors || body?.code) {
+    const interim: ApiError = {
+      message: rawMessage || 'Request failed',
       code: body?.code,
-      status: error.response?.status,
+      status,
+      fieldErrors,
+      errors: body?.errors,
+    };
+    return {
+      ...interim,
+      message: getApiErrorMessage(interim) ?? interim.message,
     };
   }
   if (error.code === 'ECONNABORTED') {
@@ -95,9 +122,13 @@ function normalizeApiError(
   if (!error.response) {
     return { message: 'Network error — is the API running?', status: 0 };
   }
-  return {
+  const interim: ApiError = {
     message: error.message || 'Unexpected error',
-    status: error.response.status,
+    status,
+  };
+  return {
+    ...interim,
+    message: getApiErrorMessage(interim) ?? interim.message,
   };
 }
 

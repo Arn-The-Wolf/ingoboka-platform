@@ -230,7 +230,7 @@ export default function AdminPartnersPage() {
 
       'from-blue-400 to-blue-600',
 
-      'from-green-400 to-green-600',
+      'from-brand-primary to-brand-primary-darker',
 
       'from-amber-400 to-amber-600',
 

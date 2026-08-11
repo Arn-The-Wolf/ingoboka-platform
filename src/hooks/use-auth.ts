@@ -13,7 +13,8 @@ import {
   savePendingVerification,
 } from '@/lib/auth/pending-verification';
 import { useAuthStore } from '@/store/auth-store';
-import type { ConsentRequest, LoginRequest, RegisterRequest, UserRole } from '@/types';
+import { resolveOnboardingPath } from '@/lib/auth/onboarding';
+import type { ConsentRequest, LoginRequest, RegisterRequest, User, UserRole } from '@/types';
 import { getPathname, routing } from '@/i18n/routing';
 
 type AppLocale = (typeof routing.locales)[number];
@@ -27,7 +28,16 @@ function localizedPath(href: `/${string}`, locale: string) {
  * Resolves the post-authentication destination (locale prefix added by caller).
  * Navigation itself is left to the page so it can show a welcome overlay first.
  */
-export function getPostAuthPath(user: { role: string; consentGiven: boolean }): string {
+export function getPostAuthPath(user: {
+  role: string;
+  consentGiven: boolean;
+  mustChangePassword?: boolean;
+  requiresEmailVerification?: boolean;
+  emailVerified?: boolean;
+  status?: string;
+}): string {
+  const onboarding = resolveOnboardingPath(user as User);
+  if (onboarding) return onboarding;
   if (user.role === 'PLATFORM_ADMIN') return '/admin/dashboard';
   if (user.role === 'AGENT') return '/agent/dashboard';
   if (isInsurerPortalRole(user.role as UserRole)) return '/insurer/dashboard';

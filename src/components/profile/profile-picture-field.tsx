@@ -1,8 +1,9 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Camera, Link2, Trash2 } from 'lucide-react';
 import { profilePictureApi } from '@/lib/api/profile-picture';
+import { withProfilePictureCacheBust } from '@/lib/profile-picture-url';
 import { useAuthStore } from '@/store/auth-store';
 import { UserAvatar } from '@/components/ui/user-avatar';
 import { Button } from '@/components/ui/button';
@@ -38,11 +39,18 @@ export function ProfilePictureField({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const applyUrl = (next: string | null) => {
-    setCurrentUrl(next);
-    setUrl(next ?? '');
-    updateUser({ profilePictureUrl: next ?? undefined });
-    onUpdated?.(next);
+  useEffect(() => {
+    setCurrentUrl(profilePictureUrl ?? null);
+    setUrl(profilePictureUrl ?? '');
+  }, [profilePictureUrl]);
+
+  const applyUrl = (next: string | null, cacheBust = false) => {
+    const resolved =
+      next && cacheBust ? withProfilePictureCacheBust(next) : next;
+    setCurrentUrl(resolved);
+    setUrl(resolved ?? '');
+    updateUser({ profilePictureUrl: resolved ?? undefined });
+    onUpdated?.(resolved);
   };
 
   const handleUpload = async (file: File) => {
@@ -50,7 +58,7 @@ export function ProfilePictureField({
     setError(null);
     try {
       const result = await profilePictureApi.upload(file);
-      applyUrl(result.profilePictureUrl ?? null);
+      applyUrl(result.profilePictureUrl ?? null, true);
     } catch {
       setError(labels?.error ?? 'Failed to update profile picture');
     } finally {
@@ -64,7 +72,7 @@ export function ProfilePictureField({
     setError(null);
     try {
       const result = await profilePictureApi.setUrl(url.trim());
-      applyUrl(result.profilePictureUrl ?? null);
+      applyUrl(result.profilePictureUrl ?? null, true);
     } catch {
       setError(labels?.error ?? 'Failed to update profile picture');
     } finally {

@@ -54,6 +54,11 @@ export interface BackendUserPayload {
   verified?: boolean;
   consentGiven?: boolean;
   profilePictureUrl?: string;
+  mustChangePassword?: boolean;
+  requiresEmailVerification?: boolean;
+  accountActive?: boolean;
+  emailVerified?: boolean;
+  status?: string;
 }
 
 export function mapAuthUser(raw?: BackendUserPayload | null): User {
@@ -77,9 +82,14 @@ export function mapAuthUser(raw?: BackendUserPayload | null): User {
     email: raw.email,
     phone: raw.phone,
     role: mapBackendRole(backendRole),
-    verified: Boolean(raw.verified),
+    verified: Boolean(raw.verified ?? raw.emailVerified),
     consentGiven: Boolean(raw.consentGiven),
     profilePictureUrl: raw.profilePictureUrl ? String(raw.profilePictureUrl) : undefined,
+    mustChangePassword: Boolean(raw.mustChangePassword),
+    requiresEmailVerification: Boolean(raw.requiresEmailVerification),
+    accountActive: raw.accountActive !== undefined ? Boolean(raw.accountActive) : undefined,
+    emailVerified: raw.emailVerified !== undefined ? Boolean(raw.emailVerified) : undefined,
+    status: raw.status ? String(raw.status) : undefined,
   };
 }
 

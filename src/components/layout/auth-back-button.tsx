@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 
 interface AuthBackButtonProps {
-  href: '/' | '/login' | '/register';
+  href: '/' | '/login' | '/register' | '/forgot-password' | '/forgot-password/verify';
 }
 
 export function AuthBackButton({ href }: AuthBackButtonProps) {

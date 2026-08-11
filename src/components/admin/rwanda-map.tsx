@@ -20,11 +20,11 @@ import { cn } from '@/lib/utils';
 const numberFmt = (v: number) => new Intl.NumberFormat('en-US').format(v);
 const pctFmt = (v: number) => `${(v * 100).toFixed(2)}%`;
 
-/** Blend a green choropleth fill from penetration (relative to the max in scope). */
+/** Blend a blue choropleth fill from penetration (relative to the max in scope). */
 function fillFor(penetration: number, max: number): string {
   const ratio = max > 0 ? Math.min(1, penetration / max) : 0;
-  const from = [232, 245, 239];
-  const to = [0, 81, 39];
+  const from = [232, 240, 248];
+  const to = [11, 58, 110];
   const c = from.map((f, i) => Math.round(f + (to[i] - f) * (0.15 + 0.85 * ratio)));
   return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
 }
@@ -140,7 +140,7 @@ export function RwandaMap({ className }: { className?: string }) {
                         fontSize: 2.8,
                         fontWeight: 700,
                         fill:
-                          region.penetration / maxPenetration > 0.55 ? '#ffffff' : '#004024',
+                          region.penetration / maxPenetration > 0.55 ? '#ffffff' : '#072A52',
                       }}
                     >
                       {shortProvinceLabel(shape.code, shape.name)}
@@ -175,7 +175,7 @@ export function RwandaMap({ className }: { className?: string }) {
                       fill:
                         region.penetration / (maxDistrictPenetration || 1) > 0.55
                           ? '#ffffff'
-                          : '#004024',
+                          : '#072A52',
                     }}
                   >
                     {shape.name}
@@ -189,7 +189,7 @@ export function RwandaMap({ className }: { className?: string }) {
             <span className="shrink-0">{t('penetration')}:</span>
             <div
               className="h-2 min-w-0 flex-1 rounded-full"
-              style={{ background: 'linear-gradient(90deg, #E8F5EF, #005127)' }}
+              style={{ background: 'linear-gradient(90deg, #E8F0F8, #0B3A6E)' }}
             />
             <span className="shrink-0">
               {t('nationalTotal')} {pctFmt(national.penetration)}

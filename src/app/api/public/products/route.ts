@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 const API_ROOT =
-  process.env.API_PROXY_TARGET?.replace(/\/$/, '') ?? 'http://185.181.10.165:8085';
+  process.env.API_PROXY_TARGET?.replace(/\/$/, '') ?? 'http://4.168.192.169:8085';
 
 async function fetchCatalogToken(): Promise<string | null> {
   const identifier =

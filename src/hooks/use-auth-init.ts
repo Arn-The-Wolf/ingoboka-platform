@@ -2,8 +2,11 @@
 
 import { useEffect, useRef } from 'react';
 import { authApi, customerApi, profilePictureApi } from '@/lib/api';
-import { setAccessToken, setTokenRefreshHandler, setUnauthorizedHandler } from '@/lib/api/client';
+import { setAccessToken, setForbiddenHandler, setTokenRefreshHandler, setUnauthorizedHandler } from '@/lib/api/client';
+import { resolveOnboardingPath } from '@/lib/auth/onboarding';
+import { getPathname, routing } from '@/i18n/routing';
 import { useAuthStore } from '@/store/auth-store';
+import type { ApiError } from '@/types';
 
 async function refreshProfilePictureUrl(): Promise<string | undefined | null> {
   try {
@@ -29,6 +32,30 @@ export function useAuthInit() {
       setAccessToken(accessToken);
     }
     setUnauthorizedHandler(() => logout());
+    setForbiddenHandler((error: ApiError) => {
+      const currentUser = useAuthStore.getState().user;
+      const locale =
+        (window.location.pathname.split('/')[1] as (typeof routing.locales)[number]) ||
+        routing.defaultLocale;
+
+      if (error.code === 'EMAIL_VERIFICATION_REQUIRED') {
+        if (currentUser) {
+          updateUser({
+            requiresEmailVerification: true,
+            emailVerified: false,
+            status: 'PENDING_EMAIL_VERIFICATION',
+          });
+        }
+        window.location.href = getPathname({ href: '/verify-email', locale });
+        return;
+      }
+      if (error.code === 'MUST_CHANGE_PASSWORD') {
+        if (currentUser) {
+          updateUser({ mustChangePassword: true, status: 'PENDING_PASSWORD_CHANGE' });
+        }
+        window.location.href = getPathname({ href: '/change-password', locale });
+      }
+    });
     setTokenRefreshHandler(async () => {
       const rt = useAuthStore.getState().refreshToken;
       const u = useAuthStore.getState().user;
@@ -43,7 +70,7 @@ export function useAuthInit() {
         return null;
       }
     });
-  }, [accessToken, logout, setAuth]);
+  }, [accessToken, logout, setAuth, updateUser]);
 
   useEffect(() => {
     if (refreshed.current || !refreshToken || !user) return;

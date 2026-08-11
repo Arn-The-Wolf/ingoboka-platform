@@ -84,6 +84,20 @@ export const otpSchema = z.object({
     .regex(/^\d{6}$/, 'Code must be numeric'),
 });
 
+export const forgotPasswordEmailSchema = z.object({
+  email: emailSchema,
+});
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  });
+
 export const consentSchema = z.object({
   dataProcessing: z.literal(true, {
     errorMap: () => ({ message: 'Data processing consent is required' }),
@@ -97,4 +111,6 @@ export const consentSchema = z.object({
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type RegisterFormData = z.infer<ReturnType<typeof createRegisterSchema>>;
 export type OtpFormData = z.infer<typeof otpSchema>;
+export type ForgotPasswordEmailFormData = z.infer<typeof forgotPasswordEmailSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
 export type ConsentFormData = z.infer<typeof consentSchema>;

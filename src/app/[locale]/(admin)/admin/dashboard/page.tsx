@@ -72,7 +72,7 @@ export default function AdminDashboardPage() {
   const kpis = [
     { href: '/admin/organizations', icon: Building2, value: overview?.organizations, label: t('partners'), theme: 'purple' },
     { href: '/admin/users', icon: Users, value: overview?.activeUsers, label: t('activeUsers'), theme: 'blue' },
-    { href: '/admin/policies', icon: Shield, value: overview?.activePolicies, label: t('activePolicies'), theme: 'green' },
+    { href: '/admin/policies', icon: Shield, value: overview?.activePolicies, label: t('activePolicies'), theme: 'brand' },
     { href: '/admin/policies', icon: FileText, value: overview?.openClaims, label: t('openClaims'), theme: 'amber' },
     { href: '/admin/audit', icon: ScrollText, value: overview?.totalApplications, label: t('totalApplications'), theme: 'indigo' },
   ] as const;
@@ -80,14 +80,14 @@ export default function AdminDashboardPage() {
   const themeClasses: Record<string, string> = {
     purple: 'border-purple-200 from-purple-50 to-purple-100/50 hover:border-purple-300',
     blue: 'border-blue-200 from-blue-50 to-blue-100/50 hover:border-blue-300',
-    green: 'border-green-200 from-green-50 to-green-100/50 hover:border-green-300',
+    brand: 'border-brand-primary/20 from-brand-primary-light to-brand-primary-light/50 hover:border-brand-primary/30',
     amber: 'border-amber-200 from-amber-50 to-amber-100/50 hover:border-amber-300',
     indigo: 'border-indigo-200 from-indigo-50 to-indigo-100/50 hover:border-indigo-300',
   };
   const iconTheme: Record<string, string> = {
     purple: 'bg-purple-500',
     blue: 'bg-blue-500',
-    green: 'bg-green-500',
+    brand: 'bg-brand-primary',
     amber: 'bg-amber-500',
     indigo: 'bg-indigo-500',
   };
@@ -165,14 +165,14 @@ export default function AdminDashboardPage() {
           ) : recentOrgs.length > 0 ? (
             <div className="grid gap-3">
               {recentOrgs.map((org, index) => (
-                <Card key={org.id} className="border-green-200 bg-white transition-all hover:border-green-300 hover:shadow-md">
+                <Card key={org.id} className="border-brand-primary/20 bg-white transition-all hover:border-brand-primary/30 hover:shadow-md">
                   <CardContent className="flex items-center justify-between p-4">
                     <div className="flex items-start gap-3">
                       <div className={cn(
                         'flex h-10 w-10 items-center justify-center rounded-lg',
                         index === 0 ? 'bg-gradient-to-br from-purple-400 to-purple-600'
                           : index === 1 ? 'bg-gradient-to-br from-blue-400 to-blue-600'
-                          : index === 2 ? 'bg-gradient-to-br from-green-400 to-green-600'
+                          : index === 2 ? 'bg-gradient-to-br from-brand-primary to-brand-primary-darker'
                           : 'bg-gradient-to-br from-amber-400 to-amber-600'
                       )}>
                         <Building2 className="h-5 w-5 text-white" />
@@ -188,7 +188,7 @@ export default function AdminDashboardPage() {
               ))}
             </div>
           ) : (
-            <Card className="border-dashed border-green-200">
+            <Card className="border-dashed border-brand-primary/20">
               <CardContent className="py-10 text-center text-sm text-brand-muted">{t('noOrganizations')}</CardContent>
             </Card>
           )}

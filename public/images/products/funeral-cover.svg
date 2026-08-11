@@ -3,5 +3,5 @@
   <ellipse cx="200" cy="170" rx="90" ry="18" fill="#1B6B3A" opacity="0.12"/>
   <path d="M168 148c0-18 14-32 32-32s32 14 32 32v24H168v-24z" fill="#1B6B3A" opacity="0.85"/>
   <path d="M184 92c0-10 8-18 16-18s16 8 16 18" stroke="#F4A228" stroke-width="6"/>
-  <text x="200" y="210" text-anchor="middle" fill="#005127" font-family="Inter,system-ui,sans-serif" font-size="18" font-weight="700">Funeral Cover</text>
+  <text x="200" y="210" text-anchor="middle" fill="#0B3A6E" font-family="Inter,system-ui,sans-serif" font-size="18" font-weight="700">Funeral Cover</text>
 </svg>

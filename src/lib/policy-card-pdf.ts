@@ -3,9 +3,9 @@ import QRCode from 'qrcode';
 import type { PolicyCard } from '@/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 
-const BRAND_GREEN = [0, 81, 39] as const;
+const BRAND_PRIMARY = [11, 58, 110] as const;
 const BRAND_GOLD = [253, 170, 48] as const;
-const BRAND_DARK = [0, 61, 30] as const;
+const BRAND_DARK = [7, 42, 82] as const;
 
 async function loadLogoDataUrl(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
@@ -51,7 +51,7 @@ export async function downloadPolicyCardPdf(card: PolicyCard): Promise<void> {
   const margin = 18;
 
   // Header band
-  doc.setFillColor(...BRAND_GREEN);
+  doc.setFillColor(...BRAND_PRIMARY);
   doc.rect(0, 0, pageWidth, 42, 'F');
   doc.setFillColor(...BRAND_GOLD);
   doc.rect(0, 42, pageWidth, 2, 'F');
@@ -77,7 +77,7 @@ export async function downloadPolicyCardPdf(card: PolicyCard): Promise<void> {
   // Card body
   const cardTop = 54;
   const cardHeight = 72;
-  doc.setFillColor(...BRAND_GREEN);
+  doc.setFillColor(...BRAND_PRIMARY);
   doc.roundedRect(margin, cardTop, pageWidth - margin * 2, cardHeight, 4, 4, 'F');
   doc.setFillColor(...BRAND_GOLD);
   doc.roundedRect(margin, cardTop, pageWidth - margin * 2, 3, 2, 2, 'F');
@@ -141,7 +141,7 @@ export async function downloadPolicyCardPdf(card: PolicyCard): Promise<void> {
   const qrDataUrl = await QRCode.toDataURL(card.qrPayload, {
     width: 256,
     margin: 1,
-    color: { dark: '#005127', light: '#ffffff' },
+    color: { dark: '#0B3A6E', light: '#ffffff' },
   });
 
   const qrSize = 44;
@@ -163,7 +163,7 @@ export async function downloadPolicyCardPdf(card: PolicyCard): Promise<void> {
   doc.setLineWidth(0.5);
   doc.line(margin, footerY - 6, pageWidth - margin, footerY - 6);
   doc.setFontSize(8);
-  doc.setTextColor(...BRAND_GREEN);
+  doc.setTextColor(...BRAND_PRIMARY);
   doc.text('Ingoboka · Digital microinsurance for Rwanda', pageWidth / 2, footerY, {
     align: 'center',
   });

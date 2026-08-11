@@ -27,7 +27,7 @@ export function PolicyHeroCard({ policy }: PolicyHeroCardProps) {
             <p className="text-lg font-bold">{policy.policyNumber}</p>
           </div>
           <span className="flex items-center gap-1.5 rounded-full bg-brand-primary-dark px-2.5 py-1 text-xs font-bold uppercase">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+            <span className="h-2 w-2 animate-pulse rounded-full bg-brand-accent" />
             {tCommon('active')}
           </span>
         </div>
