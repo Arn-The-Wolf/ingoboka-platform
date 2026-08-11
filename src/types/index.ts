@@ -106,13 +106,25 @@ export interface ClaimStatusHistoryItem {
   note?: string;
 }
 
+/** Normalized claim lifecycle status (maps backend INFORMATION_REQUIRED → INFO_REQUESTED). */
+export type ClaimStatus =
+  | 'DRAFT'
+  | 'SUBMITTED'
+  | 'UNDER_REVIEW'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'INFO_REQUESTED'
+  | 'CANCELLED'
+  | 'PAYMENT_PROCESSING'
+  | 'PAID';
+
 export interface Claim {
   id: string;
   claimNumber: string;
   policyId: string;
   policyNumber: string;
   claimantName: string;
-  status: 'SUBMITTED' | 'UNDER_REVIEW' | 'APPROVED' | 'REJECTED' | 'INFO_REQUESTED';
+  status: ClaimStatus;
   amount: number;
   currency: string;
   description: string;

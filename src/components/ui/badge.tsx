@@ -36,6 +36,7 @@ export function policyStatusVariant(
     case 'APPROVED':
       return 'active';
     case 'PENDING':
+    case 'DRAFT':
     case 'SUBMITTED':
     case 'UNDER_REVIEW':
     case 'INFO_REQUESTED':

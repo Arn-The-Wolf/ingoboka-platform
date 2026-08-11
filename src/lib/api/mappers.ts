@@ -1,5 +1,6 @@
 import type {
   Claim,
+  ClaimStatus,
   Policy,
   PolicyCard,
   PublicVerification,
@@ -195,8 +196,8 @@ function mapStatusHistory(raw: unknown): Claim['statusHistory'] {
 
 export function mapClaim(raw: Record<string, unknown>): Claim {
   const rawStatus = String(raw.status ?? 'SUBMITTED');
-  const status =
-    rawStatus === 'INFORMATION_REQUIRED' ? 'INFO_REQUESTED' : (rawStatus as Claim['status']);
+  const status: ClaimStatus =
+    rawStatus === 'INFORMATION_REQUIRED' ? 'INFO_REQUESTED' : (rawStatus as ClaimStatus);
   return {
     id: String(raw.id),
     claimNumber: String(raw.claimNumber ?? ''),
