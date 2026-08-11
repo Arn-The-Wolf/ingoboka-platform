@@ -5,8 +5,9 @@ import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from '@/i18n/routing';
-import { useClaim, useClaimAppeal, useClaimCancel } from '@/hooks/use-claims';
+import { useClaim, useClaimAppeal, useClaimCancel, useClaimDelete } from '@/hooks/use-claims';
 import { ClaimTimeline } from '@/components/insurer/claim-timeline';
+import { ClaimDocumentList } from '@/components/claims/claim-document-list';
 import { buildClaimTimeline, getLatestDecisionNote } from '@/lib/claim-timeline-utils';
 import { ConfirmDialog } from '@/components/admin/confirm-dialog';
 import { CitizenHeader } from '@/components/layout/citizen-header';
@@ -21,8 +22,6 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { claimStatusLabel } from '@/lib/insurer-status';
 import type { ApiError } from '@/types';
 
-const CANCELLABLE_STATUSES = new Set(['DRAFT', 'SUBMITTED']);
-
 export default function CitizenClaimDetailPage() {
   const t = useTranslations('citizen.claims');
   const tCommon = useTranslations('common');
@@ -32,11 +31,14 @@ export default function CitizenClaimDetailPage() {
   const { data: claim, isLoading, error, refetch } = useClaim(id);
   const appealMutation = useClaimAppeal(id);
   const cancelMutation = useClaimCancel(id);
+  const deleteMutation = useClaimDelete();
   const [appealReason, setAppealReason] = useState('');
   const [appealSubmitted, setAppealSubmitted] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const statusLabelMap: Record<string, string> = {
+    DRAFT: t('draft'),
     SUBMITTED: tCommon('submitted'),
     UNDER_REVIEW: tCommon('underReview'),
     APPROVED: tCommon('approved'),
@@ -65,7 +67,17 @@ export default function CitizenClaimDetailPage() {
     });
   };
 
-  const canCancel = claim ? CANCELLABLE_STATUSES.has(claim.status) : false;
+  const handleDelete = () => {
+    deleteMutation.mutate(id, {
+      onSuccess: () => {
+        setDeleteOpen(false);
+        router.push('/claims');
+      },
+    });
+  };
+
+  const canDelete = claim?.status === 'DRAFT';
+  const canCancel = claim?.status === 'SUBMITTED';
   const decisionNote = claim ? getLatestDecisionNote(claim.statusHistory, claim.status) : undefined;
   const showDecisionReason =
     claim &&
@@ -122,16 +134,29 @@ export default function CitizenClaimDetailPage() {
                   {formatDate(claim.submittedAt)}
                 </p>
                 <p className="text-brand-muted">{claim.description}</p>
-                {canCancel && (
-                  <div className="pt-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setCancelOpen(true)}
-                      loading={cancelMutation.isPending}
-                    >
-                      {t('cancelClaim')}
-                    </Button>
+                {(canDelete || canCancel) && (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {canDelete && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => setDeleteOpen(true)}
+                        loading={deleteMutation.isPending}
+                      >
+                        {t('deleteDraft')}
+                      </Button>
+                    )}
+                    {canCancel && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCancelOpen(true)}
+                        loading={cancelMutation.isPending}
+                      >
+                        {t('cancelClaim')}
+                      </Button>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -139,6 +164,10 @@ export default function CitizenClaimDetailPage() {
 
             {cancelMutation.error && (
               <Alert variant="error">{(cancelMutation.error as ApiError).message}</Alert>
+            )}
+
+            {deleteMutation.error && (
+              <Alert variant="error">{(deleteMutation.error as ApiError).message}</Alert>
             )}
 
             {showDecisionReason && (
@@ -159,6 +188,18 @@ export default function CitizenClaimDetailPage() {
               <CardContent>
                 <ClaimTimeline
                   steps={buildClaimTimeline(claim.statusHistory, claim.status, claim.submittedAt)}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <ClaimDocumentList
+                  claimId={id}
+                  title={t('documentsTitle')}
+                  emptyLabel={t('documentsEmpty')}
+                  viewLabel={t('viewDocument')}
+                  errorLabel={t('documentOpenError')}
                 />
               </CardContent>
             </Card>
@@ -209,6 +250,16 @@ export default function CitizenClaimDetailPage() {
         confirmLabel={t('cancelClaimConfirm')}
         onConfirm={handleCancel}
         loading={cancelMutation.isPending}
+      />
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title={t('deleteDraftTitle')}
+        description={t('deleteDraftDescription')}
+        confirmLabel={t('deleteDraftConfirm')}
+        onConfirm={handleDelete}
+        loading={deleteMutation.isPending}
       />
     </>
   );

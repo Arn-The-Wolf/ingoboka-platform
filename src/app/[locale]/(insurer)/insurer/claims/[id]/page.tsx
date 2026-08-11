@@ -7,6 +7,7 @@ import { FileText, ShieldCheck, Users } from 'lucide-react';
 import { useClaim, useClaimDecision } from '@/hooks/use-claims';
 import { useAdminToast } from '@/components/admin/admin-toast';
 import { ClaimTimeline } from '@/components/insurer/claim-timeline';
+import { ClaimDocumentList } from '@/components/claims/claim-document-list';
 import { buildClaimTimeline } from '@/lib/claim-timeline-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,7 @@ import type { ApiError } from '@/types';
 
 export default function ClaimDetailPage() {
   const t = useTranslations('insurer');
+  const tClaims = useTranslations('citizen.claims');
   const tCommon = useTranslations('common');
   const params = useParams();
   const id = params.id as string;
@@ -131,6 +133,18 @@ export default function ClaimDetailPage() {
               <CardContent>
                 <ClaimTimeline
                   steps={buildClaimTimeline(claim.statusHistory, claim.status, claim.submittedAt)}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <ClaimDocumentList
+                  claimId={id}
+                  title={tClaims('documentsTitle')}
+                  emptyLabel={tClaims('documentsEmpty')}
+                  viewLabel={tClaims('viewDocument')}
+                  errorLabel={tClaims('documentOpenError')}
                 />
               </CardContent>
             </Card>

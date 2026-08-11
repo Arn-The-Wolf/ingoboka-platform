@@ -1,6 +1,7 @@
 import { humanizeLabel, type StatusTone } from '@/lib/status-label';
 
 const CLAIM_STATUS_LABELS: Record<string, string> = {
+  DRAFT: 'Draft',
   SUBMITTED: 'Submitted',
   UNDER_REVIEW: 'Under review',
   INFORMATION_REQUIRED: 'Information requested',
@@ -9,6 +10,7 @@ const CLAIM_STATUS_LABELS: Record<string, string> = {
   REJECTED: 'Rejected',
   CANCELLED: 'Cancelled',
   PAYMENT_PROCESSING: 'Payment processing',
+  PAID: 'Paid',
   CLOSED: 'Closed',
 };
 
@@ -45,7 +47,9 @@ export function insurerStatusLabel(status?: string | null): string {
 export function claimStatusTone(status?: string | null): StatusTone {
   switch (status) {
     case 'APPROVED':
+    case 'PAID':
       return 'active';
+    case 'DRAFT':
     case 'SUBMITTED':
     case 'UNDER_REVIEW':
     case 'INFORMATION_REQUIRED':

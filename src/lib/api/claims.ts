@@ -70,6 +70,10 @@ export const claimApi = {
     return mapClaim(data);
   },
 
+  async deleteDraft(id: string): Promise<void> {
+    await apiClient.delete(`/claims/${id}`);
+  },
+
   async appeal(id: string, reason: string) {
     const { data } = await apiClient.post(`/claims/${id}/appeals`, { reason });
     return data;

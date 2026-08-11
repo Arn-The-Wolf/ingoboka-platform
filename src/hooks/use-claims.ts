@@ -50,6 +50,17 @@ export function useClaimCancel(id: string) {
   });
 }
 
+export function useClaimDelete() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => claimApi.deleteDraft(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
+    },
+  });
+}
+
 export function useClaimDecision(id: string) {
   const queryClient = useQueryClient();
 
