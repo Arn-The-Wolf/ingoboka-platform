@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { UPLOAD_API_TIMEOUT_MS } from './timeouts';
 
 export interface ProfilePictureResult {
   profilePictureUrl: string | null;
@@ -26,7 +27,10 @@ export const profilePictureApi = {
     const { data } = await apiClient.post<{ profilePictureUrl?: string | null }>(
       '/users/me/profile-picture',
       form,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: UPLOAD_API_TIMEOUT_MS,
+      }
     );
     return { profilePictureUrl: data.profilePictureUrl ?? null };
   },

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { claimApi, policyApi } from '@/lib/api';
+import { getApiErrorMessage, isTimeoutError } from '@/lib/api/integration-helpers';
 import { useAdminToast } from '@/components/admin/admin-toast';
 import { CitizenHeader } from '@/components/layout/citizen-header';
 import { PageContainer } from '@/components/layout/page-container';
@@ -72,7 +73,15 @@ export default function NewClaimPage() {
       toast.success(tCommon('submitted'));
       router.push('/claims');
     },
-    onError: () => toast.error(tCommon('error')),
+    onError: (error) => {
+      const message = getApiErrorMessage(error) ?? tCommon('error');
+      if (isTimeoutError(error)) {
+        toast.error(message);
+        router.push('/claims');
+        return;
+      }
+      toast.error(message);
+    },
   });
 
   const activePolicies = (policies?.content ?? []).filter((p) => p.status === 'ACTIVE');

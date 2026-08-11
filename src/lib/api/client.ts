@@ -2,6 +2,7 @@ import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import type { ApiError } from '@/types';
 import { getApiErrorMessage } from '@/lib/api/integration-helpers';
 import { getApiBaseUrl } from '@/lib/api/config';
+import { DEFAULT_API_TIMEOUT_MS } from '@/lib/api/timeouts';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -10,7 +11,8 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000,
+  // Must stay below Vercel rewrite/proxy limits when using `/api/v1` (typically 60s Hobby, up to 300s Pro).
+  timeout: DEFAULT_API_TIMEOUT_MS,
 });
 
 let accessToken: string | null = null;
@@ -116,8 +118,13 @@ function normalizeApiError(
       message: getApiErrorMessage(interim) ?? interim.message,
     };
   }
-  if (error.code === 'ECONNABORTED') {
-    return { message: 'Request timed out', status: 408 };
+  if (error.code === 'ECONNABORTED' || error.message.toLowerCase().includes('timeout')) {
+    return {
+      message:
+        'The request is taking longer than expected. Your action may still have succeeded — please refresh or check your list before trying again.',
+      code: 'ECONNABORTED',
+      status: 408,
+    };
   }
   if (!error.response) {
     return { message: 'Network error — is the API running?', status: 0 };
@@ -139,4 +146,10 @@ export function isNetworkError(error: unknown): boolean {
     'status' in error &&
     (error as ApiError).status === 0
   );
+}
+
+export function isTimeoutError(error: unknown): boolean {
+  if (typeof error !== 'object' || error === null) return false;
+  const apiError = error as ApiError & { code?: string };
+  return apiError.status === 408 || apiError.code === 'ECONNABORTED';
 }
