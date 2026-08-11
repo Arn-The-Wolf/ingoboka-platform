@@ -57,6 +57,8 @@ const nextConfig = {
     if (!proxyTarget) {
       return [];
     }
+    // Rewrites proxy browser `/api/v1/*` to the backend. Vercel caps upstream proxy duration
+    // (~60s Hobby, longer on Pro). Keep axios timeouts aligned in `src/lib/api/timeouts.ts`.
     return [
       {
         source: '/api/v1/:path*',

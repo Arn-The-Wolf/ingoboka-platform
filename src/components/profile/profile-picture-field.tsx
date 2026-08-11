@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Camera, Link2, Trash2 } from 'lucide-react';
 import { profilePictureApi } from '@/lib/api/profile-picture';
+import { getApiErrorMessage, isTimeoutError } from '@/lib/api/integration-helpers';
 import { withProfilePictureCacheBust } from '@/lib/profile-picture-url';
 import { useAuthStore } from '@/store/auth-store';
 import { UserAvatar } from '@/components/ui/user-avatar';
@@ -59,8 +60,19 @@ export function ProfilePictureField({
     try {
       const result = await profilePictureApi.upload(file);
       applyUrl(result.profilePictureUrl ?? null, true);
-    } catch {
-      setError(labels?.error ?? 'Failed to update profile picture');
+    } catch (err) {
+      if (isTimeoutError(err)) {
+        try {
+          const pic = await profilePictureApi.get();
+          if (pic.profilePictureUrl) {
+            applyUrl(pic.profilePictureUrl, true);
+            return;
+          }
+        } catch {
+          /* fall through to timeout message */
+        }
+      }
+      setError(getApiErrorMessage(err) ?? labels?.error ?? 'Failed to update profile picture');
     } finally {
       setLoading(false);
     }

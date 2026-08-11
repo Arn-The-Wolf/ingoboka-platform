@@ -1,5 +1,7 @@
-import { apiClient } from './client';
+import { apiClient, isTimeoutError } from './client';
 import type { ApiError } from '@/types';
+
+export { isTimeoutError };
 
 const GENERIC_SERVER_MESSAGE = 'Something went wrong. Please try again in a moment.';
 const GENERIC_VALIDATION_MESSAGE = 'Please check the highlighted fields and try again.';
@@ -74,7 +76,7 @@ function messageForStatus(status?: number): string | undefined {
     case 404:
       return 'The requested resource was not found.';
     case 408:
-      return 'The request timed out. Please try again.';
+      return 'The request is taking longer than expected. Your action may still have succeeded — please refresh or check your list before trying again.';
     case 409:
       return 'This action conflicts with existing data.';
     case 500:

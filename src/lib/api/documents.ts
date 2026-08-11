@@ -1,4 +1,5 @@
 import { apiClient } from './client';
+import { UPLOAD_API_TIMEOUT_MS } from './timeouts';
 import {
   coerceClaimDocumentContentUrl,
   isMinioStorageUrl,
@@ -45,6 +46,7 @@ export async function uploadClaimEvidence(claimId: string, files: File[]): Promi
   }
   await apiClient.post(`/claims/${claimId}/documents`, form, {
     headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: UPLOAD_API_TIMEOUT_MS,
   });
 }
 

@@ -106,7 +106,8 @@ const nextConfig = {
     ];
   },
 
-  // API Proxy - Rewrites HTTP backend calls to avoid mixed content errors on HTTPS
+  // API Proxy - Rewrites HTTP backend calls to avoid mixed content errors on HTTPS.
+  // Vercel upstream proxy limits apply (~60s Hobby). See `src/lib/api/timeouts.ts`.
   async rewrites() {
     const apiProxyTarget = process.env.API_PROXY_TARGET || 'http://4.168.192.169:8085';
     
