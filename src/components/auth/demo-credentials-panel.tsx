@@ -4,27 +4,29 @@ import { useTranslations } from 'next-intl';
 import { Shield, Building2, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+const DEMO_PASSWORD = process.env.NEXT_PUBLIC_DEMO_PASSWORD ?? '';
+
 const DEMOS = [
   {
     roleKey: 'demoCitizen' as const,
     icon: User,
     loginMethod: 'phone' as const,
-    identifier: '0780000001',
-    password: 'Ingoboka@2026',
+    identifier: process.env.NEXT_PUBLIC_DEMO_CITIZEN_ID ?? '0780000001',
+    password: DEMO_PASSWORD,
   },
   {
     roleKey: 'demoAdmin' as const,
     icon: Shield,
     loginMethod: 'email' as const,
-    identifier: 'agressive.one04@gmail.com',
-    password: 'admin@123',
+    identifier: process.env.NEXT_PUBLIC_DEMO_ADMIN_EMAIL ?? 'platform-admin@example.com',
+    password: DEMO_PASSWORD,
   },
   {
     roleKey: 'demoInsurer' as const,
     icon: Building2,
     loginMethod: 'email' as const,
-    identifier: 'claims@demo-insurer.rw',
-    password: 'Ingoboka@2026',
+    identifier: process.env.NEXT_PUBLIC_DEMO_INSURER_EMAIL ?? 'partner-admin@example.com',
+    password: DEMO_PASSWORD,
   },
 ] as const;
 

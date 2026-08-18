@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 
 const API_ROOT =
-  process.env.API_PROXY_TARGET?.replace(/\/$/, '') ?? 'http://4.168.192.169:8085';
+  process.env.API_PROXY_TARGET?.replace(/\/$/, '') ?? 'http://localhost:8085';
 
 async function fetchCatalogToken(): Promise<string | null> {
-  const identifier =
-    process.env.CATALOG_SERVICE_EMAIL?.trim() || 'citizen.demo@ingoboka.rw';
-  const password = process.env.CATALOG_SERVICE_PASSWORD?.trim() || 'Ingoboka@2026';
+  const identifier = process.env.CATALOG_SERVICE_EMAIL?.trim();
+  const password = process.env.CATALOG_SERVICE_PASSWORD?.trim();
+  if (!identifier || !password) {
+    return null;
+  }
 
   const loginRes = await fetch(`${API_ROOT}/api/v1/auth/login`, {
     method: 'POST',
